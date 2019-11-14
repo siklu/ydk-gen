@@ -71,7 +71,7 @@ class YLeafList(_YLeafList):
 
     def set(self, other):
         if not isinstance(other, YLeafList):
-            raise YModelError("Invalid value '{}' assigned to YLeafList '{}'".format(other, self.leaf_name))
+            raise YModelError("Invalid value '{}' in '{}'".format(other, self.leaf_name))
         else:
             super().clear()
             for item in other:
