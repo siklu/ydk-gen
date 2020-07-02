@@ -194,6 +194,9 @@ static void populate_xml_node_contents(const path::SchemaNode & parent_schema, E
 //////////////////////////////////////////////////////////////////
 std::shared_ptr<Entity> XmlSubtreeCodec::decode(const std::string & payload, std::shared_ptr<Entity> entity)
 {
+  if(entity->get_augment_capabilities_function())
+    entity->get_augment_capabilities_function()();
+  
     xmlDocPtr doc = xmlParseDoc(reinterpret_cast<const xmlChar*>(payload.c_str()));
     xmlNodePtr root = xmlDocGetRootElement(doc);
     if(entity->yang_name != to_string(root->name))
