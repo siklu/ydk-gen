@@ -121,12 +121,12 @@ class ClassSourcePrinter(object):
         self.ctx.bline()
 
     def _print_has_leaf_or_child_of_name(self, clazz, children, leafs):
-        self.ctx.writeln('bool %s::has_leaf_or_child_of_name(const std::string & name) const' % clazz.qualified_cpp_name())
+        self.ctx.writeln('bool %s::has_leaf_or_child_of_name(const std::string & _name) const' % clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
         if(len(children) > 0 or len(leafs) > 0):
             props = children+leafs
-            if_condition = ' || '.join('name == "%s"'% x.stmt.arg for x in props)
+            if_condition = ' || '.join('_name == "%s"'% x.stmt.arg for x in props)
             self.ctx.writeln('if(%s)' % if_condition)
             self.ctx.lvl_inc()
             self.ctx.writeln('return true;')
