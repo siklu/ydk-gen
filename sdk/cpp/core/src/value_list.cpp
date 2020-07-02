@@ -358,8 +358,7 @@ YList::operator [] (const string& key) const
     if (it != entity_map.end())
         return it->second;
     else {
-        YLOG_ERROR("Key value '{}' is not in the YList", key);
-        throw(YInvalidArgumentError{"Key value is not in the YList"});
+        return nullptr;
     }
 }
 
@@ -369,10 +368,6 @@ YList::operator [] (const std::size_t item) const
     if (item < key_vector.size()) {
         auto key =  key_vector[item];
         return entity_map.at(key);
-    }
-    else {
-        YLOG_ERROR("Index value {} is out of range [0,{}]", item, key_vector.size());
-        throw(YInvalidArgumentError{"Index value is out of range"});
     }
     return nullptr;
 }
