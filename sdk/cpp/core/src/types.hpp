@@ -36,6 +36,8 @@
 #include <utility>
 #include <initializer_list>
 
+#include <boost/iterator/transform_iterator.hpp>
+
 #include "filters.hpp"
 
 #if (__cplusplus < 201402L)
@@ -382,8 +384,10 @@ class YList
 
     std::vector<std::string> ylist_key_names;
 
-  private:
-    std::map<std::string,std::shared_ptr<Entity>> entity_map;
+ protected:
+   typedef std::map<std::string,std::shared_ptr<Entity>> MapType;
+
+    MapType entity_map;
     std::vector<std::string> key_vector;
     Entity* parent;
     int counter;
@@ -393,6 +397,42 @@ std::ostream& operator<< (std::ostream& stream, const YLeaf& value);
 std::ostream& operator<< (std::ostream& stream, const EntityPath& value);
 std::ostream& operator<< (std::ostream& stream, Entity& value);
 std::ostream& operator<< (std::ostream& stream, const LeafData& value);
+
+template <class EntityType>
+class YListWrapper : public YList {
+ public:
+  using ydk::YList::operator=;
+  using ydk::YList::operator[];
+  using ydk::YList::YList;
+
+  struct Func {
+    std::pair<const std::string&, std::shared_ptr<EntityType>>
+    operator ()(const MapType::const_iterator::value_type &value) const
+    {
+      return {
+          value.first,
+          std::static_pointer_cast<EntityType>(value.second)
+      };
+    }
+  };
+  
+  typedef typename boost::result_of<Func(const MapType::const_iterator::value_type &value)>::type t; 
+  
+  std::shared_ptr<EntityType> operator[](const std::string& key) const{
+    return std::static_pointer_cast<EntityType>(ydk::YList::operator[](key));
+  }
+  
+  typedef boost::transform_iterator<Func, 
+      MapType::const_iterator> MapWrapperIterator;
+
+  MapWrapperIterator begin() const {
+    return boost::make_transform_iterator(entity_map.cbegin(), Func());
+  }
+
+  MapWrapperIterator end() const {
+    return boost::make_transform_iterator(entity_map.cend(), Func());
+  }
+};
 
 enum class EncodingFormat {
     XML,

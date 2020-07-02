@@ -171,7 +171,7 @@ def _get_class_inits_unique(prop):
 
 def _get_class_inits_many(prop):
     if prop.is_many and isinstance(prop.property_type, Class) and not prop.property_type.is_identity():
-        return 'ydk::YList %s;' % (prop.name)
+        return 'ydk::YListWrapper<%s> %s;' % (prop.property_type.fully_qualified_cpp_name(), prop.name)
 
 
 def _get_children(clazz):
