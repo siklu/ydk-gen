@@ -29,8 +29,6 @@
 #include "ietf_parser.hpp"
 #include "logger.hpp"
 #include "netconf_model_provider.hpp"
-#include "netconf_ssh_client.hpp"
-#include "netconf_tcp_client.hpp"
 #include "types.hpp"
 #include "ydk_yang.hpp"
 
@@ -165,8 +163,8 @@ void NetconfSession::initialize_client_with_key(const string& address,
                                        int port,
                                        int timeout)
 {
-    client = make_shared<NetconfSSHClient>(
-        username, private_key_path, public_key_path, address, port, timeout);
+//    client = make_shared<NetconfSSHClient>(
+//        username, private_key_path, public_key_path, address, port, timeout);
 }
 
 void NetconfSession::initialize_client(const string& address,
@@ -178,11 +176,11 @@ void NetconfSession::initialize_client(const string& address,
 {
     if (protocol.compare(PROTOCOL_SSH) == 0 || protocol.empty())
     {
-        client = make_shared<NetconfSSHClient>(username, password, address, port, timeout);
+//        client = make_shared<NetconfSSHClient>(username, password, address, port, timeout);
     }
     else if (protocol.compare(PROTOCOL_TCP) == 0)
     {
-        client = make_shared<NetconfTCPClient>(username, password, address, port);
+//        client = make_shared<NetconfTCPClient>(username, password, address, port);
     }
     else
     {

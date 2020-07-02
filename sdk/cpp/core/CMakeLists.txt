@@ -149,14 +149,14 @@ set(libydk_src
     src/logging_callback.cpp
     src/service_provider.cpp
     src/netconf_client.cpp
-    src/netconf_ssh_client.cpp
-    src/netconf_tcp_client.cpp
+#    src/netconf_ssh_client.cpp
+#    src/netconf_tcp_client.cpp
     src/netconf_provider.cpp
     src/netconf_service.cpp
     src/netconf_session.cpp
-    src/network_topology.cpp
-    src/opendaylight_parser.cpp
-    src/opendaylight_provider.cpp
+#    src/network_topology.cpp
+#    src/opendaylight_parser.cpp
+#    src/opendaylight_provider.cpp
     src/restconf_client.cpp
     src/restconf_provider.cpp
     src/restconf_session.cpp
@@ -228,69 +228,6 @@ set(libydk_install_headers
     src/validation_service.hpp
     src/ydk.h)
 
-# Set LibNetconf variables
-set(libnetconf_location ${CMAKE_CURRENT_BINARY_DIR}/project_libnetconf/src/project_libnetconf)
-
-set(libnetconf_headers
-    ${libnetconf_location}/src/callbacks.h
-    ${libnetconf_location}/src/callbacks_ssh.h
-    ${libnetconf_location}/src/callhome.h
-    ${libnetconf_location}/src/config.h
-    ${libnetconf_location}/src/config.h.in
-    ${libnetconf_location}/src/datastore.h
-    ${libnetconf_location}/src/datastore_xml.h
-    ${libnetconf_location}/src/error.h
-    ${libnetconf_location}/src/libnetconf.h
-    ${libnetconf_location}/src/libnetconf_ssh.h
-    ${libnetconf_location}/src/libnetconf_tls.h
-    ${libnetconf_location}/src/libnetconf_xml.h
-    ${libnetconf_location}/src/messages.h
-    ${libnetconf_location}/src/messages_internal.h
-    ${libnetconf_location}/src/messages_xml.h
-    ${libnetconf_location}/src/nacm.h
-    ${libnetconf_location}/src/netconf.h
-    ${libnetconf_location}/src/netconf_internal.h
-    ${libnetconf_location}/src/notifications.h
-    ${libnetconf_location}/src/notifications_xml.h
-    ${libnetconf_location}/src/session.h
-    ${libnetconf_location}/src/ssh.h
-    ${libnetconf_location}/src/tls.h
-    ${libnetconf_location}/src/transapi.h
-    ${libnetconf_location}/src/transport.h
-    ${libnetconf_location}/src/url.h
-    ${libnetconf_location}/src/url_internal.h
-    ${libnetconf_location}/src/with_defaults.h
-    ${libnetconf_location}/src/datastore/datastore_internal.h
-    ${libnetconf_location}/src/datastore/edit_config.h
-    ${libnetconf_location}/src/datastore/custom/datastore_custom.h
-    ${libnetconf_location}/src/datastore/custom/datastore_custom_private.h
-    ${libnetconf_location}/src/datastore/empty/datastore_empty.h
-    ${libnetconf_location}/src/datastore/file/datastore_file.h
-)
-
-set(netconf_objs
-    callbacks.o
-    compat.o
-    datastore.o
-    datastore_custom.o
-    datastore_empty.o
-    datastore_file.o
-    edit_config.o
-    error.o
-    internal.o
-    messages.o
-    nacm.o
-    notifications.o
-    session.o
-    ssh.o
-    transapi.o
-    transport.o
-    url.o
-    with_defaults.o
-    xmldiff.o
-    yinparser.o
-)
-
 # Set LibYang variables
 set(libyang_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/src/project_libyang)
 set(libyang_build_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/src/project_libyang-build)
@@ -358,49 +295,10 @@ find_library(m_location m)
 find_package(LibXml2 REQUIRED)
 find_package(LibSSH REQUIRED)
 
-# Add LibNetconf
-set(libnetconf_include_location include/libnetconf)
-set(libnetconf_headers_location ${CMAKE_CURRENT_BINARY_DIR}/project_libnetconf/headers)
-
-include(ExternalProject)
-ExternalProject_Add(project_libnetconf
-    PREFIX "${CMAKE_CURRENT_BINARY_DIR}/project_libnetconf"
-    URL "https://github.com/ygorelik/libnetconf/archive/master.zip"
-    CONFIGURE_COMMAND ./configure
-    BUILD_COMMAND "make"
-    INSTALL_DIR "${libnetconf_location}"
-    INSTALL_COMMAND mkdir -p ${libnetconf_headers_location}/libnetconf && cp ${libnetconf_headers} ${libnetconf_headers_location}/libnetconf
-    BUILD_IN_SOURCE 1
-)
-install(FILES ${libnetconf_headers} DESTINATION ${libnetconf_include_location})
-
-ExternalProject_Get_Property(project_libnetconf install_dir)
-set(libnetconf_archive ${install_dir}/.libs/libnetconf.a)
-
-add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/project_libnetconf/objs
-    COMMAND cmake -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/project_libnetconf/objs
-)
-set (libnetconf_objs ${CMAKE_CURRENT_BINARY_DIR}/project_libnetconf/objs)
-
-list(APPEND libnetconf_inc_objs "")
-foreach(netconf_obj IN LISTS netconf_objs)
-    add_custom_command(
-        OUTPUT ${libnetconf_objs}/${netconf_obj}
-        COMMAND ar -x ${libnetconf_archive} ${netconf_obj}
-        MAIN_DEPENDENCY ${libnetconf_objs}
-        WORKING_DIRECTORY ${libnetconf_objs}
-    )
-    list(APPEND libnetconf_inc_objs ${libnetconf_objs}/${netconf_obj})
-endforeach(netconf_obj)
-
-add_library(libnetconf STATIC IMPORTED)
-set_property(TARGET libnetconf PROPERTY IMPORTED_LOCATION ${libnetconf_archive})
-add_dependencies(libnetconf project_libnetconf)
-
 set(LIBYANG_EXT_PLUGINS_DIR ${LIB_INSTALL_DIR}/libyang)
 message("Set libyang plugin installation directory to: ${LIBYANG_EXT_PLUGINS_DIR}")
 
+include(ExternalProject)
 # Add LibYang
 set(libyang_include_location include/libyang)
 set(libyang_headers_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/headers)
@@ -439,7 +337,6 @@ endforeach(yang_obj)
 
 include_directories(
     ${LIBYANG_INCLUDE_DIRS}
-    ${LIBSSH_INCLUDE_DIRS}
     ${LIBXML2_INCLUDE_DIR}
     ${libnetconf_headers_location}
     ${libnetconf_location}/headers
@@ -456,7 +353,6 @@ target_link_libraries(ydk
     ${LIBXML2_LIBRARIES}
     ${LIBSSH_LIBRARIES}
     ${curl_location}
-    ${ssh_threads_location}
     ${pcre_location}
     ${xslt_location}
     ${pthread_location}
@@ -492,8 +388,6 @@ if(DOXYGEN_FOUND)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     configure_file(Doxyfile.in Doxyfile)
 endif()
-
-add_subdirectory(samples)
 
 # clean cmake cache
 add_custom_target(cclean

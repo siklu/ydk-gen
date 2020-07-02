@@ -29,8 +29,6 @@
 #include "entity_data_node_walker.hpp"
 #include "errors.hpp"
 #include "ietf_parser.hpp"
-#include "netconf_ssh_client.hpp"
-#include "netconf_tcp_client.hpp"
 #include "netconf_provider.hpp"
 #include "netconf_service.hpp"
 #include "types.hpp"
