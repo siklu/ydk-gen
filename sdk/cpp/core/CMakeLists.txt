@@ -232,58 +232,6 @@ set(libydk_install_headers
 set(libyang_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/src/project_libyang)
 set(libyang_build_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/src/project_libyang-build)
 
-set(libyang_headers
-    ${libyang_location}/src/common.h
-    ${libyang_location}/src/context.h
-    ${libyang_location}/src/dict.h
-    ${libyang_location}/src/dict_private.h
-    ${libyang_location}/src/extensions.h
-    ${libyang_build_location}/src/extensions_config.h
-    ${libyang_build_location}/src/libyang.h
-    ${libyang_location}/src/parser.h
-    ${libyang_location}/src/parser_yang.h
-    ${libyang_location}/src/parser_yang_bis.h
-    ${libyang_location}/src/parser_yang_lex.h
-    ${libyang_location}/src/printer.h
-    ${libyang_location}/src/resolve.h
-    ${libyang_location}/src/tree_data.h
-    ${libyang_location}/src/tree_internal.h
-    ${libyang_location}/src/tree_schema.h
-    ${libyang_location}/src/validation.h
-    ${libyang_location}/src/xml.h
-    ${libyang_location}/src/xml_internal.h
-    ${libyang_location}/src/xpath.h
-)
-
-set(yang_objs
-    common.c.o
-    context.c.o
-    dict.c.o
-    extensions.c.o
-    log.c.o
-    parser.c.o
-    parser_json.c.o
-    parser_xml.c.o
-    parser_yang.c.o
-    parser_yang_bis.c.o
-    parser_yang_lex.c.o
-    parser_yin.c.o
-    printer.c.o
-    printer_info.c.o
-    printer_json.c.o
-    printer_tree.c.o
-    printer_xml.c.o
-    printer_yang.c.o
-    printer_yin.c.o
-    resolve.c.o
-    tree_data.c.o
-    tree_schema.c.o
-    validation.c.o
-    xml.c.o
-    xpath.c.o
-    yang_types.c.o
-)
-
 # Find dependent libraries
 find_library(curl_location curl)
 find_library(ssh_threads_location ssh_threads)
@@ -294,46 +242,8 @@ find_library(dl_location dl)
 find_library(m_location m)
 find_package(LibXml2 REQUIRED)
 find_package(LibSSH REQUIRED)
+find_library(LIBYANG libyang)
 
-set(LIBYANG_EXT_PLUGINS_DIR ${LIB_INSTALL_DIR}/libyang)
-message("Set libyang plugin installation directory to: ${LIBYANG_EXT_PLUGINS_DIR}")
-
-include(ExternalProject)
-# Add LibYang
-set(libyang_include_location include/libyang)
-set(libyang_headers_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/headers)
-ExternalProject_Add(project_libyang
-    PREFIX "${CMAKE_CURRENT_BINARY_DIR}/project_libyang"
-    URL "https://github.com/ygorelik/libyang/archive/master.zip"
-    CMAKE_ARGS -DSTATIC=true -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_LIBDIR=lib
-    INSTALL_DIR "${libyang_location}"
-    INSTALL_COMMAND mkdir -p ${libyang_headers_location}/libyang && cp ${libyang_headers} ${libyang_headers_location}/libyang
-)
-install(FILES ${libyang_headers} DESTINATION ${libyang_include_location})
-
-ExternalProject_Get_Property(project_libyang install_dir)
-set(libyang_archive ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/src/project_libyang-build/libyang.a)
-
-add_library(libyang STATIC IMPORTED)
-set_property(TARGET libyang PROPERTY IMPORTED_LOCATION ${libyang_archive})
-add_dependencies(libyang project_libyang)
-
-add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/objs
-    COMMAND cmake -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/objs
-)
-set (libyang_objs ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/objs)
-
-list(APPEND libyang_inc_objs "")
-foreach(yang_obj IN LISTS yang_objs)
-    add_custom_command(
-        OUTPUT ${libyang_objs}/${yang_obj}
-        COMMAND ar -x ${libyang_archive} ${yang_obj}
-        MAIN_DEPENDENCY ${libyang_objs}
-        WORKING_DIRECTORY ${libyang_objs}
-    )
-    list(APPEND libyang_inc_objs ${libyang_objs}/${yang_obj})
-endforeach(yang_obj)
 
 include_directories(
     ${LIBYANG_INCLUDE_DIRS}
@@ -347,7 +257,7 @@ include_directories(
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_library(ydk STATIC ${libydk_src} ${libnetconf_inc_objs} ${libyang_inc_objs})
+add_library(ydk STATIC ${libydk_src})
 
 target_link_libraries(ydk
     ${LIBXML2_LIBRARIES}
@@ -356,6 +266,7 @@ target_link_libraries(ydk
     ${pcre_location}
     ${xslt_location}
     ${pthread_location}
+    ${LIBYANG_LIBRARIES}
     libnetconf
     libyang
     -rdynamic
@@ -377,7 +288,6 @@ install(FILES ${SPDLOG_DETAILS_HEADERS} DESTINATION ${spdlog_details_include_loc
 install(FILES ${SPDLOG_FMT_HEADERS} DESTINATION ${spdlog_fmt_include_location})
 install(FILES ${SPDLOG_FMT_BUNDLED_HEADERS} DESTINATION ${spdlog_fmt_bundled_include_location})
 install(FILES ${SPDLOG_SINKS_HEADERS} DESTINATION ${spdlog_sinks_include_location})
-install(FILES ${libyang_extension_lib} DESTINATION ${LIBYANG_EXT_PLUGINS_DIR})
 
 # generate doxygen documentation for ydk_core API
 find_package(Doxygen)
