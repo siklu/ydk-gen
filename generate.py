@@ -515,11 +515,11 @@ if __name__ == '__main__':
 
     success = True
     if options.cpp:
-        preconfigure_generated_cpp_code(output_directory, options.libydk)
         cpp_package = os.path.basename(output_directory)
         print('\nSuccessfully generated {0} code for {1}\n'.format(language, cpp_package))
         cmake_build_dir = os.path.join(output_directory, 'build')
         if options.install:
+            preconfigure_generated_cpp_code(output_directory, options.libydk)
             os.chdir(cmake_build_dir)
             print('\nCompiling {0} package ...\n'.format(language))
             if os.system('make') != 0:
