@@ -60,6 +60,7 @@ class ClassMembersPrinter(object):
         self.ctx.writeln('std::vector<std::pair<std::string, ydk::LeafData> > get_name_leaf_data() const override;')
         self.ctx.writeln('std::string get_segment_path() const override;')
         self.ctx.writeln('std::shared_ptr<ydk::Entity> get_child_by_name(const std::string & yang_name, const std::string & segment_path) override;')
+        self.ctx.writeln('void set_child_by_name(const std::string & yang_name, std::shared_ptr<Entity> _ent) override;')
         self.ctx.writeln('void set_value(const std::string & value_path, const std::string & value, const std::string & name_space, const std::string & name_space_prefix) override;')
         self.ctx.writeln('void set_filter(const std::string & value_path, ydk::YFilter yfliter) override;')
         self.ctx.writeln('std::map<std::string, std::shared_ptr<ydk::Entity>> get_children() const override;')

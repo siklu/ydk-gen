@@ -143,6 +143,8 @@ class Entity {
     virtual std::string get_bundle_name() const;
     virtual std::map<std::pair<std::string, std::string>, std::string> get_namespace_identity_lookup() const;
 
+    virtual void set_child_by_name(const std::string & yang_name, std::shared_ptr<Entity> _ent) = 0;
+
     bool operator == (Entity & other) const;
     bool operator == (const Entity & other) const;
     bool operator != (Entity & other) const;

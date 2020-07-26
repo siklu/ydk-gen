@@ -28,7 +28,7 @@ from .class_get_children_printer import ClassGetChildrenPrinter
 from .class_get_child_printer import ClassGetChildPrinter
 from .class_set_value_printer import ClassSetYLeafPrinter
 from .class_get_entity_path_printer import GetEntityPathPrinter, GetSegmentPathPrinter, GetAbsolutePathPrinter
-
+from .class_set_child_printer import ClassSetChildPrinter
 
 class ClassSourcePrinter(object):
     def __init__(self, ctx, bundle_name, module_namespace_lookup):
@@ -66,6 +66,7 @@ class ClassSourcePrinter(object):
         self._print_class_set_value(clazz, leafs)
         self._print_top_level_entity_functions(clazz, leafs)
         self._print_has_leaf_or_child_of_name(clazz, children, leafs)
+        self._print_class_set_child_entity(clazz, children)
 
     def _print_top_level_entity_functions(self, clazz, leafs):
         if clazz.owner is not None and isinstance(clazz.owner, Package):
@@ -167,6 +168,9 @@ class ClassSourcePrinter(object):
 
     def _print_class_set_child(self, clazz, children):
         ClassGetChildPrinter(self.ctx).print_class_get_child(clazz, children)
+
+    def _print_class_set_child_entity(self, clazz, children):
+        ClassSetChildPrinter(self.ctx).print_class_set_child(clazz, children)
 
     def _print_class_set_value(self, clazz, leafs):
         ClassSetYLeafPrinter(self.ctx).print_class_set_value(clazz, leafs)
