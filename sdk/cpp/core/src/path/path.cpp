@@ -190,7 +190,7 @@ static ydk::path::RootSchemaNodeImpl & get_root_schema_impl(ydk::path::RootSchem
 
 static std::shared_ptr<ydk::path::DataNode> perform_decode(ydk::path::RootSchemaNodeImpl & rs_impl, struct lyd_node *lnode)
 {
-    ydk::YLOG_DEBUG("Performing decode operation");
+    YLOG_DEBUG("Performing decode operation");
     std::shared_ptr<ydk::path::RootDataImpl> rd = std::make_shared<ydk::path::RootDataImpl> (rs_impl, rs_impl.m_ctx, "/");
     rd->m_node = lnode;
 
@@ -209,7 +209,7 @@ static struct lyd_node* create_lyd_node_for_rpc(ydk::path::RootSchemaNodeImpl & 
     struct lyd_node* rpc = lyd_new_path(NULL, rs_impl.m_ctx, rpc_path.c_str(), NULL, LYD_ANYDATA_SXML, 0);
     if( rpc == nullptr || ly_errno )
     {
-        ydk::YLOG_ERROR( "Parsing failed with message {}", ly_errmsg());
+        YLOG_ERROR( "Parsing failed with message {}", ly_errmsg());
         throw(ydk::path::YCodecError{ydk::path::YCodecError::Error::XML_INVAL});
     }
     return rpc;
@@ -261,7 +261,7 @@ ydk::path::Codec::encode(const ydk::path::DataNode& dn, ydk::EncodingFormat form
             {
                 std::ostringstream os;
                 os << "Could not encode datanode: "<< m_node->schema->name;
-                ydk::YLOG_ERROR(os.str().c_str());
+                YLOG_ERROR(os.str().c_str());
                 throw(ydk::path::YCoreError{os.str()});
             }
             ret = buffer;
