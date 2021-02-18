@@ -897,80 +897,80 @@ const char* DataNodeGetSegmentPath(DataNode datanode)
     return string_to_array(segments.back());
 }
 
-void EnableLogging(LogLevel level)
+void EnableLogging(LogLevel )
 {
-    auto console = spdlog::stdout_color_mt("ydk");
-    switch(level)
-    {
-        case DEBUG:
-            console->set_level(spdlog::level::debug);
-            return;
-
-        case INFO:
-            console->set_level(spdlog::level::info);
-            return;
-
-        case WARNING:
-            console->set_level(spdlog::level::warn);
-            return;
-
-        case ERROR:
-            console->set_level(spdlog::level::err);
-            return;
-
-        case OFF:
-            console->set_level(spdlog::level::off);
-            return;
-    }
+//    auto console = spdlog::sinks::stdout_color_mt("ydk");
+//    switch(level)
+//    {
+//        case DEBUG:
+//            console->set_level(spdlog::level::debug);
+//            return;
+//
+//        case INFO:
+//            console->set_level(spdlog::level::info);
+//            return;
+//
+//        case WARNING:
+//            console->set_level(spdlog::level::warn);
+//            return;
+//
+//        case ERROR:
+//            console->set_level(spdlog::level::err);
+//            return;
+//
+//        case OFF:
+//            console->set_level(spdlog::level::off);
+//            return;
+//    }
 }
 
 LogLevel GetLoggingLevel(void)
 {
-    auto console = spdlog::get("ydk");
-    if(console == nullptr)
-    {
-        return OFF;
-    }
-
-    auto level = console->level();
-    switch(level)
-    {
-        case spdlog::level::off:
-            return OFF;
-        case spdlog::level::trace:
-        case spdlog::level::debug:
-            return DEBUG;
-
-        case spdlog::level::info:
-            return INFO;
-
-        case spdlog::level::warn:
-            return WARNING;
-
-        case spdlog::level::critical:
-        case spdlog::level::err:
-        default:
-            return ERROR;
-    }
+    return OFF;
+//    auto console = spdlog::get("ydk");
+//    if(console == nullptr)
+//    {
+//        return OFF;        
+//    }
+//
+//    auto level = console->level();
+//    switch(level)
+//    {
+//        case spdlog::level::off:
+//            return OFF;
+//        case spdlog::level::trace:
+//        case spdlog::level::debug:
+//            return DEBUG;
+//
+//        case spdlog::level::info:
+//            return INFO;
+//
+//        case spdlog::level::warn:
+//            return WARNING;
+//
+//        case spdlog::level::critical:
+//        case spdlog::level::err:
+//        default:
+//            return ERROR;
+//    }
 }
 
 void YLogInfo(const char* msg)
 {
-    ydk::YLOG_INFO(msg);
+    YLOG_INFO(msg);
 }
 
 void YLogDebug(const char* msg)
 {
-    ydk::YLOG_DEBUG(msg);
+    YLOG_DEBUG(msg);
 }
 
 void YLogWarn(const char* msg)
 {
-    ydk::YLOG_WARN(msg);
+    YLOG_WARN(msg);
 }
 
 void YLogError(const char* msg)
 {
-    ydk::YLOG_ERROR(msg);
+    YLOG_ERROR(msg);
 }
-

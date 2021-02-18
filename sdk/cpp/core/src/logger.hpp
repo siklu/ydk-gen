@@ -20,114 +20,112 @@
 #include <memory>
 #include <sstream>
 
-#include "spdlog/spdlog.h"
 #include "logging_callback.hpp"
+#include "spdlog/spdlog.h"
 
-
-namespace spdlog
-{
+namespace spdlog {
 class logger;
 }
 
-namespace ydk
-{
+namespace ydk {
 
-class Logger
-{
-    public:
-        Logger()
-            : internal_logger{ spdlog::get("ydk") }
-        {
-        }
+// class Logger
+// {
+//     public:
+//         Logger()
+//             : internal_logger{ spdlog::get("ydk") }
+//         {
+//         }
 
-        ~Logger()
-        {
-        }
-        #define _STRINGIFY(x) #x
-        #define STRINGIFY(x) _STRINGIFY(x)
-        #define YDKLOGLEVELARGS(loglevel) \
-        template <typename... Args> \
-        void loglevel(const char* fmt, const Args&... args) \
-        { \
-            logging_callback func = get_logging_callback(STRINGIFY(loglevel)); \
-            if(func != nullptr) \
-                { \
-                    std::stringstream buffer; \
-                    write_fmt_msg<Args...>(internal_logger->name(), \
-                                           STRINGIFY(loglevel), \
-                                           fmt, \
-                                           buffer, \
-                                           args...); \
-                    func(buffer.str().c_str()); \
-                    return;\
-                } \
-            /* Only applies to C++ core */ \
-            if(!lazy_check()) { return; } \
-            internal_logger->loglevel<Args...>(fmt, args...); \
-        }
+//         ~Logger()
+//         {
+//         }
+//         #define _STRINGIFY(x) #x
+//         #define STRINGIFY(x) _STRINGIFY(x)
+//         #define YDKLOGLEVELARGS(loglevel) \
+//         template <typename... Args> \
+//         void loglevel(const char* fmt, const Args&... args) \
+//         { \
+//             logging_callback func =
+//             get_logging_callback(STRINGIFY(loglevel)); \
+//             if(func != nullptr) \
+//                 { \
+//                     std::stringstream buffer; \
+//                     write_fmt_msg<Args...>(internal_logger->name(), \
+//                                            STRINGIFY(loglevel), \
+//                                            fmt, \
+//                                            buffer, \
+//                                            args...); \
+//                     func(buffer.str().c_str()); \
+//                     return;\
+//                 } \
+//             /* Only applies to C++ core */ \
+//             if(!lazy_check()) { return; } \
+//             internal_logger->loglevel<Args...>(fmt, args...); \
+//         }
 
-        #define YDKLOGLEVELNOARGS(loglevel) \
-        template <typename T> \
-        void loglevel(const T& msg) \
-        { \
-            logging_callback func = get_logging_callback(STRINGIFY(loglevel)); \
-            if(func != nullptr) { func(msg); return; } \
-            /* Only applies to C++ core */ \
-            if(!lazy_check()) { return; } \
-            internal_logger->loglevel<T>(msg); \
-        }
+//         #define YDKLOGLEVELNOARGS(loglevel) \
+//         template <typename T> \
+//         void loglevel(const T& msg) \
+//         { \
+//             logging_callback func = get_logging_callback(STRINGIFY(loglevel)); \
+//             if(func != nullptr) { func(msg); return; } \
+//             /* Only applies to C++ core */ \
+//             if(!lazy_check()) { return; } \
+//             internal_logger->loglevel<T>(msg); \
+//         }
 
-        YDKLOGLEVELARGS(trace)
-        YDKLOGLEVELARGS(debug)
-        YDKLOGLEVELARGS(info)
-        YDKLOGLEVELARGS(warn)
-        YDKLOGLEVELARGS(error)
-        YDKLOGLEVELARGS(critical)
+//         YDKLOGLEVELARGS(trace)
+//         YDKLOGLEVELARGS(debug)
+//         YDKLOGLEVELARGS(info)
+//         YDKLOGLEVELARGS(warn)
+//         YDKLOGLEVELARGS(error)
+//         YDKLOGLEVELARGS(critical)
 
-        YDKLOGLEVELNOARGS(trace)
-        YDKLOGLEVELNOARGS(debug)
-        YDKLOGLEVELNOARGS(info)
-        YDKLOGLEVELNOARGS(warn)
-        YDKLOGLEVELNOARGS(error)
-        YDKLOGLEVELNOARGS(critical)
+//         YDKLOGLEVELNOARGS(trace)
+//         YDKLOGLEVELNOARGS(debug)
+//         YDKLOGLEVELNOARGS(info)
+//         YDKLOGLEVELNOARGS(warn)
+//         YDKLOGLEVELNOARGS(error)
+//         YDKLOGLEVELNOARGS(critical)
 
-        #undef YDKLOGLEVELARGS
-        #undef YDKLOGLEVELNOARGS
-        #undef _STRINGIFY
-        #undef STRINGIFY
+//         #undef YDKLOGLEVELARGS
+//         #undef YDKLOGLEVELNOARGS
+//         #undef _STRINGIFY
+//         #undef STRINGIFY
 
-    private:
-        bool lazy_check()
-        {
-            if (!is_logger_found())
-            {
-                internal_logger = spdlog::get("ydk");
-                if (!is_logger_found())
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
+//     private:
+//         bool lazy_check()
+//         {
+//             if (!is_logger_found())
+//             {
+//                 internal_logger = spdlog::get("ydk");
+//                 if (!is_logger_found())
+//                 {
+//                     return false;
+//                 }
+//             }
+//             return true;
+//         }
 
-        bool is_logger_found()
-        {
-            return (internal_logger != nullptr);
-        }
+//         bool is_logger_found()
+//         {
+//             return (internal_logger != nullptr);
+//         }
 
-    private:
-        std::shared_ptr<spdlog::logger> internal_logger;
-};
+//     private:
+//         std::shared_ptr<spdlog::logger> internal_logger;
+// };
 
-static Logger logger{};
+// static Logger logger{};
 
-#define YLOG_TRACE(...) logger.trace(__VA_ARGS__)
-#define YLOG_DEBUG(...) logger.debug(__VA_ARGS__)
-#define YLOG_INFO(...) logger.info(__VA_ARGS__)
-#define YLOG_WARN(...) logger.warn(__VA_ARGS__)
-#define YLOG_ERROR(...) logger.error(__VA_ARGS__)
-#define YLOG_CRITICAL(...) logger.critical(__VA_ARGS__)
+#define YLOG_TRACE(...) do {}while(0)
+#define YLOG_DEBUG(...) do {}while(0)
+#define YLOG_INFO(...) do {}while(0)
+#define YLOG_WARN(...) do {}while(0)
+#define YLOG_ERROR(...) do {}while(0)
+#define YLOG_CRITICAL(...) do {}while(0)
 
-}
+}  // namespace ydk
 
 #endif /* _LOGGER_H_ */
