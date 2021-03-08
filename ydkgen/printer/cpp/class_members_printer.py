@@ -65,6 +65,7 @@ class ClassMembersPrinter(object):
         self.ctx.writeln('void set_filter(const std::string & value_path, ydk::YFilter yfliter) override;')
         self.ctx.writeln('std::map<std::string, std::shared_ptr<ydk::Entity>> get_children() const override;')
         self.ctx.writeln('bool has_leaf_or_child_of_name(const std::string & name) const override;')
+        self.ctx.writeln('const std::string get_namespace() const override;')
         if not is_top_level_class(clazz) and not has_list_ancestor(clazz):
             self.ctx.writeln('std::string get_absolute_path() const override;')
 

@@ -73,6 +73,8 @@ Entity::get_namespace_identity_lookup() const {
 
 std::string Entity::get_absolute_path() const { return ""; }
 
+const std::string Entity::get_namespace() const { return ""; }
+
 bool Entity::operator==(Entity &other) const {
   if (!has_data() && !other.has_data()) return true;
 

@@ -150,6 +150,8 @@ class Entity {
   virtual void set_child_by_name(const std::string& yang_name,
                                  std::shared_ptr<Entity> _ent) = 0;
 
+  virtual const std::string get_namespace() const;
+
   bool operator==(Entity& other) const;
   bool operator==(const Entity& other) const;
   bool operator!=(Entity& other) const;
