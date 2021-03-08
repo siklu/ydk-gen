@@ -141,8 +141,8 @@ static void populate_xml_node(Entity& entity,
   walk_children(entity, *schema, child);
 }
 
-static const xmlChar* get_content_from_leafdata(LeafData& leaf_data) {
-  const xmlChar* content = NULL;
+static const xmlChar *get_content_from_leafdata(LeafData &leaf_data) {
+  const xmlChar *content = NULL;
   if (leaf_data.is_set) {
     content = to_xmlchar(leaf_data.value);
   } else if (is_set(leaf_data.yfilter)) {
@@ -151,11 +151,11 @@ static const xmlChar* get_content_from_leafdata(LeafData& leaf_data) {
   return content;
 }
 
-static bool leaf_to_be_created(LeafData& leaf_data) {
+static bool leaf_to_be_created(LeafData &leaf_data) {
   return leaf_data.is_set || is_set(leaf_data.yfilter);
 }
 
-static void set_prefixed_namespace_from_leafdata(LeafData& leaf_data,
+static void set_prefixed_namespace_from_leafdata(LeafData &leaf_data,
                                                  xmlNodePtr xml_node) {
   if (leaf_data.name_space.size() > 0 &&
       leaf_data.name_space_prefix.size() > 0) {
@@ -194,8 +194,8 @@ static void populate_xml_node_contents(const path::SchemaNode& parent_schema,
 // XmlSubtreeCodec::decode
 //////////////////////////////////////////////////////////////////
 std::shared_ptr<Entity> XmlSubtreeCodec::decode(
-    const std::string& payload, std::shared_ptr<Entity> entity) {
-  if (entity->get_augment_capabilities_function())
+    const std::string &payload, std::shared_ptr<Entity> entity) {
+  if (entity->get_augment_capabilities_function()) {
     entity->get_augment_capabilities_function()();
 
   xmlDocPtr doc =
@@ -222,10 +222,10 @@ static void check_and_set_leaf(Entity& entity, Entity* parent,
   }
 }
 
-static string resolve_leaf_value_namespace(const string& content,
-                                           const string& name_space,
-                                           const string& name_space_prefix,
-                                           Entity* entity) {
+static string resolve_leaf_value_namespace(const string &content,
+                                           const string &name_space,
+                                           const string &name_space_prefix,
+                                           Entity *entity) {
   string c{content};
   if (name_space.size() > 0 && name_space_prefix.size() > 0) {
     if (content.find(name_space_prefix) != string::npos &&
@@ -233,7 +233,7 @@ static string resolve_leaf_value_namespace(const string& content,
       auto s = content.find(":");
       c = content.substr(s + 1);
     }
-    Entity* p = entity;
+    Entity *p = entity;
     while (p->parent != nullptr) {
       p = p->parent;
     }
@@ -248,11 +248,11 @@ static string resolve_leaf_value_namespace(const string& content,
   return c;
 }
 
-static void check_and_set_content(Entity& entity, const string& leaf_name,
-                                  xmlNodePtr parent_xml_node, xmlChar* content,
+static void check_and_set_content(Entity &entity, const string &leaf_name,
+                                  xmlNodePtr parent_xml_node, xmlChar *content,
                                   xmlDocPtr doc) {
   if (leaf_name.size() > 0 && !isonlywhitespace(content)) {
-    xmlNsPtr* nsList = xmlGetNsList(doc, parent_xml_node);
+    xmlNsPtr *nsList = xmlGetNsList(doc, parent_xml_node);
     string name_space;
     string name_space_prefix;
     if (nsList) {
@@ -271,8 +271,8 @@ static void check_and_set_content(Entity& entity, const string& leaf_name,
   }
 }
 
-static void check_payload_to_raise_exception(Entity& entity,
-                                             const xmlChar* name) {
+static void check_payload_to_raise_exception(Entity &entity,
+                                             const xmlChar *name) {
   string current_node_name{to_string(name)};
   if (!entity.has_leaf_or_child_of_name(current_node_name)) {
     ostringstream os;
@@ -283,12 +283,11 @@ static void check_payload_to_raise_exception(Entity& entity,
   }
 }
 
-static void check_and_set_node(Entity& entity, Entity* parent,
+static void check_and_set_node(Entity &entity, Entity *parent,
                                xmlNodePtr xml_node, xmlDocPtr doc) {
   YLOG_DEBUG("XMLCodec: Looking for child '{}' in '{}'",
              to_string(xml_node->name), entity.yang_name);
   check_payload_to_raise_exception(entity, xml_node->name);
-
   auto child_name = to_string(xml_node->name);
   if (xml_node->ns->href && xml_node->parent && xml_node->parent->ns->href) {
     auto child_ns = to_string(xml_node->ns->href);
@@ -318,8 +317,8 @@ static void check_and_set_node(Entity& entity, Entity* parent,
   }
 }
 
-static void decode_xml(xmlDocPtr doc, xmlNodePtr root, Entity& entity,
-                       Entity* parent, const string& leaf_name) {
+static void decode_xml(xmlDocPtr doc, xmlNodePtr root, Entity &entity,
+                       Entity *parent, const string &leaf_name) {
   xmlNodePtr xml_node = NULL;
 
   for (xml_node = root; xml_node; xml_node = xml_node->next) {

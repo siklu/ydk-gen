@@ -51,9 +51,9 @@ Entity::~Entity() {}
 
 shared_ptr<Entity> Entity::clone_ptr() const { return nullptr; }
 
-void Entity::set_parent(Entity* p) { parent = p; }
+void Entity::set_parent(Entity *p) { parent = p; }
 
-Entity* Entity::get_parent() const { return parent; }
+Entity *Entity::get_parent() const { return parent; }
 
 augment_capabilities_function Entity::get_augment_capabilities_function()
     const {
@@ -73,7 +73,7 @@ Entity::get_namespace_identity_lookup() const {
 
 std::string Entity::get_absolute_path() const { return ""; }
 
-bool Entity::operator==(Entity& other) const {
+bool Entity::operator==(Entity &other) const {
   if (!has_data() && !other.has_data()) return true;
 
   if (!has_data() || !other.has_data()) return false;
@@ -107,7 +107,7 @@ bool Entity::operator==(Entity& other) const {
   return true;
 }
 
-bool Entity::operator!=(Entity& other) const {
+bool Entity::operator!=(Entity &other) const {
   if (has_data() && !other.has_data()) return true;
 
   if (!has_data() && other.has_data()) return true;
@@ -115,8 +115,8 @@ bool Entity::operator!=(Entity& other) const {
   YLOG_DEBUG("Comparing inequality of '{}' and '{}'", get_segment_path(),
              other.get_segment_path());
 
-  auto const& this_children = get_children();
-  auto const& other_children = other.get_children();
+  auto const &this_children = get_children();
+  auto const &other_children = other.get_children();
 
   if (get_entity_path(*this, parent) == get_entity_path(other, other.parent)) {
     if (this_children.size() == other_children.size()) {
@@ -148,18 +148,18 @@ std::string Entity::get_ylist_key() const {
       ostringstream os;
       os << index;
       key = os.str();
-    } catch (const std::exception& ex) {
+    } catch (const std::exception &ex) {
       YLOG_ERROR("Failed to convert key '{}' to string", ylist_key);
     }
   }
   return key;
 }
 
-std::ostream& operator<<(std::ostream& stream, Entity& entity) {
+std::ostream &operator<<(std::ostream &stream, Entity &entity) {
   stream << get_entity_path(entity, entity.parent);
-  auto const& children = entity.get_children();
+  auto const &children = entity.get_children();
   if (entity.has_data() && children.size() > 0) stream << endl;
-  for (auto const& entry : children) {
+  for (auto const &entry : children) {
     if (entry.second->has_data())
       stream << "  { " << *(entry.second) << " }" << endl;
   }
@@ -171,13 +171,13 @@ std::ostream& operator<<(std::ostream& stream, Entity& entity) {
 //////////////////////////////////////////////////////////////////
 
 EntityPath::EntityPath(
-    const std::string& path,
-    std::vector<std::pair<std::string, LeafData>>& value_paths)
+    const std::string &path,
+    std::vector<std::pair<std::string, LeafData>> &value_paths)
     : path(path), value_paths(value_paths) {}
 
 EntityPath::~EntityPath() {}
 
-bool EntityPath::operator==(EntityPath& other) const {
+bool EntityPath::operator==(EntityPath &other) const {
   ostringstream os1, os2;
   os1 << *this;
   os2 << other;
@@ -185,7 +185,7 @@ bool EntityPath::operator==(EntityPath& other) const {
   return path == other.path && value_paths == other.value_paths;
 }
 
-bool EntityPath::operator==(const EntityPath& other) const {
+bool EntityPath::operator==(const EntityPath &other) const {
   ostringstream os1, os2;
   os1 << *this;
   os2 << other;
@@ -193,7 +193,7 @@ bool EntityPath::operator==(const EntityPath& other) const {
   return path == other.path && value_paths == other.value_paths;
 }
 
-bool EntityPath::operator!=(EntityPath& other) const {
+bool EntityPath::operator!=(EntityPath &other) const {
   ostringstream os1, os2;
   os1 << *this;
   os2 << other;
@@ -201,7 +201,7 @@ bool EntityPath::operator!=(EntityPath& other) const {
   return path != other.path || value_paths != other.value_paths;
 }
 
-bool EntityPath::operator!=(const EntityPath& other) const {
+bool EntityPath::operator!=(const EntityPath &other) const {
   ostringstream os1, os2;
   os1 << *this;
   os2 << other;
@@ -210,10 +210,10 @@ bool EntityPath::operator!=(const EntityPath& other) const {
   return path != other.path || value_paths != other.value_paths;
 }
 
-std::ostream& operator<<(std::ostream& stream, const EntityPath& path) {
+std::ostream &operator<<(std::ostream &stream, const EntityPath &path) {
   stream << path.path << " ( ";
   for (size_t index = 0; index < path.value_paths.size(); index++) {
-    auto const& value_path = path.value_paths[index];
+    auto const &value_path = path.value_paths[index];
     stream << value_path.first << ":" << value_path.second;
     if (index != path.value_paths.size() - 1) {
       stream << ", ";
