@@ -13,14 +13,13 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 ------------------------------------------------------------------*/
-#include <iostream>
-
-#include <ydk/types.hpp>
-#include <ydk/netconf_provider.hpp>
-#include <ydk/crud_service.hpp>
-
-#include <ydk_cisco_ios_xr/Cisco_IOS_XR_clns_isis_cfg.hpp>
 #include <spdlog/spdlog.h>
+
+#include <iostream>
+#include <ydk/crud_service.hpp>
+#include <ydk/netconf_provider.hpp>
+#include <ydk/types.hpp>
+#include <ydk_cisco_ios_xr/Cisco_IOS_XR_clns_isis_cfg.hpp>
 
 #include "args_parser.h"
 
@@ -28,33 +27,34 @@ using namespace ydk;
 using namespace cisco_ios_xr::Cisco_IOS_XR_clns_isis_cfg;
 using namespace std;
 
-int main(int argc, char* argv[])
-{
-    vector<string> args = parse_args(argc, argv);
-    if(args.empty()) return 1;
-    string host, username, password;
-    int port;
+int main(int argc, char* argv[]) {
+  vector<string> args = parse_args(argc, argv);
+  if (args.empty()) return 1;
+  string host, username, password;
+  int port;
 
-    username = args[0]; password = args[1]; host = args[2]; port = stoi(args[3]);
+  username = args[0];
+  password = args[1];
+  host = args[2];
+  port = stoi(args[3]);
 
-    bool verbose=(args[4]=="--verbose");
-    if(verbose)
-    {
-            auto logger = spdlog::stdout_color_mt("ydk");
-            logger->set_level(spdlog::level::info);
-    }
+  bool verbose = (args[4] == "--verbose");
+  if (verbose) {
+    auto logger = spdlog::stdout_color_mt("ydk");
+    logger->set_level(spdlog::level::info);
+  }
 
-    try
-    {
-        NetconfServiceProvider provider{host, username, password, port};
-        CrudService crud{};
+  try {
+    NetconfServiceProvider provider{host, username, password, port};
+    CrudService crud{};
 
-        auto isis = make_unique<Isis>();
-        bool reply = crud.delete_(provider, *isis);
-        if(reply) cout << "Delete yfilter success" << endl << endl; else cout << "Operation failed" << endl << endl;
-    }
-    catch(YError & e)
-    {
-        cerr << "Error details: "<<e.what()<<endl;
-    }
+    auto isis = make_unique<Isis>();
+    bool reply = crud.delete_(provider, *isis);
+    if (reply)
+      cout << "Delete yfilter success" << endl << endl;
+    else
+      cout << "Operation failed" << endl << endl;
+  } catch (YError& e) {
+    cerr << "Error details: " << e.what() << endl;
+  }
 }

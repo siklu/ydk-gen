@@ -27,55 +27,49 @@
 namespace ydk {
 
 class NetconfServiceProvider : public ServiceProvider {
-public:
-        NetconfServiceProvider(path::Repository & repo,
-                               const std::string& address,
-                               const std::string& username,
-                               const std::string& password,
-                               int port = 830,
-                               const std::string& protocol = "ssh",
-                               bool on_demand = true,
-                               int timeout = -1);
-        NetconfServiceProvider(const std::string& address,
-                               const std::string& username,
-                               const std::string& password,
-                               int port = 830,
-                               const std::string& protocol = "ssh",
-                               bool on_demand = true,
-                               bool common_cache = false,
-                               int timeout = -1);
+ public:
+  NetconfServiceProvider(path::Repository& repo, const std::string& address,
+                         const std::string& username,
+                         const std::string& password, int port = 830,
+                         const std::string& protocol = "ssh",
+                         bool on_demand = true, int timeout = -1);
+  NetconfServiceProvider(const std::string& address,
+                         const std::string& username,
+                         const std::string& password, int port = 830,
+                         const std::string& protocol = "ssh",
+                         bool on_demand = true, bool common_cache = false,
+                         int timeout = -1);
 
-        NetconfServiceProvider(path::Repository& repo,
-                               const std::string& address,
-                               const std::string& username,
-                               const std::string& private_key_path,
-                               const std::string& public_key_path,
-                               int port = 830,
-                               bool on_demand = true,
-                               int timeout = -1);
-        NetconfServiceProvider(const std::string& address,
-                               const std::string& username,
-                               const std::string& private_key_path,
-                               const std::string& public_key_path,
-                               int port = 830,
-                               bool on_demand = true,
-                               bool common_cache = false,
-                               int timeout = -1);
-        ~NetconfServiceProvider();
-        EncodingFormat get_encoding() const;
-        const path::Session& get_session() const;
-        std::vector<std::string> get_capabilities() const;
+  NetconfServiceProvider(path::Repository& repo, const std::string& address,
+                         const std::string& username,
+                         const std::string& private_key_path,
+                         const std::string& public_key_path, int port = 830,
+                         bool on_demand = true, int timeout = -1);
+  NetconfServiceProvider(const std::string& address,
+                         const std::string& username,
+                         const std::string& private_key_path,
+                         const std::string& public_key_path, int port = 830,
+                         bool on_demand = true, bool common_cache = false,
+                         int timeout = -1);
+  ~NetconfServiceProvider();
+  EncodingFormat get_encoding() const;
+  const path::Session& get_session() const;
+  std::vector<std::string> get_capabilities() const;
 
-        inline const std::string get_provider_type() const {
-            return "NetconfServiceProvider";
-        }
+  inline const std::string get_provider_type() const {
+    return "NetconfServiceProvider";
+  }
 
-        std::shared_ptr<Entity> execute_operation(const std::string & operation, Entity & entity, std::map<std::string,std::string> params);
-        std::vector<std::shared_ptr<Entity>> execute_operation(const std::string & operation, std::vector<Entity*> entity_list, std::map<std::string,std::string> params);
+  std::shared_ptr<Entity> execute_operation(
+      const std::string& operation, Entity& entity,
+      std::map<std::string, std::string> params);
+  std::vector<std::shared_ptr<Entity>> execute_operation(
+      const std::string& operation, std::vector<Entity*> entity_list,
+      std::map<std::string, std::string> params);
 
-private:
-        const path::NetconfSession session;
+ private:
+  const path::NetconfSession session;
 };
-}
+}  // namespace ydk
 
 #endif /*_NETCONF_PROVIDER_H_*/

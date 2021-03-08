@@ -26,15 +26,15 @@
 #include "path_api.hpp"
 #include "types.hpp"
 
-namespace ydk
-{
-class JsonSubtreeCodec
-{
-public:
-    JsonSubtreeCodec();
-    ~JsonSubtreeCodec();
+namespace ydk {
+class JsonSubtreeCodec {
+ public:
+  JsonSubtreeCodec();
+  ~JsonSubtreeCodec();
 
-    std::string encode(Entity & entity, path::RootSchemaNode & root_schema, bool pretty=true);
-    std::shared_ptr<Entity> decode(const std::string & payload, std::shared_ptr<Entity> entity);
+  std::string encode(Entity& entity, path::RootSchemaNode& root_schema,
+                     bool pretty = true);
+  std::shared_ptr<Entity> decode(const std::string& payload,
+                                 std::shared_ptr<Entity> entity);
 };
-}
+}  // namespace ydk

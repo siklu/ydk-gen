@@ -27,23 +27,20 @@
 #include <string>
 #include <vector>
 
-namespace ydk
-{
+namespace ydk {
 
-class NetconfClient
-{
-public:
-    NetconfClient();
-    virtual ~NetconfClient();
+class NetconfClient {
+ public:
+  NetconfClient();
+  virtual ~NetconfClient();
 
-    virtual int connect() = 0;
-    virtual std::string execute_payload(const std::string & payload) = 0;
-    virtual std::vector<std::string> get_capabilities() = 0;
-    virtual std::string get_hostname_port() = 0;
-    virtual void perform_session_check(const std::string & message) = 0;
+  virtual int connect() = 0;
+  virtual std::string execute_payload(const std::string& payload) = 0;
+  virtual std::vector<std::string> get_capabilities() = 0;
+  virtual std::string get_hostname_port() = 0;
+  virtual void perform_session_check(const std::string& message) = 0;
 };
 
-
-}
+}  // namespace ydk
 
 #endif /* _YDK_NETCONF_CLIENT_H_ */

@@ -21,111 +21,97 @@
 //
 //////////////////////////////////////////////////////////////////
 
-
 #include "path_private.hpp"
-
 
 /////////////////////////////////////////////////////////////////////////////
 /// Capability
 /////////////////////////////////////////////////////////////////////////////
 
-ydk::path::Capability::Capability(const std::string& mod, const std::string& rev): module{mod}, revision{rev}
-{
+ydk::path::Capability::Capability(const std::string& mod,
+                                  const std::string& rev)
+    : module{mod}, revision{rev} {}
 
+ydk::path::Capability::Capability(const std::string& mod,
+                                  const std::string& rev,
+                                  const std::vector<std::string>& f,
+                                  const std::vector<std::string>& d)
+    : module{mod}, revision{rev}, features{f}, deviations({d}) {}
+
+ydk::path::Capability::Capability(const Capability& cap)
+    : module{cap.module},
+      revision{cap.revision},
+      features{cap.features},
+      deviations{cap.deviations} {}
+
+ydk::path::Capability::Capability(ydk::path::Capability&& cap)
+    : module{std::move(cap.module)},
+      revision{std::move(cap.revision)},
+      features{std::move(cap.features)},
+      deviations{std::move(cap.deviations)} {}
+
+ydk::path::Capability& ydk::path::Capability::operator=(
+    const ydk::path::Capability& cap) {
+  module = cap.module;
+  revision = cap.revision;
+  features = cap.features;
+  deviations = cap.deviations;
+
+  return *this;
 }
 
-ydk::path::Capability::Capability(const std::string& mod, const std::string& rev, const std::vector<std::string>& f,
-           const std::vector<std::string>& d): module{mod}, revision{rev}, features{f}, deviations({d})
-{
+ydk::path::Capability& ydk::path::Capability::operator=(
+    ydk::path::Capability&& cap) {
+  module = std::move(cap.module);
+  revision = std::move(cap.revision);
+  features = std::move(cap.features);
+  deviations = std::move(cap.deviations);
 
+  return *this;
 }
 
-ydk::path::Capability::Capability(const Capability& cap): module{cap.module}, revision{cap.revision}, features{cap.features}, deviations{cap.deviations}
-{
+bool ydk::path::Capability::operator==(const ydk::path::Capability& cap) {
+  if (cap.module != module || cap.revision != revision) {
+    return false;
+  }
 
-}
+  if (cap.features.size() != features.size()) {
+    return false;
+  } else if (cap.features.size() != 0) {
+    // sort and compare
+    std::vector<std::string> cap_features{cap.features};
+    std::sort(cap_features.begin(), cap_features.end());
 
-ydk::path::Capability::Capability(ydk::path::Capability&& cap): module{std::move(cap.module)}, revision{std::move(cap.revision)},
-features{std::move(cap.features)}, deviations{std::move(cap.deviations)}
-{
+    // sort ourselves
+    std::sort(features.begin(), features.end());
 
-}
-
-ydk::path::Capability&
-ydk::path::Capability::operator=(const ydk::path::Capability& cap)
-{
-    module = cap.module;
-    revision = cap.revision;
-    features = cap.features;
-    deviations = cap.deviations;
-
-    return *this;
-}
-
-
-ydk::path::Capability&
-ydk::path::Capability::operator=(ydk::path::Capability&& cap)
-{
-    module = std::move(cap.module);
-    revision = std::move(cap.revision);
-    features = std::move(cap.features);
-    deviations = std::move(cap.deviations);
-
-    return *this;
-}
-
-bool
-ydk::path::Capability::operator==(const ydk::path::Capability& cap)
-{
-    if( cap.module != module || cap.revision != revision ) {
-        return false;
+    if (cap_features != features) {
+      return false;
     }
+  }
 
-    if (cap.features.size() != features.size()){
-        return false;
-    } else if(cap.features.size() != 0){
+  if (cap.deviations.size() != deviations.size()) {
+    return false;
+  } else if (cap.deviations.size() != 0) {
+    // sort and compare
+    std::vector<std::string> cap_deviations{cap.deviations};
+    std::sort(cap_deviations.begin(), cap_deviations.end());
 
-        //sort and compare
-        std::vector<std::string> cap_features{cap.features};
-        std::sort(cap_features.begin(), cap_features.end());
+    // sort ourselves
+    std::sort(deviations.begin(), deviations.end());
 
-        //sort ourselves
-        std::sort(features.begin(), features.end());
-
-        if(cap_features != features) {
-            return false;
-        }
-
+    if (cap_deviations != deviations) {
+      return false;
     }
+  }
 
-    if (cap.deviations.size() != deviations.size()) {
-        return false;
-    } else if(cap.deviations.size() != 0){
-
-        //sort and compare
-        std::vector<std::string> cap_deviations{cap.deviations};
-        std::sort(cap_deviations.begin(), cap_deviations.end());
-
-        //sort ourselves
-        std::sort(deviations.begin(), deviations.end());
-
-        if(cap_deviations != deviations) {
-            return false;
-        }
-
-    }
-
-    return true;
+  return true;
 }
 
-namespace ydk
-{
-namespace path
-{
-std::ostream& operator<< (std::ostream& stream, const Capability& cap)
-{
-    stream<<cap.module<<"@"<<cap.revision;
-    return stream;
+namespace ydk {
+namespace path {
+std::ostream& operator<<(std::ostream& stream, const Capability& cap) {
+  stream << cap.module << "@" << cap.revision;
+  return stream;
 }
-}
-}
+}  // namespace path
+}  // namespace ydk

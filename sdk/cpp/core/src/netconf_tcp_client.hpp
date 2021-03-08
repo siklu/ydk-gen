@@ -17,62 +17,60 @@
 #ifndef _YDK_NETCONF_TCP_CLIENT_H_
 #define _YDK_NETCONF_TCP_CLIENT_H_
 
+#include <curl/curl.h>
+
 #include <map>
 #include <string>
 #include <vector>
-#include <curl/curl.h>
 
 #include "errors.hpp"
 #include "netconf_client.hpp"
 
-namespace ydk
-{
+namespace ydk {
 
-class NetconfTCPClient : public NetconfClient
-{
+class NetconfTCPClient : public NetconfClient {
+ public:
+  NetconfTCPClient(const std::string& username, const std::string& password,
+                   const std::string& address, int port);
+  virtual ~NetconfTCPClient();
 
-public:
-    NetconfTCPClient(const std::string& username, const std::string& password,
-                     const std::string& address, int port);
-    virtual ~NetconfTCPClient();
+  int connect();
+  virtual std::string execute_payload(const std::string& payload);
+  virtual std::vector<std::string> get_capabilities();
+  virtual std::string get_hostname_port();
 
-    int connect();
-    virtual std::string execute_payload(const std::string & payload);
-    virtual std::vector<std::string> get_capabilities();
-    virtual std::string get_hostname_port();
+  void perform_session_check(const std::string& message);
 
-    void perform_session_check(const std::string & message);
+ private:
+  void initialize(const std::string& address, int port);
+  void initialize_curl(const std::string& address, int port);
+  void init_capabilities();
 
-private:
-    void initialize(const std::string& address, int port);
-    void initialize_curl(const std::string& address, int port);
-    void init_capabilities();
+  void check_ok(CURLcode res, const char* fmt);
+  void check_timeout(CURLcode res, int for_recv, const char* fmt);
 
-    void check_ok(CURLcode res, const char* fmt);
-    void check_timeout(CURLcode res, int for_recv, const char* fmt);
+  std::string add_message_id(const std::string& payload);
 
-    std::string add_message_id(const std::string &payload);
+  void send(const std::string& payload);
+  void send_value(const char* value, size_t value_len);
+  std::string recv();
+  std::string recv_value();
 
-    void send(const std::string & payload);
-    void send_value(const char* value, size_t value_len);
-    std::string recv();
-    std::string recv_value();
+ private:
+  CURL* curl;
+  curl_socket_t sockfd;
+  std::vector<std::string> server_capabilities;
 
-private:
-    CURL *curl;
-    curl_socket_t sockfd;
-    std::vector<std::string> server_capabilities;
+  std::string hello_msg;
+  std::string username;
+  std::string hostname;
+  std::string password;
+  int port;
 
-    std::string hello_msg;
-    std::string username;
-    std::string hostname;
-    std::string password;
-    int port;
-
-    long long unsigned int msgid;
-    bool connected = false;
+  long long unsigned int msgid;
+  bool connected = false;
 };
 
-}
+}  // namespace ydk
 
 #endif /* _YDK_NETCONF_TCP_CLIENT_H_ */

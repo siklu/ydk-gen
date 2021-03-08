@@ -27,4 +27,4 @@
 
 extern const char* TEST_HOME;
 
-#endif // YDK_TEST_CONFIG_HPP
+#endif  // YDK_TEST_CONFIG_HPP

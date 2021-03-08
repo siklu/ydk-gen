@@ -18,42 +18,42 @@
 #define _GNMI_PROVIDER_H_
 
 #include <fstream>
-
 #include <ydk/service_provider.hpp>
 
 #include "gnmi_client.hpp"
 #include "gnmi_path_api.hpp"
 
-namespace ydk 
-{
-    class gNMIClient;
+namespace ydk {
+class gNMIClient;
 
-    class gNMIServiceProvider : public ServiceProvider 
-    {
-      public:
-        gNMIServiceProvider(path::Repository & repo,
-                   const std::string& address, int port,
-                   const std::string& username,
-                   const std::string& password,
-                   const std::string & server_certificate="",
-                   const std::string & private_key="");
+class gNMIServiceProvider : public ServiceProvider {
+ public:
+  gNMIServiceProvider(path::Repository& repo, const std::string& address,
+                      int port, const std::string& username,
+                      const std::string& password,
+                      const std::string& server_certificate = "",
+                      const std::string& private_key = "");
 
-        ~gNMIServiceProvider();
+  ~gNMIServiceProvider();
 
-        EncodingFormat get_encoding() const;
-        const path::Session& get_session() const;
-        std::vector<std::string> get_capabilities() const;
+  EncodingFormat get_encoding() const;
+  const path::Session& get_session() const;
+  std::vector<std::string> get_capabilities() const;
 
-        inline const std::string get_provider_type() const {
-            return "gNMIServiceProvider";
-        }
+  inline const std::string get_provider_type() const {
+    return "gNMIServiceProvider";
+  }
 
-        std::shared_ptr<Entity> execute_operation(const std::string & operation, Entity & entity, std::map<std::string,std::string> params);
-        std::vector<std::shared_ptr<Entity>> execute_operation(const std::string & operation, std::vector<Entity*> entity_list, std::map<std::string,std::string> params);
+  std::shared_ptr<Entity> execute_operation(
+      const std::string& operation, Entity& entity,
+      std::map<std::string, std::string> params);
+  std::vector<std::shared_ptr<Entity>> execute_operation(
+      const std::string& operation, std::vector<Entity*> entity_list,
+      std::map<std::string, std::string> params);
 
-      private:
-        const path::gNMISession session;
-    };
-}
-#endif 
+ private:
+  const path::gNMISession session;
+};
+}  // namespace ydk
+#endif
 /*_GNMI_PROVIDER_H_*/

@@ -26,41 +26,41 @@
 
 namespace ydk {
 
-
 class RestconfServiceProvider : public ServiceProvider {
-public:
-        RestconfServiceProvider(path::Repository & repo,
-                               const std::string & address,
-                               const std::string & username,
-                               const std::string & password,
-                               int port = 80,
-                               EncodingFormat encoding = EncodingFormat::JSON,
-                               const std::string & config_url_root = "/data",
-                               const std::string & state_url_root = "/data");
+ public:
+  RestconfServiceProvider(path::Repository& repo, const std::string& address,
+                          const std::string& username,
+                          const std::string& password, int port = 80,
+                          EncodingFormat encoding = EncodingFormat::JSON,
+                          const std::string& config_url_root = "/data",
+                          const std::string& state_url_root = "/data");
 
-        RestconfServiceProvider(std::unique_ptr<RestconfClient> client,
-                                const std::shared_ptr<ydk::path::RootSchemaNode>& root_schema,
-                                const std::string & edit_method,
-                                const std::string & config_url_root,
-                                const std::string & state_url_root,
-                                EncodingFormat encoding);
+  RestconfServiceProvider(
+      std::unique_ptr<RestconfClient> client,
+      const std::shared_ptr<ydk::path::RootSchemaNode>& root_schema,
+      const std::string& edit_method, const std::string& config_url_root,
+      const std::string& state_url_root, EncodingFormat encoding);
 
-        ~RestconfServiceProvider();
+  ~RestconfServiceProvider();
 
-        EncodingFormat get_encoding() const;
-        const path::Session& get_session() const;
+  EncodingFormat get_encoding() const;
+  const path::Session& get_session() const;
 
-        inline const std::string get_provider_type() const {
-            return "RestconfServiceProvider";
-        }
+  inline const std::string get_provider_type() const {
+    return "RestconfServiceProvider";
+  }
 
-        std::shared_ptr<Entity> execute_operation(const std::string & operation, Entity & entity, std::map<std::string,std::string> params);
-        std::vector<std::shared_ptr<Entity>> execute_operation(const std::string & operation, std::vector<Entity*> entity_list, std::map<std::string,std::string> params);
+  std::shared_ptr<Entity> execute_operation(
+      const std::string& operation, Entity& entity,
+      std::map<std::string, std::string> params);
+  std::vector<std::shared_ptr<Entity>> execute_operation(
+      const std::string& operation, std::vector<Entity*> entity_list,
+      std::map<std::string, std::string> params);
 
-private:
-        EncodingFormat encoding;
-        const path::RestconfSession session;
+ private:
+  EncodingFormat encoding;
+  const path::RestconfSession session;
 };
-}
+}  // namespace ydk
 
 #endif /*_RESTCONF_PROVIDER_H_*/

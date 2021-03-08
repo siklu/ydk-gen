@@ -25,281 +25,292 @@
 #define YDK_PRIVATE_HPP
 
 #include <algorithm>
-#include <cstdlib>
-#include <functional>
-#include <cstring>
 #include <cassert>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <map>
 #include <set>
 #include <unordered_set>
-#include <map>
 
+#include "../filters.hpp"
+#include "../path_api.hpp"
 #include "libyang/libyang.h"
-#include "libyang/tree_schema.h"
 #include "libyang/tree_data.h"
+#include "libyang/tree_schema.h"
 #include "libyang/xml.h"
 
-#include "../path_api.hpp"
-#include "../filters.hpp"
-
 namespace ydk {
-    namespace path {
+namespace path {
 
-        std::vector<std::string> segmentalize(const std::string& path);
+std::vector<std::string> segmentalize(const std::string& path);
 
-        std::unordered_set<std::string> segmentalize_module_names(const std::string& value);
+std::unordered_set<std::string> segmentalize_module_names(
+    const std::string& value);
 
-        class RepositoryPtr : public std::enable_shared_from_this<RepositoryPtr> {
-          public:
-            explicit RepositoryPtr(ModelCachingOption caching_option);
-            explicit RepositoryPtr(const std::string& search_dir, ModelCachingOption caching_option);
-            ~RepositoryPtr();
+class RepositoryPtr : public std::enable_shared_from_this<RepositoryPtr> {
+ public:
+  explicit RepositoryPtr(ModelCachingOption caching_option);
+  explicit RepositoryPtr(const std::string& search_dir,
+                         ModelCachingOption caching_option);
+  ~RepositoryPtr();
 
-            std::shared_ptr<RootSchemaNode> create_root_schema(const std::unordered_map<std::string, path::Capability>& lookup_table,
-                                                               const std::vector<path::Capability>& caps_to_load);
+  std::shared_ptr<RootSchemaNode> create_root_schema(
+      const std::unordered_map<std::string, path::Capability>& lookup_table,
+      const std::vector<path::Capability>& caps_to_load);
 
-            void add_model_provider(ModelProvider* model_provider);
-            void remove_model_provider(ModelProvider* model_provider);
-            std::vector<ModelProvider*> get_model_providers() const;
+  void add_model_provider(ModelProvider* model_provider);
+  void remove_model_provider(ModelProvider* model_provider);
+  std::vector<ModelProvider*> get_model_providers() const;
 
-            std::vector<const lys_module*> get_new_ly_modules_from_lookup(ly_ctx* ctx,
-                                                                          const std::unordered_set<std::string>& namespace_module_names,
-                                                                          const std::unordered_map<std::string, path::Capability>& lookup_table);
-            std::vector<const lys_module*> get_new_ly_modules_from_path(ly_ctx* ctx,
-                                                                        const std::string& path,
-                                                                        const std::unordered_map<std::string, path::Capability>& lookup_table);
+  std::vector<const lys_module*> get_new_ly_modules_from_lookup(
+      ly_ctx* ctx,
+      const std::unordered_set<std::string>& namespace_module_names,
+      const std::unordered_map<std::string, path::Capability>& lookup_table);
+  std::vector<const lys_module*> get_new_ly_modules_from_path(
+      ly_ctx* ctx, const std::string& path,
+      const std::unordered_map<std::string, path::Capability>& lookup_table);
 
-            std::string path;
-            std::vector<path::Capability> server_caps;
+  std::string path;
+  std::vector<path::Capability> server_caps;
 
-          private:
-            ly_ctx* create_ly_context();
+ private:
+  ly_ctx* create_ly_context();
 
-            void load_module_from_capabilities(ly_ctx* ctx, const std::vector<path::Capability>& caps);
+  void load_module_from_capabilities(ly_ctx* ctx,
+                                     const std::vector<path::Capability>& caps);
 
-            const lys_module* load_module(ly_ctx* ctx, const std::string& module_name);
-            const lys_module* load_module(ly_ctx* ctx, const std::string& module_name, bool& new_module);
-            const lys_module* load_module(ly_ctx* ctx, ydk::path::Capability& capability);
-            const lys_module* load_module(ly_ctx* ctx, ydk::path::Capability& capability, bool& new_module);
-            const lys_module* load_module(ly_ctx* ctx, const std::string& module_name, const std::string& revision);
-            const lys_module* load_module(ly_ctx* ctx, const std::string& module_name, const std::string& revision, const std::vector<std::string>& features, bool& new_module);
+  const lys_module* load_module(ly_ctx* ctx, const std::string& module_name);
+  const lys_module* load_module(ly_ctx* ctx, const std::string& module_name,
+                                bool& new_module);
+  const lys_module* load_module(ly_ctx* ctx, ydk::path::Capability& capability);
+  const lys_module* load_module(ly_ctx* ctx, ydk::path::Capability& capability,
+                                bool& new_module);
+  const lys_module* load_module(ly_ctx* ctx, const std::string& module_name,
+                                const std::string& revision);
+  const lys_module* load_module(ly_ctx* ctx, const std::string& module_name,
+                                const std::string& revision,
+                                const std::vector<std::string>& features,
+                                bool& new_module);
 
-            void get_module_capabilities(ydk::path::Capability& capability);
-            void collect_features_from_imported_modules(const lys_module* module,
-                                                        std::set<std::pair<lys_module*, std::string>>& features);
-            std::vector<ModelProvider*> model_providers;
-            bool using_temp_directory;
-            ModelCachingOption caching_option;
-        };
+  void get_module_capabilities(ydk::path::Capability& capability);
+  void collect_features_from_imported_modules(
+      const lys_module* module,
+      std::set<std::pair<lys_module*, std::string>>& features);
+  std::vector<ModelProvider*> model_providers;
+  bool using_temp_directory;
+  ModelCachingOption caching_option;
+};
 
-        class SchemaNodeImpl : public SchemaNode
-        {
-        public:
-            SchemaNodeImpl(const SchemaNode* parent, struct lys_node* node);
+class SchemaNodeImpl : public SchemaNode {
+ public:
+  SchemaNodeImpl(const SchemaNode* parent, struct lys_node* node);
 
-            ~SchemaNodeImpl();
+  ~SchemaNodeImpl();
 
-            std::string get_path() const;
+  std::string get_path() const;
 
-            std::vector<SchemaNode*> find(const std::string& path);
+  std::vector<SchemaNode*> find(const std::string& path);
 
-            const SchemaNode* get_parent() const noexcept;
+  const SchemaNode* get_parent() const noexcept;
 
-            const std::vector<std::unique_ptr<SchemaNode>>& get_children() const;
+  const std::vector<std::unique_ptr<SchemaNode>>& get_children() const;
 
-            const SchemaNode& get_root() const noexcept;
+  const SchemaNode& get_root() const noexcept;
 
-            Statement get_statement() const;
+  Statement get_statement() const;
 
-            std::vector<Statement> get_keys() const;
+  std::vector<Statement> get_keys() const;
 
-            void populate_augmented_schema_node(std::vector<lys_node*>& ancestors, struct lys_node* target);
+  void populate_augmented_schema_node(std::vector<lys_node*>& ancestors,
+                                      struct lys_node* target);
 
-            void populate_new_schemas_from_path(const std::string& path);
+  void populate_new_schemas_from_path(const std::string& path);
 
-            const SchemaNode* m_parent;
-            struct lys_node* m_node;
-            std::vector<std::unique_ptr<SchemaNode>> m_children;
-        };
+  const SchemaNode* m_parent;
+  struct lys_node* m_node;
+  std::vector<std::unique_ptr<SchemaNode>> m_children;
+};
 
+class RootSchemaNodeImpl : public RootSchemaNode {
+ public:
+  explicit RootSchemaNodeImpl(struct ly_ctx* ctx,
+                              const std::shared_ptr<RepositoryPtr>& repo);
+  explicit RootSchemaNodeImpl(
+      struct ly_ctx* ctx, const std::shared_ptr<RepositoryPtr>& repo,
+      const std::unordered_map<std::string, path::Capability>& lookup_table);
 
-        class RootSchemaNodeImpl : public RootSchemaNode
-        {
-        public:
-            explicit RootSchemaNodeImpl(struct ly_ctx* ctx, const std::shared_ptr<RepositoryPtr> & repo);
-            explicit RootSchemaNodeImpl(struct ly_ctx* ctx, const std::shared_ptr<RepositoryPtr> & repo,
-                                                   const std::unordered_map<std::string, path::Capability>& lookup_table);
+  ~RootSchemaNodeImpl();
 
-            ~RootSchemaNodeImpl();
+  std::vector<SchemaNode*> find(const std::string& path);
 
-            std::vector<SchemaNode*> find(const std::string& path);
+  const std::vector<std::unique_ptr<SchemaNode>>& get_children() const;
 
-            const std::vector<std::unique_ptr<SchemaNode>>& get_children() const;
+  DataNode& create_datanode(const std::string& path);
 
-            DataNode& create_datanode(const std::string& path);
+  DataNode& create_datanode(const std::string& path, const std::string& value);
 
-            DataNode& create_datanode(const std::string& path, const std::string& value);
+  std::shared_ptr<Rpc> create_rpc(const std::string& path);
 
-            std::shared_ptr<Rpc> create_rpc(const std::string& path);
+  void populate_new_schemas_from_path(const std::string& path);
+  void populate_new_schemas_from_payload(const std::string& payload,
+                                         ydk::EncodingFormat format);
 
-            void populate_new_schemas_from_path(const std::string& path);
-            void populate_new_schemas_from_payload(const std::string& payload, ydk::EncodingFormat format);
+  struct ly_ctx* m_ctx;
+  std::vector<std::unique_ptr<DataNode>> m_root_data_nodes;
+  std::vector<std::unique_ptr<SchemaNode>> m_children;
 
+ private:
+  void populate_all_module_schemas();
+  void populate_module_schema(const struct lys_module*);
+  void populate_augmented_schema_nodes(const struct lys_module* module);
+  void populate_augmented_schema_node(std::vector<lys_node*>& ancestors,
+                                      struct lys_node* target);
+  void populate_new_schemas(std::vector<const lys_module*>& new_modules);
 
-            struct ly_ctx* m_ctx;
-            std::vector<std::unique_ptr<DataNode>> m_root_data_nodes;
-            std::vector<std::unique_ptr<SchemaNode>> m_children;
+  const std::shared_ptr<RepositoryPtr> m_priv_repo;
+  const std::unordered_map<std::string, path::Capability>
+      m_name_namespace_lookup;
+};
 
-        private:
+class DataNodeImpl : public DataNode {
+ public:
+  DataNodeImpl(DataNode* parent, struct lyd_node* node,
+               const std::shared_ptr<RepositoryPtr>& repo);
 
-            void populate_all_module_schemas();
-            void populate_module_schema(const struct lys_module*);
-            void populate_augmented_schema_nodes(const struct lys_module* module);
-            void populate_augmented_schema_node(std::vector<lys_node*>& ancestors, struct lys_node* target);
-            void populate_new_schemas(std::vector<const lys_module*>& new_modules);
+  // no copy constructor
+  DataNodeImpl(const DataNodeImpl& dn) = delete;
 
-            const std::shared_ptr<RepositoryPtr> m_priv_repo;
-            const std::unordered_map<std::string, path::Capability> m_name_namespace_lookup;
-        };
+  DataNodeImpl(DataNodeImpl&& dn) = delete;
 
+  virtual ~DataNodeImpl();
 
-        class DataNodeImpl : public DataNode{
+  virtual const SchemaNode& get_schema_node() const;
 
-        public:
-            DataNodeImpl(DataNode* parent, struct lyd_node* node, const std::shared_ptr<RepositoryPtr> & repo);
+  virtual std::string get_path() const;
 
-            //no copy constructor
-            DataNodeImpl(const DataNodeImpl& dn) = delete;
+  // Create a new data node based on a simple XPath
+  // The new node is normally inserted at the end, either as the last child of a
+  // parent.
+  //
+  // If path points to a list key and the list does not exist, the key value
+  // from the predicate is used and value is ignored
+  //
+  // returns the first created or updated node
 
-            DataNodeImpl(DataNodeImpl&& dn) = delete;
+  virtual DataNode& create_datanode(const std::string& path,
+                                    const std::string& value);
 
-            virtual ~DataNodeImpl();
+  DataNode& create_action(const std::string& path);
 
-            virtual const SchemaNode& get_schema_node() const;
+  std::shared_ptr<DataNode> operator()(const Session& session);
 
-            virtual std::string get_path() const;
+  bool has_action_node() const;
 
-            // Create a new data node based on a simple XPath
-            // The new node is normally inserted at the end, either as the last child of a parent.
-            //
-            // If path points to a list key and the list does not exist, the key value from the predicate is used
-            // and value is ignored
-            //
-            // returns the first created or updated node
+  std::string get_action_node_path() const;
 
-            virtual DataNode& create_datanode(const std::string& path, const std::string& value);
+  void set_value(const std::string& value);
 
-            DataNode& create_action(const std::string& path);
+  virtual std::string get_value() const;
 
-            std::shared_ptr<DataNode> operator()(const Session& session);
+  virtual std::vector<std::shared_ptr<DataNode>> find(const std::string& path);
 
-            bool has_action_node() const;
+  DataNode* get_parent() const;
 
-            std::string get_action_node_path() const;
+  virtual std::vector<std::shared_ptr<DataNode>> get_children() const;
 
-            void set_value(const std::string& value);
+  virtual const DataNode& get_root() const;
 
-            virtual std::string get_value() const;
+  void add_annotation(const Annotation& an);
 
-            virtual std::vector<std::shared_ptr<DataNode>> find(const std::string& path);
+  bool remove_annotation(const Annotation& an);
 
-            DataNode* get_parent() const;
+  std::vector<Annotation> annotations();
 
-            virtual std::vector<std::shared_ptr<DataNode>> get_children() const;
+  std::string xml() const;
 
-            virtual const DataNode& get_root() const;
+  std::shared_ptr<DataNode> get_dn_for_desc_node(
+      struct lyd_node* desc_node) const;
 
-            void add_annotation(const Annotation& an);
+ private:
+  DataNode& create_helper(const std::string& path, const std::string& value);
 
-            bool remove_annotation(const Annotation& an);
+  void populate_new_schemas_from_path(const std::string& path);
 
-            std::vector<Annotation> annotations();
+ public:
+  DataNode* m_parent;
+  struct lyd_node* m_node;
+  std::map<struct lyd_node*, std::shared_ptr<DataNode>> child_map;
+  YFilter yfilter;
 
-            std::string xml() const;
+ private:
+  const std::shared_ptr<RepositoryPtr> m_priv_repo;
+};
 
-            std::shared_ptr<DataNode> get_dn_for_desc_node(struct lyd_node* desc_node) const;
+class RootDataImpl : public DataNodeImpl {
+ public:
+  RootDataImpl(const SchemaNode& schema, struct ly_ctx* ctx,
+               const std::string& path);
+  RootDataImpl(const SchemaNode& schema, struct ly_ctx* ctx,
+               const std::string& path,
+               const std::shared_ptr<RepositoryPtr>& repo);
 
-        private:
+  ~RootDataImpl();
 
-            DataNode& create_helper(const std::string& path, const std::string& value);
+  const SchemaNode& get_schema_node() const;
 
-            void populate_new_schemas_from_path(const std::string& path);
+  std::string get_path() const;
 
-        public:
+  DataNode& create_datanode(const std::string& path, const std::string& value);
 
-            DataNode* m_parent;
-            struct lyd_node* m_node;
-            std::map<struct lyd_node*, std::shared_ptr<DataNode>> child_map;
-            YFilter yfilter;
+  void set_value(const std::string& value);
 
-        private:
-            const std::shared_ptr<RepositoryPtr> m_priv_repo;
+  std::string get_value() const;
 
-        };
+  std::vector<std::shared_ptr<DataNode>> get_children() const;
 
+  const DataNode& get_root() const;
 
-        class RootDataImpl : public DataNodeImpl {
-        public:
-            RootDataImpl(const SchemaNode& schema, struct ly_ctx* ctx, const std::string & path);
-            RootDataImpl(const SchemaNode& schema, struct ly_ctx* ctx, const std::string & path, const std::shared_ptr<RepositoryPtr> & repo);
+  std::vector<std::shared_ptr<DataNode>> find(const std::string& path);
 
-            ~RootDataImpl();
+ public:
+  const SchemaNode& m_schema;
+  struct ly_ctx* m_ctx;
+  std::string m_path;
 
-            const SchemaNode& get_schema_node() const;
+ private:
+  void populate_new_schemas_from_path(const std::string& path);
 
-            std::string get_path() const;
+ private:
+  const std::shared_ptr<RepositoryPtr> m_priv_repo;
+};
 
-            DataNode& create_datanode(const std::string& path, const std::string& value);
+class RpcImpl : public Rpc {
+ public:
+  RpcImpl(SchemaNodeImpl& sn, struct ly_ctx* ctx,
+          const std::shared_ptr<RepositoryPtr>& repo);
 
-            void set_value(const std::string& value);
+  ~RpcImpl();
 
-            std::string get_value() const;
+  std::shared_ptr<DataNode> operator()(const Session& session);
 
-            std::vector<std::shared_ptr<DataNode>> get_children() const;
+  DataNode& get_input_node() const;
 
-            const DataNode& get_root() const;
+  SchemaNode& get_schema_node() const;
 
-            std::vector<std::shared_ptr<DataNode>> find(const std::string& path);
+  bool has_output_node() const;
 
-        public:
-            const SchemaNode& m_schema;
-            struct ly_ctx* m_ctx;
-            std::string m_path;
+  std::string get_name() const;
 
-        private:
-            void populate_new_schemas_from_path(const std::string& path);
+  SchemaNodeImpl& schema_node;
+  std::unique_ptr<DataNodeImpl> data_node;
 
-        private:
-            const std::shared_ptr<RepositoryPtr> m_priv_repo;
-        };
+ private:
+  const std::shared_ptr<RepositoryPtr> m_priv_repo;
+};
 
+}  // namespace path
 
-        class RpcImpl : public Rpc {
-        public:
-
-            RpcImpl(SchemaNodeImpl& sn, struct ly_ctx* ctx, const std::shared_ptr<RepositoryPtr> & repo);
-
-            ~RpcImpl();
-
-            std::shared_ptr<DataNode> operator()(const Session& session);
-
-            DataNode& get_input_node() const;
-
-            SchemaNode& get_schema_node() const;
-
-            bool has_output_node() const;
-
-            std::string get_name() const;
-
-            SchemaNodeImpl& schema_node;
-            std::unique_ptr<DataNodeImpl> data_node;
-
-        private:
-            const std::shared_ptr<RepositoryPtr> m_priv_repo;
-
-        };
-
-    }
-
-}
+}  // namespace ydk
 
 #endif /* YDK_PRIVATE_HPP */

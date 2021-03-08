@@ -28,19 +28,22 @@
 #ifndef _WALKER_HPP_
 #define _WALKER_HPP_
 
-#include <vector>
 #include <map>
-#include "path_api.hpp"
+#include <vector>
+
 #include "filters.hpp"
+#include "path_api.hpp"
 
 namespace ydk {
 
 class Entity;
 
-path::DataNode& get_data_node_from_entity(Entity & entity, path::RootSchemaNode & root_schema);
+path::DataNode& get_data_node_from_entity(Entity& entity,
+                                          path::RootSchemaNode& root_schema);
 
-void get_entity_from_data_node(path::DataNode * node, std::shared_ptr<Entity> entity);
+void get_entity_from_data_node(path::DataNode* node,
+                               std::shared_ptr<Entity> entity);
 
-YFilter get_data_node_yfilter(path::DataNode * node);
-}
+YFilter get_data_node_yfilter(path::DataNode* node);
+}  // namespace ydk
 #endif /* _WALKER_HPP_ */

@@ -45,79 +45,81 @@ typedef void* YDKStatePtr;
 
 typedef void* Session;
 
-typedef struct DataNodeChildren
-{
-    DataNode* datanodes;
-    int count;
+typedef struct DataNodeChildren {
+  DataNode* datanodes;
+  int count;
 } DataNodeChildren;
 
 typedef int boolean;
 
-typedef enum EncodingFormat
-{
-    XML   = 0,
-    JSON
-} EncodingFormat;
+typedef enum EncodingFormat { XML = 0, JSON } EncodingFormat;
 
-typedef enum LogLevel
-{
-    OFF    = 0,
-    DEBUG,
-    INFO,
-    WARNING,
-    ERROR
-} LogLevel;
+typedef enum LogLevel { OFF = 0, DEBUG, INFO, WARNING, ERROR } LogLevel;
 
-typedef enum Protocol
-{
-    Netconf = 0,
-    Restconf
-} Protocol;
+typedef enum Protocol { Netconf = 0, Restconf } Protocol;
 
 typedef enum YDKErrorType {
-    YDK_ERROR_NONE = 0,
-    YDK_ERROR,
-    YDK_CORE_ERROR,
-    YDK_CODEC_ERROR,
-    YDK_CLIENT_ERROR,
-    YDK_SERVICE_PROVIDER_ERROR,
-    YDK_SERVICE_ERROR,
-    YDK_ILLEGAL_STATE_ERROR,
-    YDK_INVALID_ARGUMENT_ERROR,
-    YDK_OPERATION_NOTSUPPORTED_ERROR,
-    YDK_MODEL_ERROR
+  YDK_ERROR_NONE = 0,
+  YDK_ERROR,
+  YDK_CORE_ERROR,
+  YDK_CODEC_ERROR,
+  YDK_CLIENT_ERROR,
+  YDK_SERVICE_PROVIDER_ERROR,
+  YDK_SERVICE_ERROR,
+  YDK_ILLEGAL_STATE_ERROR,
+  YDK_INVALID_ARGUMENT_ERROR,
+  YDK_OPERATION_NOTSUPPORTED_ERROR,
+  YDK_MODEL_ERROR
 } YDKErrorType;
 
 typedef struct YDKState {
-    boolean error_occurred;
-    char* error_message;
-    YDKErrorType error_type;
+  boolean error_occurred;
+  char* error_message;
+  YDKErrorType error_type;
 } YDKState;
 
 YDKStatePtr YDKStateCreate(void);
-const char * YDKStateGetErrorMessage(YDKStatePtr);
+const char* YDKStateGetErrorMessage(YDKStatePtr);
 YDKErrorType YDKStateGetErrorType(YDKStatePtr);
 boolean YDKStateErrorOccurred(YDKStatePtr);
 void YDKStateClear(YDKStatePtr ptr);
 void YDKStateFree(YDKStatePtr);
 
-void handle_error_message(YDKState* state, const char * message);
+void handle_error_message(YDKState* state, const char* message);
 void handle_error(YDKState* state);
 
-Capability CapabilityCreate(YDKStatePtr state, const char* mod, const char* rev);
+Capability CapabilityCreate(YDKStatePtr state, const char* mod,
+                            const char* rev);
 void CapabilityFree(Capability);
 
 Repository RepositoryInitWithPath(YDKStatePtr, const char*);
 Repository RepositoryInit(void);
-RootSchemaWrapper RepositoryCreateRootSchemaWrapper(YDKStatePtr state, Repository, const char* keys[], const Capability values[], int size);
+RootSchemaWrapper RepositoryCreateRootSchemaWrapper(YDKStatePtr state,
+                                                    Repository,
+                                                    const char* keys[],
+                                                    const Capability values[],
+                                                    int size);
 void RepositoryFree(Repository);
 
-ServiceProvider NetconfServiceProviderInit(YDKStatePtr state, const char * address, const char * username, const char * password, int port, const char * protocol);
-ServiceProvider NetconfServiceProviderInitWithOnDemand(YDKStatePtr state, const char * address, const char * username, const char * password, int port, const char * protocol, boolean on_demand, boolean common_cache);
-ServiceProvider NetconfServiceProviderInitWithRepo(YDKStatePtr state, Repository repo, const char * address, const char * username, const char * password, int port, const char * protocol);
-ServiceProvider NetconfServiceProviderInitWithOnDemandRepo(YDKStatePtr state, Repository repo, const char * address, const char * username, const char * password, int port, const char * protocol, boolean on_demand);
+ServiceProvider NetconfServiceProviderInit(YDKStatePtr state,
+                                           const char* address,
+                                           const char* username,
+                                           const char* password, int port,
+                                           const char* protocol);
+ServiceProvider NetconfServiceProviderInitWithOnDemand(
+    YDKStatePtr state, const char* address, const char* username,
+    const char* password, int port, const char* protocol, boolean on_demand,
+    boolean common_cache);
+ServiceProvider NetconfServiceProviderInitWithRepo(
+    YDKStatePtr state, Repository repo, const char* address,
+    const char* username, const char* password, int port, const char* protocol);
+ServiceProvider NetconfServiceProviderInitWithOnDemandRepo(
+    YDKStatePtr state, Repository repo, const char* address,
+    const char* username, const char* password, int port, const char* protocol,
+    boolean on_demand);
 RootSchemaNode ServiceProviderGetRootSchema(YDKStatePtr, ServiceProvider);
-RootSchemaWrapper ServiceProviderGetRootSchemaNode(YDKStatePtr, ServiceProvider);
+RootSchemaWrapper ServiceProviderGetRootSchemaNode(YDKStatePtr,
+                                                   ServiceProvider);
 EncodingFormat ServiceProviderGetEncoding(ServiceProvider);
 Session ServiceProviderGetSession(ServiceProvider);
 RootSchemaNode SessionGetRootSchema(YDKStatePtr, Session);
@@ -125,20 +127,32 @@ void NetconfServiceProviderFree(ServiceProvider);
 int NetconfServiceProviderGetNumCapabilities(ServiceProvider);
 const char* NetconfServiceProviderGetCapabilityByIndex(ServiceProvider, int);
 
-ServiceProvider RestconfServiceProviderInitWithRepo(YDKStatePtr state, Repository repo, const char * address, const char * username, const char * password, int port, EncodingFormat encoding, const char* config_url_root, const char* state_url_root);
+ServiceProvider RestconfServiceProviderInitWithRepo(
+    YDKStatePtr state, Repository repo, const char* address,
+    const char* username, const char* password, int port,
+    EncodingFormat encoding, const char* config_url_root,
+    const char* state_url_root);
 void RestconfServiceProviderFree(ServiceProvider);
 
-OpenDaylightServiceProvider OpenDaylightServiceProviderInitWithRepo(YDKStatePtr state, Repository repo, const char * address, const char * username, const char * password, int port, EncodingFormat encoding, Protocol protocol);
+OpenDaylightServiceProvider OpenDaylightServiceProviderInitWithRepo(
+    YDKStatePtr state, Repository repo, const char* address,
+    const char* username, const char* password, int port,
+    EncodingFormat encoding, Protocol protocol);
 void OpenDaylightServiceProviderFree(OpenDaylightServiceProvider);
-ServiceProvider OpenDaylightServiceProviderGetNodeProvider(YDKStatePtr state, OpenDaylightServiceProvider provider, const char * node_id);
-const char* OpenDaylightServiceProviderGetNodeIDByIndex(YDKStatePtr state, OpenDaylightServiceProvider provider, int idx);
+ServiceProvider OpenDaylightServiceProviderGetNodeProvider(
+    YDKStatePtr state, OpenDaylightServiceProvider provider,
+    const char* node_id);
+const char* OpenDaylightServiceProviderGetNodeIDByIndex(
+    YDKStatePtr state, OpenDaylightServiceProvider provider, int idx);
 
-const char * ServiceProviderType(ServiceProvider);
+const char* ServiceProviderType(ServiceProvider);
 
 Codec CodecInit();
 void CodecFree(Codec);
-const char* CodecEncode(YDKStatePtr state, Codec, DataNode, EncodingFormat, boolean);
-DataNode CodecDecode(YDKStatePtr state, Codec, RootSchemaNode, const char*, EncodingFormat);
+const char* CodecEncode(YDKStatePtr state, Codec, DataNode, EncodingFormat,
+                        boolean);
+DataNode CodecDecode(YDKStatePtr state, Codec, RootSchemaNode, const char*,
+                     EncodingFormat);
 
 DataNode RootSchemaNodeCreate(YDKStatePtr, RootSchemaNode, const char*);
 Rpc RootSchemaNodeRpc(YDKStatePtr state, RootSchemaNode, const char*);

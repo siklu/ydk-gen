@@ -23,16 +23,17 @@
 #ifndef GNMI_TEST_UTIL_HPP
 #define GNMI_TEST_UTIL_HPP
 
+#include <ydk/gnmi_provider.hpp>
+#include <ydk/path_api.hpp>
 #include <ydk_ydktest/openconfig_bgp.hpp>
 #include <ydk_ydktest/openconfig_interfaces.hpp>
 
-#include <ydk/path_api.hpp>
-#include <ydk/gnmi_provider.hpp>
-
 void print_data_node(std::shared_ptr<ydk::path::DataNode> dn);
-void print_entity(std::shared_ptr<ydk::Entity> entity, ydk::path::RootSchemaNode& root);
+void print_entity(std::shared_ptr<ydk::Entity> entity,
+                  ydk::path::RootSchemaNode& root);
 
-std::string entity2string(std::shared_ptr<ydk::Entity> entity, ydk::path::RootSchemaNode& root);
+std::string entity2string(std::shared_ptr<ydk::Entity> entity,
+                          ydk::path::RootSchemaNode& root);
 std::string print_tree(ydk::path::DataNode* dn, const std::string& indent);
 
 void config_bgp(ydktest::openconfig_bgp::Bgp& bgp);

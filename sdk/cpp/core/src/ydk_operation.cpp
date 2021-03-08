@@ -27,26 +27,25 @@
 
 #include "types.hpp"
 
-namespace ydk
-{
-std::string to_string(YFilter yfilter)
-{
-    #define TOSTR(a) case YFilter::a: return #a;
-    switch(yfilter)
-    {
-        TOSTR(merge)
-        TOSTR(create)
-        TOSTR(remove)
-        TOSTR(replace)
-        TOSTR(not_set)
-        TOSTR(read)
-        TOSTR(update)
-        case YFilter::delete_:
-            return "delete";
-        default:
-            return "unknown";
-    }
-    #undef TOSTR
-    return {};
+namespace ydk {
+std::string to_string(YFilter yfilter) {
+#define TOSTR(a)   \
+  case YFilter::a: \
+    return #a;
+  switch (yfilter) {
+    TOSTR(merge)
+    TOSTR(create)
+    TOSTR(remove)
+    TOSTR(replace)
+    TOSTR(not_set)
+    TOSTR(read)
+    TOSTR(update)
+    case YFilter::delete_:
+      return "delete";
+    default:
+      return "unknown";
+  }
+#undef TOSTR
+  return {};
 }
-}
+}  // namespace ydk

@@ -26,54 +26,51 @@
 
 #include "gnmi_path_api.hpp"
 
-namespace ydk
-{
+namespace ydk {
 class gNMIServiceProvider;
 
-struct gNMISubscription
-{
-    Entity* entity;
-    std::string subscription_mode;
-    uint64 sample_interval;
-    bool suppress_redundant;
-    uint64 heartbeat_interval;
+struct gNMISubscription {
+  Entity* entity;
+  std::string subscription_mode;
+  uint64 sample_interval;
+  bool suppress_redundant;
+  uint64 heartbeat_interval;
 
-    gNMISubscription() {};
+  gNMISubscription(){};
 };
 
-class gNMIService
-{
-  public:
+class gNMIService {
+ public:
+  gNMIService();
+  ~gNMIService();
 
-    gNMIService();
-    ~gNMIService();
+  std::shared_ptr<Entity> get(gNMIServiceProvider& provider, Entity& filter,
+                              const std::string& operation) const;
+  std::vector<std::shared_ptr<Entity>> get(gNMIServiceProvider& provider,
+                                           std::vector<Entity*>& filter_list,
+                                           const std::string& operation) const;
 
-    std::shared_ptr<Entity> get(gNMIServiceProvider & provider,
-                                Entity& filter, const std::string & operation) const;
-    std::vector<std::shared_ptr<Entity>> get(gNMIServiceProvider & provider,
-                                std::vector<Entity*> & filter_list, const std::string & operation) const;
+  bool set(gNMIServiceProvider& provider, Entity& entity) const;
+  bool set(gNMIServiceProvider& provider,
+           std::vector<Entity*>& entity_list) const;
 
-    bool set(gNMIServiceProvider & provider, Entity& entity) const;
-    bool set(gNMIServiceProvider & provider, std::vector<Entity*> & entity_list) const;
+  void subscribe(
+      gNMIServiceProvider& provider, gNMISubscription& sub, uint32 qos,
+      const std::string& mode, const std::string& encoding,
+      std::function<void(const char* response)> out_func = nullptr,
+      std::function<bool(const char* response)> poll_func = nullptr) const;
+  void subscribe(
+      gNMIServiceProvider& provider, std::vector<gNMISubscription*>& sub_list,
+      uint32 qos, const std::string& mode, const std::string& encoding,
+      std::function<void(const char* response)> out_func = nullptr,
+      std::function<bool(const char* response)> poll_func = nullptr) const;
 
-    void subscribe(gNMIServiceProvider& provider,
-                   gNMISubscription& sub,
-                   uint32 qos, const std::string & mode, const std::string & encoding,
-                   std::function<void(const char * response)> out_func=nullptr,
-                   std::function<bool(const char * response)> poll_func=nullptr) const;
-    void subscribe(gNMIServiceProvider& provider,
-                   std::vector<gNMISubscription*> & sub_list,
-                   uint32 qos, const std::string & mode, const std::string & encoding,
-                   std::function<void(const char * response)> out_func=nullptr,
-                   std::function<bool(const char * response)> poll_func=nullptr) const;
+  std::string capabilities(gNMIServiceProvider& provider);
 
-    std::string capabilities(gNMIServiceProvider & provider);
-
-    std::shared_ptr<path::DataNode> get_from_path(gNMIServiceProvider& provider,
-                                                  std::vector<gnmi::Path*> path_list,
-												  const std::string & operation) const;
+  std::shared_ptr<path::DataNode> get_from_path(
+      gNMIServiceProvider& provider, std::vector<gnmi::Path*> path_list,
+      const std::string& operation) const;
 };
 
-}
+}  // namespace ydk
 #endif /* GNMI_SERVICE_HPP */
-

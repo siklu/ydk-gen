@@ -28,44 +28,40 @@
 #ifndef VALIDATION_SERVICE_HPP
 #define VALIDATION_SERVICE_HPP
 
-#include <string>
 #include <memory>
-
+#include <string>
 
 namespace ydk {
 
 class Entity;
-namespace path
-{
+namespace path {
 class Session;
 }
 
 class ValidationService {
+ public:
+  ///
+  /// @brief Options for validation.
+  ///
+  /// All validation is performed in the context of some yfilter.
+  /// These options capture the context of use.
+  ///
+  enum class Option {
+    DATASTORE,   /// Datastore validation. Note the DataNode Tree should contain
+                 /// everything for cross reference resolution
+    GET_CONFIG,  // Get config validation. Checks to see if only config nodes
+                 // are references
+    GET,         // Get validation
+    EDIT_CONFIG  // Edit validation. Checks on the values of leafs etc
+  };
 
-  public:
+  ValidationService() {}
+  ~ValidationService() {}
 
-    ///
-    /// @brief Options for validation.
-    ///
-    /// All validation is performed in the context of some yfilter.
-    /// These options capture the context of use.
-    ///
-    enum class Option {
-        DATASTORE,  /// Datastore validation. Note the DataNode Tree should contain everything for cross reference resolution
-        GET_CONFIG, // Get config validation. Checks to see if only config nodes are references
-        GET, // Get validation
-        EDIT_CONFIG // Edit validation. Checks on the values of leafs etc
-    };
-
-    ValidationService()
-    {
-    }
-    ~ValidationService(){}
-
-    void validate(const ydk::path::Session& session, ydk::Entity& entity, ydk::ValidationService::Option option);
+  void validate(const ydk::path::Session& session, ydk::Entity& entity,
+                ydk::ValidationService::Option option);
 };
 
-
-}
+}  // namespace ydk
 
 #endif /* VALIDATION_SERVICE_HPP */

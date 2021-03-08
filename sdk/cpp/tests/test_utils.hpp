@@ -23,16 +23,18 @@
 #ifndef TEST_UTIL_HPP
 #define TEST_UTIL_HPP
 
-#include <ydk/types.hpp>
 #include <ydk/path_api.hpp>
+#include <ydk/types.hpp>
 
 void print_data_node(std::shared_ptr<ydk::path::DataNode> dn);
-void print_entity(std::shared_ptr<ydk::Entity> entity, ydk::path::RootSchemaNode& root);
+void print_entity(std::shared_ptr<ydk::Entity> entity,
+                  ydk::path::RootSchemaNode& root);
 
 std::string data_node_to_xml(std::shared_ptr<ydk::path::DataNode> dn);
-std::string data_node_to_xml(ydk::path::DataNode & dn);
+std::string data_node_to_xml(ydk::path::DataNode& dn);
 
-std::string entity2string(std::shared_ptr<ydk::Entity> entity, ydk::path::RootSchemaNode& root);
+std::string entity2string(std::shared_ptr<ydk::Entity> entity,
+                          ydk::path::RootSchemaNode& root);
 std::string print_tree(ydk::path::DataNode* dn, const std::string& indent);
 
 #endif /* TEST_UTIL_HPP */

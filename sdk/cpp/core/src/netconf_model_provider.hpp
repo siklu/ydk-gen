@@ -23,42 +23,40 @@
 #include "path_api.hpp"
 #include "service_provider.hpp"
 
-namespace ydk
-{
+namespace ydk {
 
-namespace path
-{
+namespace path {
 
-class NetconfModelProvider : public path::ModelProvider
-{
-public:
-        NetconfModelProvider(NetconfClient & client);
+class NetconfModelProvider : public path::ModelProvider {
+ public:
+  NetconfModelProvider(NetconfClient& client);
 
-        ~NetconfModelProvider();
+  ~NetconfModelProvider();
 
-        std::string get_model(const std::string& name, const std::string& version, Format format);
-        std::string get_hostname_port();
+  std::string get_model(const std::string& name, const std::string& version,
+                        Format format);
+  std::string get_hostname_port();
 
-private:
-        NetconfClient & client;
+ private:
+  NetconfClient& client;
 };
 
-class StaticModelProvider : public path::ModelProvider
-{
-public:
-        explicit StaticModelProvider(NetconfClient & client);
+class StaticModelProvider : public path::ModelProvider {
+ public:
+  explicit StaticModelProvider(NetconfClient& client);
 
-        ~StaticModelProvider();
+  ~StaticModelProvider();
 
-        std::string get_model(const std::string& name, const std::string& version, Format format);
-        std::string get_hostname_port();
+  std::string get_model(const std::string& name, const std::string& version,
+                        Format format);
+  std::string get_hostname_port();
 
-private:
-        NetconfClient & client;
+ private:
+  NetconfClient& client;
 };
 
-} //namespace path
+}  // namespace path
 
-} //namespace ydk
+}  // namespace ydk
 
 #endif /*_NETCONF_MODEL_PROVIDER_H_*/

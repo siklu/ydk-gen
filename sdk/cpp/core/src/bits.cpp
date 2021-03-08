@@ -25,28 +25,15 @@
 //
 //////////////////////////////////////////////////////////////////
 
-
 #include "types.hpp"
 
-namespace ydk
-{
+namespace ydk {
 
-Bits::Bits()
-{
-}
+Bits::Bits() {}
 
-Bits::~Bits()
-{
-}
+Bits::~Bits() {}
 
-bool & Bits::operator [] (std::string key)
-{
-    return bitmap[key];
-}
+bool& Bits::operator[](std::string key) { return bitmap[key]; }
 
-const std::map<std::string, bool> & Bits::get_bitmap() const
-{
-    return bitmap;
-}
-}
-
+const std::map<std::string, bool>& Bits::get_bitmap() const { return bitmap; }
+}  // namespace ydk

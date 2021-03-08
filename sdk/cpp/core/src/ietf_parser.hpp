@@ -23,37 +23,36 @@
 
 struct _xmlDoc;
 typedef struct _xmlDoc xmlDoc;
-typedef xmlDoc * xmlDocPtr;
+typedef xmlDoc* xmlDocPtr;
 
+namespace ydk {
 
-namespace ydk
-{
+class IetfCapabilitiesXmlParser : public CapabilitiesXmlParser {
+ public:
+  IetfCapabilitiesXmlParser();
+  ~IetfCapabilitiesXmlParser();
 
-class IetfCapabilitiesXmlParser : public CapabilitiesXmlParser
-{
-    public:
-        IetfCapabilitiesXmlParser();
-        ~IetfCapabilitiesXmlParser();
+  std::vector<std::string> parse(const std::string& buffer);
+  std::vector<std::string> parse_yang_1_1(const std::string& buffer);
 
-        std::vector<std::string> parse(const std::string & buffer);
-        std::vector<std::string> parse_yang_1_1(const std::string & buffer);
-
-    private:
-        xmlDocPtr doc;
+ private:
+  xmlDocPtr doc;
 };
 
+class IetfCapabilitiesParser : public CapabilitiesParser {
+ public:
+  IetfCapabilitiesParser();
+  ~IetfCapabilitiesParser();
 
-class IetfCapabilitiesParser : public CapabilitiesParser
-{
-    public:
-        IetfCapabilitiesParser();
-        ~IetfCapabilitiesParser();
-
-        std::vector<path::Capability> parse(std::vector<std::string> & capabilities) const;
-        std::unordered_map<std::string, path::Capability> get_lookup_table(std::vector<std::string>& capabilities) const;
-        std::unordered_map<std::string, path::Capability> get_lookup_table(std::vector<path::Capability>& capabilities) const;
-        std::vector<std::pair<std::string, path::Capability>> segmentalize_capabilities(std::vector<std::string>& capabilities) const;
+  std::vector<path::Capability> parse(
+      std::vector<std::string>& capabilities) const;
+  std::unordered_map<std::string, path::Capability> get_lookup_table(
+      std::vector<std::string>& capabilities) const;
+  std::unordered_map<std::string, path::Capability> get_lookup_table(
+      std::vector<path::Capability>& capabilities) const;
+  std::vector<std::pair<std::string, path::Capability>>
+  segmentalize_capabilities(std::vector<std::string>& capabilities) const;
 };
-}
+}  // namespace ydk
 
 #endif /* _IETF_PARSER_H_ */

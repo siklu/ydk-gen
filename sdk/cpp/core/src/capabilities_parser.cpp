@@ -16,21 +16,12 @@
 
 #include "capabilities_parser.hpp"
 
-namespace ydk
-{
-CapabilitiesXmlParser::CapabilitiesXmlParser()
-{
-}
+namespace ydk {
+CapabilitiesXmlParser::CapabilitiesXmlParser() {}
 
-CapabilitiesXmlParser::~CapabilitiesXmlParser()
-{
-}
+CapabilitiesXmlParser::~CapabilitiesXmlParser() {}
 
-CapabilitiesParser::CapabilitiesParser()
-{
-}
+CapabilitiesParser::CapabilitiesParser() {}
 
-CapabilitiesParser::~CapabilitiesParser()
-{
-}
-}
+CapabilitiesParser::~CapabilitiesParser() {}
+}  // namespace ydk

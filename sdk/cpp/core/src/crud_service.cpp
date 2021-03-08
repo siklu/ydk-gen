@@ -22,126 +22,124 @@
 //////////////////////////////////////////////////////////////////
 
 #include "crud_service.hpp"
-#include "logger.hpp"
+
 #include "common_utilities.hpp"
+#include "logger.hpp"
 
 using namespace std;
 
 namespace ydk {
 
-static bool operation_succeeded(shared_ptr<Entity> entity)
-{
-    YLOG_INFO("Operation {}", ((entity == nullptr)?"succeeded":"failed"));
-    return entity == nullptr;
+static bool operation_succeeded(shared_ptr<Entity> entity) {
+  YLOG_INFO("Operation {}", ((entity == nullptr) ? "succeeded" : "failed"));
+  return entity == nullptr;
 }
 
-static bool operation_succeeded(vector<shared_ptr<Entity>> entity_list)
-{
-    YLOG_INFO("Operation {}", (entity_list.size() == 0) ? "succeeded" : "failed");
-    return entity_list.size() == 0;
+static bool operation_succeeded(vector<shared_ptr<Entity>> entity_list) {
+  YLOG_INFO("Operation {}", (entity_list.size() == 0) ? "succeeded" : "failed");
+  return entity_list.size() == 0;
 }
 
 // Class CrudService implementation
 //
-CrudService::CrudService()
-{
+CrudService::CrudService() {}
+
+CrudService::~CrudService() {}
+
+bool CrudService::create(ydk::ServiceProvider& provider, Entity& entity) {
+  YLOG_INFO("Executing CRUD create operation on [{}]",
+            entity.get_segment_path());
+
+  map<string, string> params;
+  return operation_succeeded(
+      provider.execute_operation("create", entity, params));
 }
 
-CrudService::~CrudService()
-{
+bool CrudService::create(ydk::ServiceProvider& provider,
+                         vector<Entity*>& entity_list) {
+  YLOG_INFO("Executing CRUD create operation on {}",
+            entity_vector_to_string(entity_list));
+
+  map<string, string> params;
+  return operation_succeeded(
+      provider.execute_operation("create", entity_list, params));
 }
 
-bool CrudService::create(ydk::ServiceProvider & provider, Entity & entity)
-{
-    YLOG_INFO("Executing CRUD create operation on [{}]", entity.get_segment_path());
+bool CrudService::update(ydk::ServiceProvider& provider, Entity& entity) {
+  YLOG_INFO("Executing CRUD update operation on [{}]",
+            entity.get_segment_path());
 
-    map<string,string> params;
-    return operation_succeeded(
-    		provider.execute_operation("create", entity, params) );
+  map<string, string> params;
+  return operation_succeeded(
+      provider.execute_operation("update", entity, params));
 }
 
-bool CrudService::create(ydk::ServiceProvider & provider, vector<Entity*> & entity_list)
-{
-    YLOG_INFO("Executing CRUD create operation on {}", entity_vector_to_string(entity_list));
+bool CrudService::update(ydk::ServiceProvider& provider,
+                         vector<Entity*>& entity_list) {
+  YLOG_INFO("Executing CRUD create operation on {}",
+            entity_vector_to_string(entity_list));
 
-    map<string,string> params;
-    return operation_succeeded(
-            provider.execute_operation("create", entity_list, params) );
+  map<string, string> params;
+  return operation_succeeded(
+      provider.execute_operation("update", entity_list, params));
 }
 
-bool CrudService::update(ydk::ServiceProvider & provider, Entity & entity)
-{
-    YLOG_INFO("Executing CRUD update operation on [{}]", entity.get_segment_path());
+bool CrudService::delete_(ydk::ServiceProvider& provider, Entity& entity) {
+  YLOG_INFO("Executing CRUD delete operation on [{}]",
+            entity.get_segment_path());
 
-    map<string,string> params;
-    return operation_succeeded(
-            provider.execute_operation("update", entity, params) );
+  map<string, string> params;
+  return operation_succeeded(
+      provider.execute_operation("delete", entity, params));
 }
 
-bool CrudService::update(ydk::ServiceProvider & provider, vector<Entity*> & entity_list)
-{
-    YLOG_INFO("Executing CRUD create operation on {}", entity_vector_to_string(entity_list));
+bool CrudService::delete_(ydk::ServiceProvider& provider,
+                          vector<Entity*>& entity_list) {
+  YLOG_INFO("Executing CRUD delete operation on {}",
+            entity_vector_to_string(entity_list));
 
-    map<string,string> params;
-    return operation_succeeded(
-            provider.execute_operation("update", entity_list, params) );
+  map<string, string> params;
+  return operation_succeeded(
+      provider.execute_operation("delete", entity_list, params));
 }
 
-bool CrudService::delete_(ydk::ServiceProvider & provider, Entity & entity)
-{
-    YLOG_INFO("Executing CRUD delete operation on [{}]", entity.get_segment_path());
+shared_ptr<Entity> CrudService::read(ydk::ServiceProvider& provider,
+                                     Entity& filter) {
+  YLOG_INFO("Executing CRUD read operation on [{}]", filter.get_segment_path());
 
-    map<string,string> params;
-    return operation_succeeded(
-            provider.execute_operation("delete", entity, params) );
+  map<string, string> params;
+  params["mode"] = "all";
+  return provider.execute_operation("read", filter, params);
 }
 
-bool CrudService::delete_(ydk::ServiceProvider & provider, vector<Entity*> & entity_list)
-{
-    YLOG_INFO("Executing CRUD delete operation on {}", entity_vector_to_string(entity_list));
+vector<shared_ptr<Entity>> CrudService::read(ydk::ServiceProvider& provider,
+                                             vector<Entity*>& filter_list) {
+  YLOG_INFO("Executing CRUD read operation on {}",
+            entity_vector_to_string(filter_list));
 
-    map<string,string> params;
-    return operation_succeeded(
-            provider.execute_operation("delete", entity_list, params) );
+  map<string, string> params;
+  params["mode"] = "all";
+  return provider.execute_operation("read", filter_list, params);
 }
 
-shared_ptr<Entity>
-CrudService::read(ydk::ServiceProvider & provider, Entity & filter)
-{
-    YLOG_INFO("Executing CRUD read operation on [{}]", filter.get_segment_path());
+shared_ptr<Entity> CrudService::read_config(ydk::ServiceProvider& provider,
+                                            Entity& filter) {
+  YLOG_INFO("Executing CRUD read_config operation on [{}]",
+            filter.get_segment_path());
 
-    map<string,string> params;
-    params["mode"] = "all";
-    return provider.execute_operation("read", filter, params);
+  map<string, string> params;
+  params["mode"] = "config";
+  return provider.execute_operation("read", filter, params);
 }
 
-vector<shared_ptr<Entity>>
-CrudService::read(ydk::ServiceProvider & provider, vector<Entity*> & filter_list)
-{
-    YLOG_INFO("Executing CRUD read operation on {}", entity_vector_to_string(filter_list));
+vector<shared_ptr<Entity>> CrudService::read_config(
+    ydk::ServiceProvider& provider, vector<Entity*>& filter_list) {
+  YLOG_INFO("Executing CRUD read operation on {}",
+            entity_vector_to_string(filter_list));
 
-    map<string,string> params;
-    params["mode"] = "all";
-    return provider.execute_operation("read", filter_list, params);
+  map<string, string> params;
+  params["mode"] = "config";
+  return provider.execute_operation("read", filter_list, params);
 }
 
-shared_ptr<Entity> CrudService::read_config(ydk::ServiceProvider & provider, Entity & filter)
-{
-    YLOG_INFO("Executing CRUD read_config operation on [{}]", filter.get_segment_path());
-
-    map<string,string> params;
-    params["mode"] = "config";
-    return provider.execute_operation("read", filter, params);
-}
-
-vector<shared_ptr<Entity>>
-CrudService::read_config(ydk::ServiceProvider & provider, vector<Entity*> & filter_list)
-{
-    YLOG_INFO("Executing CRUD read operation on {}", entity_vector_to_string(filter_list));
-
-    map<string,string> params;
-    params["mode"] = "config";
-    return provider.execute_operation("read", filter_list, params);
-}
-
-}
+}  // namespace ydk

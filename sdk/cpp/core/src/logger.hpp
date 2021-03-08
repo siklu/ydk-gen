@@ -119,12 +119,24 @@ namespace ydk {
 
 // static Logger logger{};
 
-#define YLOG_TRACE(...) do {}while(0)
-#define YLOG_DEBUG(...) do {}while(0)
-#define YLOG_INFO(...) do {}while(0)
-#define YLOG_WARN(...) do {}while(0)
-#define YLOG_ERROR(...) do {}while(0)
-#define YLOG_CRITICAL(...) do {}while(0)
+#define YLOG_TRACE(...) \
+  do {                  \
+  } while (0)
+#define YLOG_DEBUG(...) \
+  do {                  \
+  } while (0)
+#define YLOG_INFO(...) \
+  do {                 \
+  } while (0)
+#define YLOG_WARN(...) \
+  do {                 \
+  } while (0)
+#define YLOG_ERROR(...) \
+  do {                  \
+  } while (0)
+#define YLOG_CRITICAL(...) \
+  do {                     \
+  } while (0)
 
 }  // namespace ydk
 

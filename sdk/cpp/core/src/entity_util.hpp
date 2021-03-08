@@ -24,35 +24,40 @@
 #define ENTITY_UTIL_HPP
 
 #include <sstream>
+
 #include "types.hpp"
 
-namespace ydk
-{
+namespace ydk {
 
-std::string get_relative_entity_path(const Entity* current_node, const Entity* ancestor, const std::string & path);
+std::string get_relative_entity_path(const Entity* current_node,
+                                     const Entity* ancestor,
+                                     const std::string& path);
 
-bool is_set(const YFilter & yfilter);
+bool is_set(const YFilter& yfilter);
 
-const EntityPath get_entity_path(const Entity & entity, Entity* ancestor);
+const EntityPath get_entity_path(const Entity& entity, Entity* ancestor);
 
-std::string absolute_path(Entity & entity);
+std::string absolute_path(Entity& entity);
 
-Entity* path_to_entity(Entity & entity, std::string & abs_path);
+Entity* path_to_entity(Entity& entity, std::string& abs_path);
 
-std::map<std::string,std::string> entity_to_dict(Entity & entity);
+std::map<std::string, std::string> entity_to_dict(Entity& entity);
 
-std::map<std::string, std::pair<std::string,std::string>> entity_diff(Entity & ent1, Entity & ent2);
+std::map<std::string, std::pair<std::string, std::string>> entity_diff(
+    Entity& ent1, Entity& ent2);
 
-}
+}  // namespace ydk
 
-#define ADD_KEY_TOKEN(attr, attr_name) {\
-    std::ostringstream attr_buffer;\
-    attr_buffer << attr; std::string attr_str = attr_buffer.str();\
-    if (attr_str.find("\'") != std::string::npos) {\
-        path_buffer << "[" << attr_name << "=\"" << attr_str << "\"]";\
-    } else {\
-        path_buffer << "[" << attr_name << "='" << attr_str << "']";\
-	}\
-}
+#define ADD_KEY_TOKEN(attr, attr_name)                               \
+  {                                                                  \
+    std::ostringstream attr_buffer;                                  \
+    attr_buffer << attr;                                             \
+    std::string attr_str = attr_buffer.str();                        \
+    if (attr_str.find("\'") != std::string::npos) {                  \
+      path_buffer << "[" << attr_name << "=\"" << attr_str << "\"]"; \
+    } else {                                                         \
+      path_buffer << "[" << attr_name << "='" << attr_str << "']";   \
+    }                                                                \
+  }
 
 #endif /* ENTITY_UTIL_HPP */

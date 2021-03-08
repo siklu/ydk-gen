@@ -24,127 +24,139 @@
 //
 //////////////////////////////////////////////////////////////////
 
+#include <ydk/ydk.h>
+
 #include <iostream>
 
-#include <ydk/ydk.h>
 #include "catch.hpp"
 
 using namespace std;
 
-const char* test_string="<runner xmlns=\"http://cisco.com/ns/yang/ydktest-sanity\"><ytypes><built-in-t><number8>2</number8></built-in-t></ytypes></runner>";
+const char* test_string =
+    "<runner "
+    "xmlns=\"http://cisco.com/ns/yang/"
+    "ydktest-sanity\"><ytypes><built-in-t><number8>2</number8></built-in-t></"
+    "ytypes></runner>";
 
-TEST_CASE( "codec_encode"  )
-{
-    YDKStatePtr state = YDKStateCreate();
-    Codec c = CodecInit();
-    Repository repo = RepositoryInitWithPath(state, "/usr/local/share/ydktest@0.1.0");
-    ServiceProvider provider = NetconfServiceProviderInitWithRepo(state, repo, "localhost", "admin", "admin", 12022, "ssh");
-    REQUIRE(provider!=NULL);
+TEST_CASE("codec_encode") {
+  YDKStatePtr state = YDKStateCreate();
+  Codec c = CodecInit();
+  Repository repo =
+      RepositoryInitWithPath(state, "/usr/local/share/ydktest@0.1.0");
+  ServiceProvider provider = NetconfServiceProviderInitWithRepo(
+      state, repo, "localhost", "admin", "admin", 12022, "ssh");
+  REQUIRE(provider != NULL);
 
-    RootSchemaNode root_schema = ServiceProviderGetRootSchema(state, provider);
+  RootSchemaNode root_schema = ServiceProviderGetRootSchema(state, provider);
 
-    DataNode runner = RootSchemaNodeCreate(state, root_schema, "ydktest-sanity:runner");
+  DataNode runner =
+      RootSchemaNodeCreate(state, root_schema, "ydktest-sanity:runner");
 
-    DataNodeCreate(state, runner, "ytypes/built-in-t/number8", "2");
+  DataNodeCreate(state, runner, "ytypes/built-in-t/number8", "2");
 
-    const char* encode_xml = CodecEncode(state, c, runner, XML, 0);
-    string s { encode_xml };
-    free((void*)encode_xml);
-    REQUIRE(s == test_string);
+  const char* encode_xml = CodecEncode(state, c, runner, XML, 0);
+  string s{encode_xml};
+  free((void*)encode_xml);
+  REQUIRE(s == test_string);
 
-    NetconfServiceProviderFree(provider);
-    RepositoryFree(repo);
-    CodecFree(c);
-    YDKStateFree(state);
+  NetconfServiceProviderFree(provider);
+  RepositoryFree(repo);
+  CodecFree(c);
+  YDKStateFree(state);
 }
 
-TEST_CASE( "codec_decode"  )
-{
-    YDKStatePtr state = YDKStateCreate();
-    Codec c = CodecInit();
-    Repository repo = RepositoryInitWithPath(state, "/usr/local/share/ydktest@0.1.0");
-    ServiceProvider provider = NetconfServiceProviderInitWithRepo(state, repo, "localhost", "admin", "admin", 12022, "ssh");
-    REQUIRE(provider!=NULL);
+TEST_CASE("codec_decode") {
+  YDKStatePtr state = YDKStateCreate();
+  Codec c = CodecInit();
+  Repository repo =
+      RepositoryInitWithPath(state, "/usr/local/share/ydktest@0.1.0");
+  ServiceProvider provider = NetconfServiceProviderInitWithRepo(
+      state, repo, "localhost", "admin", "admin", 12022, "ssh");
+  REQUIRE(provider != NULL);
 
-    RootSchemaNode root_schema = ServiceProviderGetRootSchema(state, provider);
+  RootSchemaNode root_schema = ServiceProviderGetRootSchema(state, provider);
 
-    DataNode runner = CodecDecode(state, c, root_schema, test_string, XML);
+  DataNode runner = CodecDecode(state, c, root_schema, test_string, XML);
 
-    REQUIRE(runner!=NULL);
+  REQUIRE(runner != NULL);
 
-    const char* encode_xml = CodecEncode(state, c, runner, XML, 0);
-    string s { encode_xml };
-    free((void*)encode_xml);
-    REQUIRE(s == test_string);
+  const char* encode_xml = CodecEncode(state, c, runner, XML, 0);
+  string s{encode_xml};
+  free((void*)encode_xml);
+  REQUIRE(s == test_string);
 
-    NetconfServiceProviderFree(provider);
-    RepositoryFree(repo);
-    CodecFree(c);
-    YDKStateFree(state);
+  NetconfServiceProviderFree(provider);
+  RepositoryFree(repo);
+  CodecFree(c);
+  YDKStateFree(state);
 }
 
-TEST_CASE( "provider_withpath"  )
-{
-    YDKStatePtr state = YDKStateCreate();
-    Repository repo = RepositoryInitWithPath(state, "/usr/local/share/ydktest@0.1.0");
-    ServiceProvider provider = NetconfServiceProviderInitWithRepo(state, repo, "localhost", "admin", "admin", 12022, "ssh");
+TEST_CASE("provider_withpath") {
+  YDKStatePtr state = YDKStateCreate();
+  Repository repo =
+      RepositoryInitWithPath(state, "/usr/local/share/ydktest@0.1.0");
+  ServiceProvider provider = NetconfServiceProviderInitWithRepo(
+      state, repo, "localhost", "admin", "admin", 12022, "ssh");
 
-    REQUIRE(repo!=NULL);
-    REQUIRE(provider!=NULL);
+  REQUIRE(repo != NULL);
+  REQUIRE(provider != NULL);
 
-    NetconfServiceProviderFree(provider);
-    RepositoryFree(repo);
-    YDKStateFree(state);
+  NetconfServiceProviderFree(provider);
+  RepositoryFree(repo);
+  YDKStateFree(state);
 }
 
-TEST_CASE( "provider"  )
-{
-    YDKStatePtr state = YDKStateCreate();
-    Repository repo = RepositoryInit();
-    ServiceProvider provider = NetconfServiceProviderInitWithRepo(state, repo, "localhost", "admin", "admin", 12022, "ssh");
+TEST_CASE("provider") {
+  YDKStatePtr state = YDKStateCreate();
+  Repository repo = RepositoryInit();
+  ServiceProvider provider = NetconfServiceProviderInitWithRepo(
+      state, repo, "localhost", "admin", "admin", 12022, "ssh");
 
-    REQUIRE(repo!=NULL);
-    REQUIRE(provider!=NULL);
+  REQUIRE(repo != NULL);
+  REQUIRE(provider != NULL);
 
-    NetconfServiceProviderFree(provider);
-    RepositoryFree(repo);
-    YDKStateFree(state);
+  NetconfServiceProviderFree(provider);
+  RepositoryFree(repo);
+  YDKStateFree(state);
 }
 
-TEST_CASE( "rpc" )
-{
-    YDKStatePtr state = YDKStateCreate();
-    Codec c = CodecInit();
+TEST_CASE("rpc") {
+  YDKStatePtr state = YDKStateCreate();
+  Codec c = CodecInit();
 
-    Repository repo = RepositoryInitWithPath(state, "/usr/local/share/ydktest@0.1.0");
+  Repository repo =
+      RepositoryInitWithPath(state, "/usr/local/share/ydktest@0.1.0");
 
-    ServiceProvider provider = NetconfServiceProviderInitWithRepo(state, repo, "localhost", "admin", "admin", 12022, "ssh");
-    REQUIRE(provider!=NULL);
+  ServiceProvider provider = NetconfServiceProviderInitWithRepo(
+      state, repo, "localhost", "admin", "admin", 12022, "ssh");
+  REQUIRE(provider != NULL);
 
-    RootSchemaNode root_schema = ServiceProviderGetRootSchema(state, provider);
+  RootSchemaNode root_schema = ServiceProviderGetRootSchema(state, provider);
 
-    DataNode runner = RootSchemaNodeCreate(state, root_schema, "ydktest-sanity:runner");
+  DataNode runner =
+      RootSchemaNodeCreate(state, root_schema, "ydktest-sanity:runner");
 
-    DataNodeCreate(state, runner, "ytypes/built-in-t/number8", "2");
-    const char* create_xml = CodecEncode(state, c, runner, XML, 0);
+  DataNodeCreate(state, runner, "ytypes/built-in-t/number8", "2");
+  const char* create_xml = CodecEncode(state, c, runner, XML, 0);
 
-    Rpc create_rpc = RootSchemaNodeRpc(state, root_schema, "ydk:create");
-    DataNode input = RpcInput(state, create_rpc);
-    DataNodeCreate(state, input, "entity", create_xml);
-    RpcExecute(state, create_rpc, provider);
+  Rpc create_rpc = RootSchemaNodeRpc(state, root_schema, "ydk:create");
+  DataNode input = RpcInput(state, create_rpc);
+  DataNodeCreate(state, input, "entity", create_xml);
+  RpcExecute(state, create_rpc, provider);
 
-    Rpc read_rpc = RootSchemaNodeRpc(state, root_schema, "ydk:read");
-    input = RpcInput(state, read_rpc);
-    DataNode runner_filter = RootSchemaNodeCreate(state, root_schema, "ydktest-sanity:runner");
-    const char* read_xml = CodecEncode(state, c, runner_filter, XML, 0);
+  Rpc read_rpc = RootSchemaNodeRpc(state, root_schema, "ydk:read");
+  input = RpcInput(state, read_rpc);
+  DataNode runner_filter =
+      RootSchemaNodeCreate(state, root_schema, "ydktest-sanity:runner");
+  const char* read_xml = CodecEncode(state, c, runner_filter, XML, 0);
 
-    DataNodeCreate(state, input, "filter", read_xml);
-    DataNode read_data = RpcExecute(state, read_rpc, provider);
+  DataNodeCreate(state, input, "filter", read_xml);
+  DataNode read_data = RpcExecute(state, read_rpc, provider);
 
-    free ((void*)create_xml);
-    free ((void*)read_xml);
-    NetconfServiceProviderFree(provider);
-    RepositoryFree(repo);
-    CodecFree(c);
-    YDKStateFree(state);
+  free((void*)create_xml);
+  free((void*)read_xml);
+  NetconfServiceProviderFree(provider);
+  RepositoryFree(repo);
+  CodecFree(c);
+  YDKStateFree(state);
 }
