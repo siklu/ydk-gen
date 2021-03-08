@@ -26,6 +26,7 @@
 #define ENTITY_LOOKUP_HPP
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace ydk {
