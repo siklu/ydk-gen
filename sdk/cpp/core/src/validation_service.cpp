@@ -21,28 +21,27 @@
 //
 //////////////////////////////////////////////////////////////////
 
-#include "entity_data_node_walker.hpp"
-#include "path_api.hpp"
 #include "validation_service.hpp"
+
 #include <map>
+
+#include "entity_data_node_walker.hpp"
 #include "logger.hpp"
+#include "path_api.hpp"
 
 using namespace std;
 
 namespace ydk {
 
-void
-ValidationService::validate(const path::Session& session, Entity& entity,
-                            ValidationService::Option option)
-{
-    path::RootSchemaNode& root_schema = session.get_root_schema();
-    const path::DataNode& datanode = get_data_node_from_entity(entity, root_schema);
-    const path::DataNode* dn = &datanode;
-    while(dn!= nullptr && dn->get_parent()!=nullptr)
-        dn = dn->get_parent();
+void ValidationService::validate(const path::Session& session, Entity& entity,
+                                 ValidationService::Option option) {
+  path::RootSchemaNode& root_schema = session.get_root_schema();
+  const path::DataNode& datanode =
+      get_data_node_from_entity(entity, root_schema);
+  const path::DataNode* dn = &datanode;
+  while (dn != nullptr && dn->get_parent() != nullptr) dn = dn->get_parent();
 
-    path::ValidationService path_validation_service{};
-    path_validation_service.validate(*dn, option);
-
+  path::ValidationService path_validation_service{};
+  path_validation_service.validate(*dn, option);
 }
-}
+}  // namespace ydk

@@ -24,47 +24,47 @@
 #include "network_topology.hpp"
 #include "path_api.hpp"
 
-namespace ydk
-{
+namespace ydk {
 class ServiceProvider;
 }
-namespace ydk
-{
+namespace ydk {
 
-class OpenDaylightServiceProvider
-{
-    public:
-        OpenDaylightServiceProvider(path::Repository & repo,
-                                   const std::string & address,
-                                   const std::string & username,
-                                   const std::string & password,
-                                   int port = 8181,
-                                   EncodingFormat encoding = EncodingFormat::JSON,
-                                   Protocol protocol = Protocol::restconf);
+class OpenDaylightServiceProvider {
+ public:
+  OpenDaylightServiceProvider(path::Repository& repo,
+                              const std::string& address,
+                              const std::string& username,
+                              const std::string& password, int port = 8181,
+                              EncodingFormat encoding = EncodingFormat::JSON,
+                              Protocol protocol = Protocol::restconf);
 
-        ~OpenDaylightServiceProvider();
+  ~OpenDaylightServiceProvider();
 
-        ydk::ServiceProvider & get_node_provider(const std::string & node_id);
-        const std::vector<std::string> & get_node_ids();
+  ydk::ServiceProvider& get_node_provider(const std::string& node_id);
+  const std::vector<std::string>& get_node_ids();
 
-    private:
-        std::unique_ptr<ydk::ServiceProvider> create_provider_for_node(const std::string & node_id);
+ private:
+  std::unique_ptr<ydk::ServiceProvider> create_provider_for_node(
+      const std::string& node_id);
 
-    private:
-        std::unique_ptr<path::Repository> m_repo_ptr;
-        path::Repository & m_repo;
+ private:
+  std::unique_ptr<path::Repository> m_repo_ptr;
+  path::Repository& m_repo;
 
-        std::string address;
-        std::string username;
-        std::string password;
-        int port;
-        EncodingFormat encoding;
+  std::string address;
+  std::string username;
+  std::string password;
+  int port;
+  EncodingFormat encoding;
 
-        std::map<std::string, std::unique_ptr<opendaylight::network_topology::NetworkTopology::Topology::Node>> odl_nodes;
-        std::map<std::string, std::unique_ptr<ydk::ServiceProvider>> providers;
-        std::vector<std::string> node_ids;
+  std::map<std::string,
+           std::unique_ptr<
+               opendaylight::network_topology::NetworkTopology::Topology::Node>>
+      odl_nodes;
+  std::map<std::string, std::unique_ptr<ydk::ServiceProvider>> providers;
+  std::vector<std::string> node_ids;
 };
 
-}
+}  // namespace ydk
 
 #endif /* _OPENDAYLIGHT_PROVIDER_H_ */

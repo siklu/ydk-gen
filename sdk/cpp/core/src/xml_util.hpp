@@ -23,15 +23,15 @@
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+
 #include <string>
 
-namespace ydk
-{
+namespace ydk {
 
-std::string to_string(const xmlChar * s);
-const xmlChar * to_xmlchar(const std::string & s);
+std::string to_string(const xmlChar* s);
+const xmlChar* to_xmlchar(const std::string& s);
 std::string to_string(xmlDocPtr doc, xmlNodePtr xml_node);
-void set_xml_namespace(const std::string & name_space, xmlNodePtr xml_node);
-bool isonlywhitespace(xmlChar *	content);
+void set_xml_namespace(const std::string& name_space, xmlNodePtr xml_node);
+bool isonlywhitespace(xmlChar* content);
 
-}
+}  // namespace ydk

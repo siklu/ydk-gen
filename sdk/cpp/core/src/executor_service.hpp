@@ -33,30 +33,24 @@
 #include "path_api.hpp"
 #include "service_provider.hpp"
 
+namespace ydk {
 
-namespace ydk
-{
-
-namespace core
-{
+namespace core {
 class DataNode;
 class Session;
-}
+}  // namespace core
 
 class Entity;
 
-class ExecutorService
-{
-    public:
-        ExecutorService();
-        ~ExecutorService();
-        std::shared_ptr<Entity> execute_rpc(
-            ServiceProvider & provider,
-            Entity & rpc_entity,
-            std::shared_ptr<Entity> top_entity = nullptr
-        );
+class ExecutorService {
+ public:
+  ExecutorService();
+  ~ExecutorService();
+  std::shared_ptr<Entity> execute_rpc(
+      ServiceProvider& provider, Entity& rpc_entity,
+      std::shared_ptr<Entity> top_entity = nullptr);
 };
 
-}
+}  // namespace ydk
 
 #endif /* EXECUTOR_SERVICE_HPP */

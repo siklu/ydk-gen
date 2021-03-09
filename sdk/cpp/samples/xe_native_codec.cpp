@@ -13,15 +13,14 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 ------------------------------------------------------------------*/
-#include <iostream>
-
-#include <ydk/types.hpp>
-#include <ydk/path_api.hpp>
-#include <ydk/codec_service.hpp>
-#include <ydk/codec_provider.hpp>
-
-#include <ydk_cisco_ios_xe/Cisco_IOS_XE_native.hpp>
 #include <spdlog/spdlog.h>
+
+#include <iostream>
+#include <ydk/codec_provider.hpp>
+#include <ydk/codec_service.hpp>
+#include <ydk/path_api.hpp>
+#include <ydk/types.hpp>
+#include <ydk_cisco_ios_xe/Cisco_IOS_XE_native.hpp>
 
 #include "args_parser.h"
 
@@ -2099,33 +2098,30 @@ static const string xe_native_payload = R"(
         </accounting>
 */
 
-int main(int argc, char* argv[])
-{
-    if (argc >= 2)
-    {
-        string arg = argv[1];
+int main(int argc, char* argv[]) {
+  if (argc >= 2) {
+    string arg = argv[1];
 
-        if ((arg == "-v") || (arg == "--verbose"))
-        {
-            auto logger = spdlog::stdout_color_mt("ydk");
-            logger->set_level(spdlog::level::debug);
-        }
+    if ((arg == "-v") || (arg == "--verbose")) {
+      auto logger = spdlog::stdout_color_mt("ydk");
+      logger->set_level(spdlog::level::debug);
     }
+  }
 
-    CodecServiceProvider provider{EncodingFormat::XML};
-    CodecService codec{};
-    path::Codec s{};
-    path::NetconfSession session{"jose", "admin", "admin"};
-    path::RootSchemaNode& schema = session.get_root_schema();
-    auto new_bgp = s.decode(schema, xe_native_payload, ydk::EncodingFormat::XML);
+  CodecServiceProvider provider{EncodingFormat::XML};
+  CodecService codec{};
+  path::Codec s{};
+  path::NetconfSession session{"jose", "admin", "admin"};
+  path::RootSchemaNode& schema = session.get_root_schema();
+  auto new_bgp = s.decode(schema, xe_native_payload, ydk::EncodingFormat::XML);
 
-//    auto n = make_shared<Native>();
-//    auto decoded_entity = codec.decode(provider, xe_native_payload, n);
-//    auto reply = crud.read(provider, n);
+  //    auto n = make_shared<Native>();
+  //    auto decoded_entity = codec.decode(provider, xe_native_payload, n);
+  //    auto reply = crud.read(provider, n);
 
-//    if(decoded_entity != nullptr) cout << "Create operation success" << endl << endl; else cout << "Operation failed" << endl << endl;
+  //    if(decoded_entity != nullptr) cout << "Create operation success" << endl
+  //    << endl; else cout << "Operation failed" << endl << endl;
 
-    auto g = make_shared<Native>();
-    auto d = codec.decode(provider, giga_payload, g);
-
+  auto g = make_shared<Native>();
+  auto d = codec.decode(provider, giga_payload, g);
 }

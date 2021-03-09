@@ -13,13 +13,12 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 ------------------------------------------------------------------*/
-#include <iostream>
-#include <memory>
 #include <spdlog/spdlog.h>
 
-#include <ydk/gnmi_provider.hpp>
+#include <iostream>
+#include <memory>
 #include <ydk/crud_service.hpp>
-
+#include <ydk/gnmi_provider.hpp>
 #include <ydk_ydktest/openconfig_bgp.hpp>
 #include <ydk_ydktest/openconfig_bgp_types.hpp>
 
@@ -29,36 +28,35 @@ using namespace ydk;
 using namespace std;
 using namespace ydktest;
 
-int main(int argc, char* argv[])
-{
-	vector<string> args = parse_args(argc, argv);
-	if(args.empty()) return 1;
+int main(int argc, char* argv[]) {
+  vector<string> args = parse_args(argc, argv);
+  if (args.empty()) return 1;
 
-	string host, username, password, sport, address;
-    username = args[0]; password = args[1]; host = args[2]; sport = args[3];
+  string host, username, password, sport, address;
+  username = args[0];
+  password = args[1];
+  host = args[2];
+  sport = args[3];
 
-	bool verbose=(args[4]=="--verbose");
-	if(verbose)
-	{
-	    auto logger = spdlog::stdout_color_mt("ydk");
-	    logger->set_level(spdlog::level::debug);
-	}
+  bool verbose = (args[4] == "--verbose");
+  if (verbose) {
+    auto logger = spdlog::stdout_color_mt("ydk");
+    logger->set_level(spdlog::level::debug);
+  }
 
-    ydk::path::Repository repo{TEST_HOME};
-    int port = stoi(sport);
-    gNMIServiceProvider provider{repo, host, port, username, password};
-	CrudService crud{};
+  ydk::path::Repository repo{TEST_HOME};
+  int port = stoi(sport);
+  gNMIServiceProvider provider{repo, host, port, username, password};
+  CrudService crud{};
 
-	auto bgp = openconfig_bgp::Bgp();
-	try {
-        bool reply = crud.delete_(provider, bgp);
-        if (reply)
-            cout << "BGP Delete operation success" << endl;
-        else
-            cout << "BGP Delete Operation failed" << endl;
-	}
-    catch (YError & e)
-    {
-    	cerr << "BGP Delete operation failed. Error details: " << e.what() << endl;
-    }
+  auto bgp = openconfig_bgp::Bgp();
+  try {
+    bool reply = crud.delete_(provider, bgp);
+    if (reply)
+      cout << "BGP Delete operation success" << endl;
+    else
+      cout << "BGP Delete Operation failed" << endl;
+  } catch (YError& e) {
+    cerr << "BGP Delete operation failed. Error details: " << e.what() << endl;
+  }
 }

@@ -39,32 +39,42 @@ typedef void* GnmiPath;
 typedef void* GnmiPathElem;
 typedef void* GnmiPathList;
 
-ServiceProvider GnmiServiceProviderInit(YDKStatePtr state, Repository repo, const char * address, int port,
-		                                const char * username, const char * password,
-										const char * server_certificate, const char * private_key);
+ServiceProvider GnmiServiceProviderInit(YDKStatePtr state, Repository repo,
+                                        const char* address, int port,
+                                        const char* username,
+                                        const char* password,
+                                        const char* server_certificate,
+                                        const char* private_key);
 void GnmiServiceProviderFree(ServiceProvider);
-RootSchemaWrapper GnmiServiceProviderGetRootSchemaNode(YDKStatePtr, ServiceProvider);
+RootSchemaWrapper GnmiServiceProviderGetRootSchemaNode(YDKStatePtr,
+                                                       ServiceProvider);
 GnmiSession GnmiServiceProviderGetSession(YDKStatePtr, ServiceProvider);
 
-const char * GnmiServiceGetCapabilities(YDKStatePtr state, ServiceProvider);
-DataNode     GnmiServiceGetFromPath(YDKStatePtr state, ServiceProvider, GnmiPathList path, const char* operation);
+const char* GnmiServiceGetCapabilities(YDKStatePtr state, ServiceProvider);
+DataNode GnmiServiceGetFromPath(YDKStatePtr state, ServiceProvider,
+                                GnmiPathList path, const char* operation);
 
-GnmiSession GnmiSessionInit(YDKStatePtr state, Repository repo, const char * address, int port,
-                            const char * username, const char * password,
-                            const char * server_certificate, const char * private_key);
+GnmiSession GnmiSessionInit(YDKStatePtr state, Repository repo,
+                            const char* address, int port, const char* username,
+                            const char* password,
+                            const char* server_certificate,
+                            const char* private_key);
 void GnmiSessionFree(GnmiSession session);
 RootSchemaWrapper GnmiSessionGetRootSchemaNode(YDKStatePtr, GnmiSession);
 DataNode GnmiSessionExecuteRpc(YDKStatePtr state, GnmiSession session, Rpc rpc);
-void GnmiSessionExecuteSubscribeRpc(YDKStatePtr state, GnmiSession session, Rpc rpc);
+void GnmiSessionExecuteSubscribeRpc(YDKStatePtr state, GnmiSession session,
+                                    Rpc rpc);
 
 boolean GnmiSessionSubscribeInProgress(YDKStatePtr state, GnmiSession session);
-const char * GetLastSubscribeResponse(YDKStatePtr state, GnmiSession session, const char * previous_subscribe_response);
+const char* GetLastSubscribeResponse(YDKStatePtr state, GnmiSession session,
+                                     const char* previous_subscribe_response);
 
 GnmiPath GnmiPathInit();
 void GnmiPathFree(GnmiPath);
 void GnmiPathAddOrigin(GnmiPath path, const char* origin);
 GnmiPathElem GnmiPathAddElem(GnmiPath path, const char* name);
-void GnmiPathAddElemKey(GnmiPathElem elem, const char* key_name, const char* key_value);
+void GnmiPathAddElemKey(GnmiPathElem elem, const char* key_name,
+                        const char* key_value);
 const char* GnmiPathToString(GnmiPath path);
 
 GnmiPathList GnmiPathListInit();

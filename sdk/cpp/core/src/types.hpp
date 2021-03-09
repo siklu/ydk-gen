@@ -28,31 +28,27 @@
 #ifndef _TYPES_HPP_
 #define _TYPES_HPP_
 
-#include <map>
+#include <boost/iterator/transform_iterator.hpp>
+#include <initializer_list>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <string>
-#include <vector>
 #include <utility>
-#include <initializer_list>
-
-#include <boost/iterator/transform_iterator.hpp>
+#include <vector>
 
 #include "filters.hpp"
 
 #if (__cplusplus < 201402L)
-namespace std
-{
-template<typename T, typename ...Args>
-std::unique_ptr<T> make_unique( Args&& ...args )
-{
-    return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
+namespace std {
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
-}
+}  // namespace std
 #endif
 
-namespace ydk
-{
+namespace ydk {
 
 typedef unsigned short uint8;
 typedef unsigned int uint16;
@@ -65,7 +61,7 @@ typedef signed int int32;
 typedef signed long long int64;
 
 typedef struct Empty {
-    bool set;
+  bool set;
 } Empty;
 
 class Entity;
@@ -73,37 +69,38 @@ class YLeaf;
 class YLeafList;
 class YList;
 
-class LeafData
-{
-  public:
-    LeafData(const std::string & value, YFilter yfilter, bool is_set, const std::string & name_space, const std::string & name_space_prefix);
-    ~LeafData();
+class LeafData {
+ public:
+  LeafData(const std::string& value, YFilter yfilter, bool is_set,
+           const std::string& name_space, const std::string& name_space_prefix);
+  ~LeafData();
 
-    bool operator == (LeafData & other) const;
-    bool operator == (const LeafData & other) const;
-    friend std::ostream& operator<<(std::ostream& stream, const LeafData& value);
+  bool operator==(LeafData& other) const;
+  bool operator==(const LeafData& other) const;
+  friend std::ostream& operator<<(std::ostream& stream, const LeafData& value);
 
-  public:
-    std::string value;
-    std::string name_space;
-    std::string name_space_prefix;
-    YFilter yfilter;
-    bool is_set;
+ public:
+  std::string value;
+  std::string name_space;
+  std::string name_space_prefix;
+  YFilter yfilter;
+  bool is_set;
 };
 
 struct EntityPath {
-    std::string path;
-    std::vector<std::pair<std::string, LeafData>> value_paths;
+  std::string path;
+  std::vector<std::pair<std::string, LeafData>> value_paths;
 
-    EntityPath(const std::string & path, std::vector<std::pair<std::string, LeafData> > & value_paths);
+  EntityPath(const std::string& path,
+             std::vector<std::pair<std::string, LeafData>>& value_paths);
 
-    ~EntityPath();
+  ~EntityPath();
 
-    bool operator == (EntityPath & other) const;
-    bool operator == (const EntityPath & other) const;
+  bool operator==(EntityPath& other) const;
+  bool operator==(const EntityPath& other) const;
 
-    bool operator != (EntityPath & other) const;
-    bool operator != (const EntityPath & other) const;
+  bool operator!=(EntityPath& other) const;
+  bool operator!=(const EntityPath& other) const;
 };
 
 typedef void (*augment_capabilities_function)();
@@ -111,294 +108,288 @@ typedef void (*augment_capabilities_function)();
 class YList;
 
 class Entity {
-  public:
-    Entity();
-    virtual ~Entity();
+ public:
+  Entity();
+  virtual ~Entity();
 
-  public:
-    virtual std::string get_segment_path() const = 0;
+ public:
+  virtual std::string get_segment_path() const = 0;
 
-    virtual bool has_data() const = 0;
-    virtual bool has_operation() const = 0;
-    virtual std::string get_absolute_path() const;
+  virtual bool has_data() const = 0;
+  virtual bool has_operation() const = 0;
+  virtual std::string get_absolute_path() const;
 
-    virtual void set_value(const std::string & path, const std::string & value, const std::string & name_space="", const std::string & name_space_prefix="") = 0;
-    virtual void set_filter(const std::string & path, YFilter filter) = 0;
-    virtual std::shared_ptr<Entity> get_child_by_name(const std::string & yang_name, const std::string & segment_path="") = 0;
+  virtual void set_value(const std::string& path, const std::string& value,
+                         const std::string& name_space = "",
+                         const std::string& name_space_prefix = "") = 0;
+  virtual void set_filter(const std::string& path, YFilter filter) = 0;
+  virtual std::shared_ptr<Entity> get_child_by_name(
+      const std::string& yang_name, const std::string& segment_path = "") = 0;
 
-    virtual bool has_leaf_or_child_of_name(const std::string & name) const = 0;
+  virtual bool has_leaf_or_child_of_name(const std::string& name) const = 0;
 
-    virtual std::vector<std::pair<std::string, LeafData> > get_name_leaf_data() const = 0;
+  virtual std::vector<std::pair<std::string, LeafData>> get_name_leaf_data()
+      const = 0;
 
-    virtual std::map<std::string, std::shared_ptr<Entity>> get_children() const = 0;
-    virtual std::vector<std::string> get_order_of_children() const ;
+  virtual std::map<std::string, std::shared_ptr<Entity>> get_children()
+      const = 0;
+  virtual std::vector<std::string> get_order_of_children() const;
 
-    virtual std::shared_ptr<Entity> clone_ptr() const;
+  virtual std::shared_ptr<Entity> clone_ptr() const;
 
-    virtual void set_parent(Entity* p);
-    virtual Entity* get_parent() const;
+  virtual void set_parent(Entity* p);
+  virtual Entity* get_parent() const;
 
-    virtual augment_capabilities_function get_augment_capabilities_function() const;
-    virtual std::string get_bundle_yang_models_location() const;
-    virtual std::string get_bundle_name() const;
-    virtual std::map<std::pair<std::string, std::string>, std::string> get_namespace_identity_lookup() const;
+  virtual augment_capabilities_function get_augment_capabilities_function()
+      const;
+  virtual std::string get_bundle_yang_models_location() const;
+  virtual std::string get_bundle_name() const;
+  virtual std::map<std::pair<std::string, std::string>, std::string>
+  get_namespace_identity_lookup() const;
 
-    virtual void set_child_by_name(const std::string & yang_name, std::shared_ptr<Entity> _ent) = 0;
+  virtual void set_child_by_name(const std::string& yang_name,
+                                 std::shared_ptr<Entity> _ent) = 0;
 
-    bool operator == (Entity & other) const;
-    bool operator == (const Entity & other) const;
-    bool operator != (Entity & other) const;
-    bool operator != (const Entity & other) const;
+  virtual const std::string get_namespace() const;
 
-  public:
-    Entity* parent = nullptr;
-    std::string yang_name;
-    std::string yang_parent_name;
-    YFilter yfilter;
-    bool is_presence_container;
-    bool is_top_level_class;
-    bool has_list_ancestor;
-    bool ignore_validation;
-    std::vector<std::string> ylist_key_names;
-    std::string ylist_key;
-    YList* ylist = nullptr;
+  bool operator==(Entity& other) const;
+  bool operator==(const Entity& other) const;
+  bool operator!=(Entity& other) const;
+  bool operator!=(const Entity& other) const;
 
-    std::string get_ylist_key() const;
+ public:
+  Entity* parent = nullptr;
+  std::string yang_name;
+  std::string yang_parent_name;
+  YFilter yfilter;
+  bool is_presence_container;
+  bool is_top_level_class;
+  bool has_list_ancestor;
+  bool ignore_validation;
+  std::vector<std::string> ylist_key_names;
+  std::string ylist_key;
+  YList* ylist = nullptr;
+
+  std::string get_ylist_key() const;
 };
 
 class Bits {
-  public:
-    Bits();
-    virtual ~Bits();
-    bool & operator [] (std::string key);
-    const std::map<std::string, bool> & get_bitmap() const;
+ public:
+  Bits();
+  virtual ~Bits();
+  bool& operator[](std::string key);
+  const std::map<std::string, bool>& get_bitmap() const;
 
-  private:
-    std::map<std::string, bool> bitmap;
+ private:
+  std::map<std::string, bool> bitmap;
 };
 
 class Decimal64 {
-  public:
-    explicit Decimal64(const std::string & value)
-     : value(value)
-    {
-    }
-    virtual ~Decimal64()
-    {
-    }
+ public:
+  explicit Decimal64(const std::string& value) : value(value) {}
+  virtual ~Decimal64() {}
 
-    std::string value;
+  std::string value;
 };
 
 class Identity {
-  public:
-    Identity(const std::string & name_space, const std::string & namespace_prefix, const std::string & tag) :name_space(name_space), namespace_prefix(namespace_prefix),  tag(tag)
-    {
-    }
+ public:
+  Identity(const std::string& name_space, const std::string& namespace_prefix,
+           const std::string& tag)
+      : name_space(name_space), namespace_prefix(namespace_prefix), tag(tag) {}
 
-    virtual ~Identity(){}
+  virtual ~Identity() {}
 
-    std::string to_string()
-    {
-        return tag;
-    }
+  std::string to_string() { return tag; }
 
-  public:
-    std::string name_space;
-    std::string namespace_prefix;
+ public:
+  std::string name_space;
+  std::string namespace_prefix;
 
-  private:
-    std::string tag;
+ private:
+  std::string tag;
 };
 
 class Enum {
-  public:
-    class YLeaf {
-      public:
-        YLeaf(int value, const std::string & name)
-            : value(value), name(name)
-        {
-        }
-        ~YLeaf(){}
+ public:
+  class YLeaf {
+   public:
+    YLeaf(int value, const std::string& name) : value(value), name(name) {}
+    ~YLeaf() {}
 
-        int value;
-        std::string name;
-    };
+    int value;
+    std::string name;
+  };
 
-    Enum()
-    {
-    }
-    ~Enum()
-    {
-    }
+  Enum() {}
+  ~Enum() {}
 };
 
 enum class YType {
-    uint8,
-    uint16,
-    uint32,
-    uint64,
-    int8,
-    int16,
-    int32,
-    int64,
-    empty,
-    identityref,
-    str,
-    boolean,
-    enumeration,
-    bits,
-    decimal64
+  uint8,
+  uint16,
+  uint32,
+  uint64,
+  int8,
+  int16,
+  int32,
+  int64,
+  empty,
+  identityref,
+  str,
+  boolean,
+  enumeration,
+  bits,
+  decimal64
 };
 
-class YLeaf
-{
-  public:
-    YLeaf(YType type, std::string name);
-    ~YLeaf();
+class YLeaf {
+ public:
+  YLeaf(YType type, std::string name);
+  ~YLeaf();
 
-    YLeaf(const YLeaf& val);
-    YLeaf(YLeaf&& val);
+  YLeaf(const YLeaf& val);
+  YLeaf(YLeaf&& val);
 
-    YLeaf& operator=(const YLeaf& val)=delete;
-    YLeaf& operator=(YLeaf&& val)=delete;
+  YLeaf& operator=(const YLeaf& val) = delete;
+  YLeaf& operator=(YLeaf&& val) = delete;
 
-    const std::string get() const;
-    std::pair<std::string, LeafData> get_name_leafdata() const;
+  const std::string get() const;
+  std::pair<std::string, LeafData> get_name_leafdata() const;
 
-    void operator = (uint8 val);
-    void operator = (uint32 val);
-    void operator = (uint64 val);
-    void operator = (long val);
-    void operator = (int8 val);
-    void operator = (int32 val);
-    void operator = (int64 val);
-    void operator = (double val);
-    void operator = (Empty val);
-    void operator = (Identity val);
-    void operator = (Bits val);
-    void operator = (std::string val);
-    void operator = (Enum::YLeaf val);
-    void operator = (Decimal64 val);
+  void operator=(uint8 val);
+  void operator=(uint32 val);
+  void operator=(uint64 val);
+  void operator=(long val);
+  void operator=(int8 val);
+  void operator=(int32 val);
+  void operator=(int64 val);
+  void operator=(double val);
+  void operator=(Empty val);
+  void operator=(Identity val);
+  void operator=(Bits val);
+  void operator=(std::string val);
+  void operator=(Enum::YLeaf val);
+  void operator=(Decimal64 val);
 
-    void set(uint8 val);
-    void set(uint32 val);
-    void set(uint64 val);
-    void set(long val);
-    void set(int8 val);
-    void set(int32 val);
-    void set(int64 val);
-    void set(double val);
-    void set(Empty val);
-    void set(Identity val);
-    void set(Bits val);
-    void set(std::string val);
-    void set(Enum::YLeaf val);
-    void set(Decimal64 val);
+  void set(uint8 val);
+  void set(uint32 val);
+  void set(uint64 val);
+  void set(long val);
+  void set(int8 val);
+  void set(int32 val);
+  void set(int64 val);
+  void set(double val);
+  void set(Empty val);
+  void set(Identity val);
+  void set(Bits val);
+  void set(std::string val);
+  void set(Enum::YLeaf val);
+  void set(Decimal64 val);
 
-    operator std::string() const;
-    bool operator == (YLeaf & other) const;
-    bool operator == (const YLeaf & other) const;
+  operator std::string() const;
+  bool operator==(YLeaf& other) const;
+  bool operator==(const YLeaf& other) const;
 
-    bool & operator [] (std::string key);
+  bool& operator[](std::string key);
 
-  public:
-    bool is_set;
-    YFilter yfilter;
-    std::string value_namespace;
-    std::string value_namespace_prefix;
+ public:
+  bool is_set;
+  YFilter yfilter;
+  std::string value_namespace;
+  std::string value_namespace_prefix;
 
-  public:
-    void store_value(std::string && val);
-    std::string get_bits_string() const;
+ public:
+  void store_value(std::string&& val);
+  std::string get_bits_string() const;
 
-    std::string name;
-    std::string value;
-    int enum_value;
-    YType type;
-    Bits bits_value;
+  std::string name;
+  std::string value;
+  int enum_value;
+  YType type;
+  Bits bits_value;
 };
 
 class YLeafList {
-  public:
-    YLeafList(YType type, const std::string & name);
-    virtual ~YLeafList();
+ public:
+  YLeafList(YType type, const std::string& name);
+  virtual ~YLeafList();
 
-    YLeafList(const YLeafList& val);
-    YLeafList(YLeafList&& val);
+  YLeafList(const YLeafList& val);
+  YLeafList(YLeafList&& val);
 
-    YLeafList& operator=(const YLeafList& val);
-    YLeafList& operator=(YLeafList&& val);
+  YLeafList& operator=(const YLeafList& val);
+  YLeafList& operator=(YLeafList&& val);
 
-    virtual void append(uint8 val);
-    virtual void append(uint32 val);
-    virtual void append(uint64 val);
-    virtual void append(long val);
-    virtual void append(int8 val);
-    virtual void append(int32 val);
-    virtual void append(int64 val);
-    virtual void append(double val);
-    virtual void append(Empty val);
-    virtual void append(Identity val);
-    virtual void append(Bits val);
-    virtual void append(std::string val);
-    virtual void append(Enum::YLeaf val);
-    virtual void append(Decimal64 val);
+  virtual void append(uint8 val);
+  virtual void append(uint32 val);
+  virtual void append(uint64 val);
+  virtual void append(long val);
+  virtual void append(int8 val);
+  virtual void append(int32 val);
+  virtual void append(int64 val);
+  virtual void append(double val);
+  virtual void append(Empty val);
+  virtual void append(Identity val);
+  virtual void append(Bits val);
+  virtual void append(std::string val);
+  virtual void append(Enum::YLeaf val);
+  virtual void append(Decimal64 val);
 
-    virtual YLeaf & operator [] (size_t index);
+  virtual YLeaf& operator[](size_t index);
 
-    operator std::string() const;
-    bool operator == (YLeafList & other) const;
-    bool operator == (const YLeafList & other) const;
+  operator std::string() const;
+  bool operator==(YLeafList& other) const;
+  bool operator==(const YLeafList& other) const;
 
-    virtual std::vector<std::pair<std::string, LeafData> > get_name_leafdata() const;
-    virtual std::vector<YLeaf> getYLeafs() const;
-    virtual void clear();
+  virtual std::vector<std::pair<std::string, LeafData>> get_name_leafdata()
+      const;
+  virtual std::vector<YLeaf> getYLeafs() const;
+  virtual void clear();
 
-  public:
-    YFilter yfilter;
+ public:
+  YFilter yfilter;
 
-  public:
-    std::vector<YLeaf> values;
-    YType type;
-    std::string name;
+ public:
+  std::vector<YLeaf> values;
+  YType type;
+  std::string name;
 };
 
-class YList
-{
-  public:
-    YList(Entity* parent_entity, std::initializer_list<std::string> key_names);
-    virtual ~YList();
+class YList {
+ public:
+  YList(Entity* parent_entity, std::initializer_list<std::string> key_names);
+  virtual ~YList();
 
-    std::shared_ptr<Entity> operator [] (const std::string& key) const;
-    std::shared_ptr<Entity> operator [] (const std::size_t item) const;
-    std::vector<std::shared_ptr<Entity>> entities() const;
-    std::vector<std::string> keys() const;
-    std::size_t len() const;
+  std::shared_ptr<Entity> operator[](const std::string& key) const;
+  std::shared_ptr<Entity> operator[](const std::size_t item) const;
+  std::vector<std::shared_ptr<Entity>> entities() const;
+  std::vector<std::string> keys() const;
+  std::size_t len() const;
 
-    void append(std::shared_ptr<Entity> ep);
-    void extend(std::initializer_list<std::shared_ptr<Entity>> ep_list);
-    void review(std::shared_ptr<Entity> ep);
-    std::string build_key(std::shared_ptr<Entity> ep);
+  void append(std::shared_ptr<Entity> ep);
+  void extend(std::initializer_list<std::shared_ptr<Entity>> ep_list);
+  void review(std::shared_ptr<Entity> ep);
+  std::string build_key(std::shared_ptr<Entity> ep);
 
-    std::shared_ptr<Entity> pop(const std::string& key);
-    std::shared_ptr<Entity> pop(const std::size_t item);
+  std::shared_ptr<Entity> pop(const std::string& key);
+  std::shared_ptr<Entity> pop(const std::size_t item);
 
-    std::vector<std::string> ylist_key_names;
+  std::vector<std::string> ylist_key_names;
 
  protected:
-   typedef std::map<std::string,std::shared_ptr<Entity>> MapType;
+  typedef std::map<std::string, std::shared_ptr<Entity>> MapType;
 
-    MapType entity_map;
-    std::vector<std::string> key_vector;
-    Entity* parent;
-    int counter;
+  MapType entity_map;
+  std::vector<std::string> key_vector;
+  Entity* parent;
+  int counter;
 };
 
-std::ostream& operator<< (std::ostream& stream, const YLeaf& value);
-std::ostream& operator<< (std::ostream& stream, const EntityPath& value);
-std::ostream& operator<< (std::ostream& stream, Entity& value);
-std::ostream& operator<< (std::ostream& stream, const LeafData& value);
+std::ostream& operator<<(std::ostream& stream, const YLeaf& value);
+std::ostream& operator<<(std::ostream& stream, const EntityPath& value);
+std::ostream& operator<<(std::ostream& stream, Entity& value);
+std::ostream& operator<<(std::ostream& stream, const LeafData& value);
 
 template <class EntityType>
 class YListWrapper : public YList {
@@ -408,24 +399,21 @@ class YListWrapper : public YList {
   using ydk::YList::YList;
 
   struct Func {
-    std::pair<const std::string&, std::shared_ptr<EntityType>>
-    operator ()(const MapType::const_iterator::value_type &value) const
-    {
-      return {
-          value.first,
-          std::static_pointer_cast<EntityType>(value.second)
-      };
+    std::pair<const std::string&, std::shared_ptr<EntityType>> operator()(
+        const MapType::const_iterator::value_type& value) const {
+      return {value.first, std::static_pointer_cast<EntityType>(value.second)};
     }
   };
-  
-  typedef typename boost::result_of<Func(const MapType::const_iterator::value_type &value)>::type t; 
-  
-  std::shared_ptr<EntityType> operator[](const std::string& key) const{
+
+  typedef typename boost::result_of<Func(
+      const MapType::const_iterator::value_type& value)>::type t;
+
+  std::shared_ptr<EntityType> operator[](const std::string& key) const {
     return std::static_pointer_cast<EntityType>(ydk::YList::operator[](key));
   }
-  
-  typedef boost::transform_iterator<Func, 
-      MapType::const_iterator> MapWrapperIterator;
+
+  typedef boost::transform_iterator<Func, MapType::const_iterator>
+      MapWrapperIterator;
 
   MapWrapperIterator begin() const {
     return boost::make_transform_iterator(entity_map.cbegin(), Func());
@@ -436,27 +424,14 @@ class YListWrapper : public YList {
   }
 };
 
-enum class EncodingFormat {
-    XML,
-    JSON
-};
+enum class EncodingFormat { XML, JSON };
 
 std::string to_string(YFilter yfilter);
 
-enum class Protocol
-{
-    restconf,
-    netconf
-};
+enum class Protocol { restconf, netconf };
 
-enum class DataStore {
-    candidate,
-    running,
-    startup,
-    url,
-    na
-};
+enum class DataStore { candidate, running, startup, url, na };
 
-}
+}  // namespace ydk
 
 #endif /* _TYPES_HPP_ */

@@ -33,34 +33,35 @@
 #include "path_api.hpp"
 #include "service_provider.hpp"
 
+namespace ydk {
 
-namespace ydk
-{
+class CrudService {
+ public:
+  CrudService();
+  virtual ~CrudService();
 
-class CrudService
-{
-    public:
-        CrudService();
-        virtual ~CrudService();
+  bool create(ydk::ServiceProvider& provider, Entity& entity);
+  bool create(ydk::ServiceProvider& provider,
+              std::vector<Entity*>& entity_list);
 
-        bool create(ydk::ServiceProvider & provider, Entity & entity);
-        bool create(ydk::ServiceProvider & provider, std::vector<Entity*> & entity_list);
+  bool update(ydk::ServiceProvider& provider, Entity& entity);
+  bool update(ydk::ServiceProvider& provider,
+              std::vector<Entity*>& entity_list);
 
-        bool update(ydk::ServiceProvider & provider, Entity & entity);
-        bool update(ydk::ServiceProvider & provider, std::vector<Entity*> & entity_list);
+  bool delete_(ydk::ServiceProvider& provider, Entity& entity);
+  bool delete_(ydk::ServiceProvider& provider,
+               std::vector<Entity*>& entity_list);
 
-        bool delete_(ydk::ServiceProvider & provider, Entity & entity);
-        bool delete_(ydk::ServiceProvider & provider, std::vector<Entity*> & entity_list);
+  std::shared_ptr<Entity> read(ydk::ServiceProvider& provider, Entity& filter);
+  std::vector<std::shared_ptr<Entity>> read(ydk::ServiceProvider& provider,
+                                            std::vector<Entity*>& filter_list);
 
-        std::shared_ptr<Entity> read(ydk::ServiceProvider & provider, Entity & filter);
-        std::vector<std::shared_ptr<Entity>>
-		    read(ydk::ServiceProvider & provider, std::vector<Entity*> & filter_list);
-
-        std::shared_ptr<Entity> read_config(ydk::ServiceProvider & provider, Entity & filter);
-        std::vector<std::shared_ptr<Entity>>
-		    read_config(ydk::ServiceProvider & provider, std::vector<Entity*> & filter_list);
+  std::shared_ptr<Entity> read_config(ydk::ServiceProvider& provider,
+                                      Entity& filter);
+  std::vector<std::shared_ptr<Entity>> read_config(
+      ydk::ServiceProvider& provider, std::vector<Entity*>& filter_list);
 };
 
-}
+}  // namespace ydk
 
 #endif /* CRUD_SERVICE_HPP */

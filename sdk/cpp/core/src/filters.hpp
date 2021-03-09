@@ -28,20 +28,17 @@
 #ifndef _FILTERS_HPP_
 #define _FILTERS_HPP_
 
-namespace ydk
-{
-enum class YFilter
-{
-    merge,
-    create,
-    remove,
-    delete_,
-    replace,
-    read,
-    update,
-    not_set
+namespace ydk {
+enum class YFilter {
+  merge,
+  create,
+  remove,
+  delete_,
+  replace,
+  read,
+  update,
+  not_set
 };
 }
 
 #endif /* _FILTERS_HPP_ */
-

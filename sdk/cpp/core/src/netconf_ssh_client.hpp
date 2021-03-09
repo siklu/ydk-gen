@@ -16,11 +16,11 @@
 
 #ifndef _YDK_NETCONF_SSH_CLIENT_H_
 #define _YDK_NETCONF_SSH_CLIENT_H_
+#include <libnetconf/netconf.h>
+
 #include <map>
 #include <string>
 #include <vector>
-
-#include <libnetconf/netconf.h>
 
 #include "errors.hpp"
 #include "netconf_client.hpp"
@@ -31,73 +31,65 @@ typedef struct nc_msg nc_reply;
 typedef struct ssh_session_struct* ssh_session;
 
 typedef struct capabilities {
-    explicit capabilities(std::vector<std::string> cas):caps(cas){}
+  explicit capabilities(std::vector<std::string> cas) : caps(cas) {}
 
-    std::vector<std::string> caps;
+  std::vector<std::string> caps;
 } capabilities;
 
-namespace ydk
-{
+namespace ydk {
 
-class NetconfSSHClient : public NetconfClient
-{
-  public:
-    static std::map<std::pair<std::string, std::string>, std::string> password_lookup;
+class NetconfSSHClient : public NetconfClient {
+ public:
+  static std::map<std::pair<std::string, std::string>, std::string>
+      password_lookup;
 
-    NetconfSSHClient(
-        std::string  username, 
-        std::string  password,
-        std::string  server_ip,
-        int port,
-        int timeout = -1);
+  NetconfSSHClient(std::string username, std::string password,
+                   std::string server_ip, int port, int timeout = -1);
 
-    NetconfSSHClient(
-        std::string username, 
-        std::string private_key_path,
-        std::string public_key_path,
-        std::string server_ip,
-        int port,
-        int timeout = -1
-    );
+  NetconfSSHClient(std::string username, std::string private_key_path,
+                   std::string public_key_path, std::string server_ip, int port,
+                   int timeout = -1);
 
-    virtual ~NetconfSSHClient();
+  virtual ~NetconfSSHClient();
 
-    virtual int connect();
-    virtual std::string execute_payload(const std::string & payload);
-    virtual std::vector<std::string> get_capabilities();
-    virtual std::string get_hostname_port();
+  virtual int connect();
+  virtual std::string execute_payload(const std::string& payload);
+  virtual std::vector<std::string> get_capabilities();
+  virtual std::string get_hostname_port();
 
-    void perform_session_check(const std::string & message);
+  void perform_session_check(const std::string& message);
 
-  private:
+ private:
+  static void clb_print(NC_VERB_LEVEL level, const char* msg);
+  static void clb_error_print(const char* tag, const char* type,
+                              const char* severity, const char* apptag,
+                              const char* path, const char* message,
+                              const char* attribute, const char* element,
+                              const char* ns, const char* sid);
+  static char* clb_set_password(const char* username, const char* hostname);
+  static char* clb_set_interactive(const char* name, const char* instruction,
+                                   const char* prompt, int echo);
+  static char* clb_set_passphrase(const char* username, const char* hostname,
+                                  const char* priv_key_file);
+  static int clb_ssh_host_authenticity_check(const char* hostname,
+                                             ssh_session session);
 
-    static void clb_print(NC_VERB_LEVEL level, const char* msg);
-    static void clb_error_print(const char* tag, const char* type,
-            const char* severity, const char* apptag, const char* path,
-            const char* message, const char* attribute, const char* element,
-            const char* ns, const char* sid);
-    static char* clb_set_password(const char* username, const char* hostname);
-    static char* clb_set_interactive(const char *name, const char *instruction, const char *prompt, int echo);
-    static char* clb_set_passphrase(const char *username, const char *hostname, const char *priv_key_file);
-    static int clb_ssh_host_authenticity_check(const char *hostname, ssh_session session);
+  nc_rpc* build_rpc_request(const std::string& payload);
+  std::string process_rpc_reply(int reply_type, const nc_reply* reply);
+  void init_capabilities();
 
-    nc_rpc* build_rpc_request(const std::string & payload);
-    std::string process_rpc_reply(int reply_type, const nc_reply* reply);
-    void init_capabilities();
+  struct nc_session* session;
 
-    struct nc_session *session;
+  std::string username;
+  std::string hostname;
+  int port;
+  int timeout;
+  std::vector<std::string> capabilities;
 
-    std::string username;
-    std::string hostname;
-    int port;
-    int timeout;
-    std::vector<std::string> capabilities;
-
-    std::string private_key_path;
-    std::string public_key_path;
+  std::string private_key_path;
+  std::string public_key_path;
 };
 
-
-}
+}  // namespace ydk
 
 #endif /* _YDK_NETCONF_SSH_CLIENT_H_ */

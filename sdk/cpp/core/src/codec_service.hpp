@@ -26,26 +26,31 @@
 #include <map>
 #include <memory>
 
-namespace ydk
-{
+namespace ydk {
 class CodecServiceProvider;
 class Entity;
 
-class CodecService
-{
-public:
+class CodecService {
+ public:
+  CodecService();
+  ~CodecService();
 
-    CodecService();
-    ~CodecService();
+  std::string encode(CodecServiceProvider& provider, Entity& entity,
+                     bool pretty = false, bool subtree = false);
+  std::map<std::string, std::string> encode(
+      CodecServiceProvider& provider,
+      std::map<std::string, std::unique_ptr<Entity>>& entity,
+      bool pretty = false);
 
-    std::string encode(CodecServiceProvider & provider, Entity & entity, bool pretty=false, bool subtree=false);
-    std::map<std::string, std::string> encode(CodecServiceProvider & provider, std::map<std::string, std::unique_ptr<Entity>> & entity, bool pretty=false);
-
-    std::shared_ptr<Entity> decode(CodecServiceProvider & provider, const std::string & payload, std::shared_ptr<Entity> entity, bool subtree=false);
-    std::map<std::string, std::shared_ptr<Entity>> decode(CodecServiceProvider & provider,
-        std::map<std::string, std::string> & payload_map,
-        std::map<std::string, std::shared_ptr<Entity>> entity_map);
+  std::shared_ptr<Entity> decode(CodecServiceProvider& provider,
+                                 const std::string& payload,
+                                 std::shared_ptr<Entity> entity,
+                                 bool subtree = false);
+  std::map<std::string, std::shared_ptr<Entity>> decode(
+      CodecServiceProvider& provider,
+      std::map<std::string, std::string>& payload_map,
+      std::map<std::string, std::shared_ptr<Entity>> entity_map);
 };
-}
+}  // namespace ydk
 
 #endif /* CODEC_SERVICE_HPP */

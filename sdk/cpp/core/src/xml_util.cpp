@@ -21,67 +21,56 @@
 //
 //////////////////////////////////////////////////////////////////
 
+#include "xml_util.hpp"
+
 #include <iostream>
 
 #include "errors.hpp"
 #include "logger.hpp"
-#include "xml_util.hpp"
 
 using namespace std;
 
-namespace ydk
-{
+namespace ydk {
 
 //////////////////////////////////////////////////////////////////
 // XML miscellaneous utilities
 //////////////////////////////////////////////////////////////////
-string to_string(const xmlChar * s)
-{
-    if(s == NULL) return "";
+string to_string(const xmlChar* s) {
+  if (s == NULL) return "";
 
-    const char* buffer = reinterpret_cast<const char*>(s);
-    return buffer;
+  const char* buffer = reinterpret_cast<const char*>(s);
+  return buffer;
 }
 
-const xmlChar * to_xmlchar(const string & s)
-{
-    const xmlChar* buffer = reinterpret_cast<const xmlChar*>(s.c_str());
-    return buffer;
+const xmlChar* to_xmlchar(const string& s) {
+  const xmlChar* buffer = reinterpret_cast<const xmlChar*>(s.c_str());
+  return buffer;
 }
 
-string to_string(xmlDocPtr doc, xmlNodePtr root)
-{
-    string str;
-    xmlBufferPtr buf = xmlBufferCreate();
-    if (buf != NULL)
-    {
-        xmlNodeDump(buf, doc, root, 0, 1);
-        str = to_string(buf->content);
-        xmlBufferFree(buf);
-    }
-    else
-    {
-        YLOG_ERROR("Error creating the xml buffer");
-        throw YServiceProviderError{"Error creating the xml buffer"};
-    }
-    return str;
+string to_string(xmlDocPtr doc, xmlNodePtr root) {
+  string str;
+  xmlBufferPtr buf = xmlBufferCreate();
+  if (buf != NULL) {
+    xmlNodeDump(buf, doc, root, 0, 1);
+    str = to_string(buf->content);
+    xmlBufferFree(buf);
+  } else {
+    YLOG_ERROR("Error creating the xml buffer");
+    throw YServiceProviderError{"Error creating the xml buffer"};
+  }
+  return str;
 }
 
-void set_xml_namespace(const string & name_space, xmlNodePtr xml_node)
-{
-    xmlNewProp(xml_node, to_xmlchar("xmlns"), to_xmlchar(name_space));
+void set_xml_namespace(const string& name_space, xmlNodePtr xml_node) {
+  xmlNewProp(xml_node, to_xmlchar("xmlns"), to_xmlchar(name_space));
 }
 
-bool isonlywhitespace(xmlChar *	content)
-{
-    if(content == NULL)
-        return true;
+bool isonlywhitespace(xmlChar* content) {
+  if (content == NULL) return true;
 
-    for(auto g:to_string(content))
-    {
-        if (!isspace(g))
-            return false;
-    }
-    return true;
+  for (auto g : to_string(content)) {
+    if (!isspace(g)) return false;
+  }
+  return true;
 }
-}
+}  // namespace ydk

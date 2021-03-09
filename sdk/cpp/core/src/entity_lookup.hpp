@@ -26,21 +26,22 @@
 #define ENTITY_LOOKUP_HPP
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
-namespace ydk
-{
+namespace ydk {
 
-namespace path
-{
+namespace path {
 struct Capability;
 }
 
-const std::unordered_map<std::string, path::Capability> get_global_capabilities_lookup_tables();
+const std::unordered_map<std::string, path::Capability>
+get_global_capabilities_lookup_tables();
 
 // Variable is generated
-extern std::unordered_map<std::string, path::Capability> ydk_global_capabilities_lookup_tables;
+extern std::unordered_map<std::string, path::Capability>
+    ydk_global_capabilities_lookup_tables;
 
-}
+}  // namespace ydk
 
 #endif /* ENTITY_LOOKUP_HPP */

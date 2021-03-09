@@ -21,15 +21,14 @@
 //
 //////////////////////////////////////////////////////////////////
 
+#include <spdlog/spdlog.h>
+
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <spdlog/spdlog.h>
-
+#include <ydk/crud_service.hpp>
 #include <ydk/gnmi_provider.hpp>
 #include <ydk/gnmi_service.hpp>
-#include <ydk/crud_service.hpp>
-
 #include <ydk_ydktest/openconfig_bgp.hpp>
 #include <ydk_ydktest/openconfig_bgp_types.hpp>
 
@@ -39,84 +38,82 @@ using namespace std;
 using namespace ydk;
 using namespace ydktest;
 
-void config_bgp(openconfig_bgp::Bgp & bgp)
-{
-    bgp.global->config->as = 65172;
+void config_bgp(openconfig_bgp::Bgp& bgp) {
+  bgp.global->config->as = 65172;
 
-    auto neighbor = make_shared<openconfig_bgp::Bgp::Neighbors::Neighbor>();
-    neighbor->neighbor_address = "172.16.255.2";
-    neighbor->config->neighbor_address = "172.16.255.2";
-    neighbor->config->peer_as = 65172;
+  auto neighbor = make_shared<openconfig_bgp::Bgp::Neighbors::Neighbor>();
+  neighbor->neighbor_address = "172.16.255.2";
+  neighbor->config->neighbor_address = "172.16.255.2";
+  neighbor->config->peer_as = 65172;
 
-    bgp.neighbors->neighbor.append(neighbor);
+  bgp.neighbors->neighbor.append(neighbor);
 }
 
-int main(int argc, char* argv[]) 
-{
-    vector<string> args = parse_args(argc, argv);
-    if(args.empty()) return 1;
-    
-    string host, username, password, sport, address;
-    username = args[0]; password = args[1]; host = args[2]; sport = args[3];
+int main(int argc, char* argv[]) {
+  vector<string> args = parse_args(argc, argv);
+  if (args.empty()) return 1;
 
-    bool verbose = (args[4]=="--verbose");
-    if(verbose)
-    {
-        auto logger = spdlog::stdout_color_mt("ydk");
-        logger->set_level(spdlog::level::debug);
-    }
+  string host, username, password, sport, address;
+  username = args[0];
+  password = args[1];
+  host = args[2];
+  sport = args[3];
 
-    ydk::path::Repository repo{TEST_HOME};
-    int port = stoi(sport);
+  bool verbose = (args[4] == "--verbose");
+  if (verbose) {
+    auto logger = spdlog::stdout_color_mt("ydk");
+    logger->set_level(spdlog::level::debug);
+  }
 
-    gNMIService gs;
+  ydk::path::Repository repo{TEST_HOME};
+  int port = stoi(sport);
 
-    bool is_secure = false;
-    if(is_secure)
-    {
-        gNMIServiceProvider provider{repo, host, port, username, password};
+  gNMIService gs;
 
-        // Set Create Request
-	    openconfig_bgp::Bgp bgp = {};
-	    config_bgp(bgp);
-	    bgp.yfilter = YFilter::replace;
-	    gs.set(provider, bgp);
+  bool is_secure = false;
+  if (is_secure) {
+    gNMIServiceProvider provider{repo, host, port, username, password};
 
-	    // Get Request
-	    openconfig_bgp::Bgp filter;
-	    gs.get(provider, filter, "CONFIG");
+    // Set Create Request
+    openconfig_bgp::Bgp bgp = {};
+    config_bgp(bgp);
+    bgp.yfilter = YFilter::replace;
+    gs.set(provider, bgp);
 
-	    // Set Delete Request
-	    bgp = openconfig_bgp::Bgp();
-	    bgp.yfilter = YFilter::delete_;
-	    gs.set(provider, bgp);
+    // Get Request
+    openconfig_bgp::Bgp filter;
+    gs.get(provider, filter, "CONFIG");
 
-	    // Get Request
-	    filter = openconfig_bgp::Bgp();
-	    gs.get(provider, filter, "CONFIG");
-    }
-    else {
-        gNMIServiceProvider provider{repo, host, port, username, password};
+    // Set Delete Request
+    bgp = openconfig_bgp::Bgp();
+    bgp.yfilter = YFilter::delete_;
+    gs.set(provider, bgp);
 
-	    // Set Create Request
-	    openconfig_bgp::Bgp bgp = {};
-	    config_bgp(bgp);
-	    bgp.yfilter = YFilter::replace;
-	    gs.set(provider, bgp);
+    // Get Request
+    filter = openconfig_bgp::Bgp();
+    gs.get(provider, filter, "CONFIG");
+  } else {
+    gNMIServiceProvider provider{repo, host, port, username, password};
 
-	    // Get Request
-	    openconfig_bgp::Bgp filter;
-	    gs.get(provider, filter, "CONFIG");
+    // Set Create Request
+    openconfig_bgp::Bgp bgp = {};
+    config_bgp(bgp);
+    bgp.yfilter = YFilter::replace;
+    gs.set(provider, bgp);
 
-	    // Set Delete Request
-	    bgp = openconfig_bgp::Bgp();
-	    bgp.yfilter = YFilter::delete_;
-	    gs.set(provider, bgp);
+    // Get Request
+    openconfig_bgp::Bgp filter;
+    gs.get(provider, filter, "CONFIG");
 
-	    // Get Request
-	    filter = openconfig_bgp::Bgp();
-	    gs.get(provider, filter, "CONFIG");
-    }
+    // Set Delete Request
+    bgp = openconfig_bgp::Bgp();
+    bgp.yfilter = YFilter::delete_;
+    gs.set(provider, bgp);
 
-    return 0;
+    // Get Request
+    filter = openconfig_bgp::Bgp();
+    gs.get(provider, filter, "CONFIG");
+  }
+
+  return 0;
 }

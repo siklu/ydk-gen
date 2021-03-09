@@ -21,244 +21,222 @@
 //
 //////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <sstream>
-#include <memory>
-
 #include <libyang/libyang.h>
+
+#include <iostream>
+#include <memory>
+#include <sstream>
 
 #include "entity_data_node_walker.hpp"
 #include "errors.hpp"
 #include "ietf_parser.hpp"
+#include "logger.hpp"
 #include "restconf_client.hpp"
 #include "types.hpp"
-#include "logger.hpp"
 
 using namespace std;
 
-namespace ydk
-{
+namespace ydk {
 
-namespace path
-{
-static const std::string default_capabilities_url = "/ietf-restconf-monitoring:restconf-state/capabilities";
+namespace path {
+static const std::string default_capabilities_url =
+    "/ietf-restconf-monitoring:restconf-state/capabilities";
 
-static std::shared_ptr<path::DataNode> handle_crud_read_reply(const string & reply, path::RootSchemaNode & root_schema, EncodingFormat encoding);
-static path::SchemaNode* get_schema_for_operation(path::RootSchemaNode & root_schema, const string & operation);
+static std::shared_ptr<path::DataNode> handle_crud_read_reply(
+    const string& reply, path::RootSchemaNode& root_schema,
+    EncodingFormat encoding);
+static path::SchemaNode* get_schema_for_operation(
+    path::RootSchemaNode& root_schema, const string& operation);
 static string get_encoding_string(EncodingFormat encoding);
 
-static bool is_config(path::Rpc & rpc);
-static string get_module_url_path(const string & path);
+static bool is_config(path::Rpc& rpc);
+static string get_module_url_path(const string& path);
 
-RestconfSession::RestconfSession(path::Repository & repo,
-                                 const string & address,
-                                 const string & username,
-                                 const string & password,
-                                 int port,
-                                 EncodingFormat encoding,
-                                 const string & config_url_root,
-                                 const string & state_url_root)
-    : client(make_shared<RestconfClient>(address,
-                                         username,
-                                         password,
-                                         port,
+RestconfSession::RestconfSession(path::Repository& repo, const string& address,
+                                 const string& username, const string& password,
+                                 int port, EncodingFormat encoding,
+                                 const string& config_url_root,
+                                 const string& state_url_root)
+    : client(make_shared<RestconfClient>(address, username, password, port,
                                          get_encoding_string(encoding))),
       encoding(encoding),
       config_url_root(config_url_root),
-      state_url_root(state_url_root)
-{
-    edit_method = "PATCH";
-    initialize(repo);
+      state_url_root(state_url_root) {
+  edit_method = "PATCH";
+  initialize(repo);
 }
 
-RestconfSession::RestconfSession(std::shared_ptr<RestconfClient> client,
-                                 const std::shared_ptr<ydk::path::RootSchemaNode>& root_schema,
-                                 const std::string & edit_method,
-                                 EncodingFormat encoding,
-                                 const std::string & config_url_root,
-                                 const std::string & state_url_root)
+RestconfSession::RestconfSession(
+    std::shared_ptr<RestconfClient> client,
+    const std::shared_ptr<ydk::path::RootSchemaNode>& root_schema,
+    const std::string& edit_method, EncodingFormat encoding,
+    const std::string& config_url_root, const std::string& state_url_root)
     : client(move(client)),
       root_schema(root_schema),
       encoding(encoding),
       edit_method(edit_method),
       config_url_root(config_url_root),
-      state_url_root(state_url_root)
-{
+      state_url_root(state_url_root) {}
+
+void RestconfSession::initialize(path::Repository& repo) {
+  vector<path::Capability> capabilities;
+  IetfCapabilitiesParser capabilities_parser{};
+  IetfCapabilitiesXmlParser capabilities_xml_parser{};
+  edit_method = "PATCH";
+  server_capabilities = capabilities_xml_parser.parse(
+      client->get_capabilities(state_url_root + default_capabilities_url,
+                               get_encoding_string(EncodingFormat::XML)));
+
+  auto lookup_table = capabilities_parser.get_lookup_table(server_capabilities);
+  capabilities = capabilities_parser.parse(server_capabilities);
+
+  root_schema = repo.create_root_schema(lookup_table, capabilities);
 }
 
-void RestconfSession::initialize(path::Repository & repo)
-{
-    vector<path::Capability> capabilities;
-    IetfCapabilitiesParser capabilities_parser{};
-    IetfCapabilitiesXmlParser capabilities_xml_parser{};
-    edit_method = "PATCH";
-    server_capabilities = capabilities_xml_parser.parse
-                    (
-                    client->get_capabilities
-                                (
-                                state_url_root + default_capabilities_url, get_encoding_string(EncodingFormat::XML)
-                                )
-                    );
+RestconfSession::~RestconfSession() { YLOG_INFO("Disconnected from device"); }
 
-    auto lookup_table = capabilities_parser.get_lookup_table(server_capabilities);
-    capabilities = capabilities_parser.parse(server_capabilities);
-
-    root_schema = repo.create_root_schema(lookup_table, capabilities);
-}
-
-RestconfSession::~RestconfSession()
-{
-    YLOG_INFO("Disconnected from device");
-}
-
-path::RootSchemaNode& RestconfSession::get_root_schema() const
-{
-    return *root_schema;
+path::RootSchemaNode& RestconfSession::get_root_schema() const {
+  return *root_schema;
 }
 
 std::shared_ptr<path::DataNode> RestconfSession::invoke(
-    path::DataNode& rpc) const
-{
-    throw(YOperationNotSupportedError{"RestconfSession::invoke: action datanode is not supported!"});
-    return nullptr;
+    path::DataNode& rpc) const {
+  throw(YOperationNotSupportedError{
+      "RestconfSession::invoke: action datanode is not supported!"});
+  return nullptr;
 }
 
-std::shared_ptr<path::DataNode> RestconfSession::invoke(
-    path::Rpc& rpc) const
-{
-    path::SchemaNode* create_schema = get_schema_for_operation(*root_schema, "ydk:create");
-    path::SchemaNode* read_schema = get_schema_for_operation(*root_schema, "ydk:read");
-    path::SchemaNode* update_schema = get_schema_for_operation(*root_schema, "ydk:update");
-    path::SchemaNode* delete_schema = get_schema_for_operation(*root_schema, "ydk:delete");
+std::shared_ptr<path::DataNode> RestconfSession::invoke(path::Rpc& rpc) const {
+  path::SchemaNode* create_schema =
+      get_schema_for_operation(*root_schema, "ydk:create");
+  path::SchemaNode* read_schema =
+      get_schema_for_operation(*root_schema, "ydk:read");
+  path::SchemaNode* update_schema =
+      get_schema_for_operation(*root_schema, "ydk:update");
+  path::SchemaNode* delete_schema =
+      get_schema_for_operation(*root_schema, "ydk:delete");
 
-    path::SchemaNode* rpc_schema = &(rpc.get_schema_node());
-    std::shared_ptr<path::DataNode> datanode = nullptr;
+  path::SchemaNode* rpc_schema = &(rpc.get_schema_node());
+  std::shared_ptr<path::DataNode> datanode = nullptr;
 
-    if(rpc_schema == create_schema || rpc_schema == update_schema)
-    {
-        return handle_crud_edit(rpc, edit_method);
-    }
-    else if(rpc_schema == read_schema)
-    {
-        return handle_crud_read(rpc);
-    }
-    else if(rpc_schema == delete_schema)
-    {
-       return handle_crud_edit(rpc, "DELETE");
-    }
-    else
-    {
-        YLOG_ERROR("RestconfSession::invoke:RPC is not supported");
-        throw(YOperationNotSupportedError{"RPC is not supported!"});
-    }
+  if (rpc_schema == create_schema || rpc_schema == update_schema) {
+    return handle_crud_edit(rpc, edit_method);
+  } else if (rpc_schema == read_schema) {
+    return handle_crud_read(rpc);
+  } else if (rpc_schema == delete_schema) {
+    return handle_crud_edit(rpc, "DELETE");
+  } else {
+    YLOG_ERROR("RestconfSession::invoke:RPC is not supported");
+    throw(YOperationNotSupportedError{"RPC is not supported!"});
+  }
 
-    return datanode;
+  return datanode;
 }
 
-std::shared_ptr<path::DataNode> RestconfSession::handle_crud_read(path::Rpc& rpc) const
-{
-    path::Codec codec_service{};
+std::shared_ptr<path::DataNode> RestconfSession::handle_crud_read(
+    path::Rpc& rpc) const {
+  path::Codec codec_service{};
 
-    auto filter = rpc.get_input_node().find("filter");
-    if(filter.empty()){
-        YLOG_ERROR("Failed to get entity node.");
-        throw(YInvalidArgumentError{"Failed to get entity node"});
-    }
+  auto filter = rpc.get_input_node().find("filter");
+  if (filter.empty()) {
+    YLOG_ERROR("Failed to get entity node.");
+    throw(YInvalidArgumentError{"Failed to get entity node"});
+  }
 
-    path::DataNode* filter_node = filter[0].get();
-    string filter_instance = filter_node->get_value();
+  path::DataNode* filter_node = filter[0].get();
+  string filter_instance = filter_node->get_value();
 
-    auto datanode = codec_service.decode(*root_schema, filter_instance, encoding);
+  auto datanode = codec_service.decode(*root_schema, filter_instance, encoding);
 
-    string url;
-    if(is_config(rpc))
-    {
-        url = config_url_root + get_module_url_path(datanode->get_children()[0]->get_schema_node().get_path());
-    }
-    else
-    {
-        url = state_url_root + get_module_url_path(datanode->get_children()[0]->get_schema_node().get_path());
-    }
+  string url;
+  if (is_config(rpc)) {
+    url = config_url_root +
+          get_module_url_path(
+              datanode->get_children()[0]->get_schema_node().get_path());
+  } else {
+    url = state_url_root +
+          get_module_url_path(
+              datanode->get_children()[0]->get_schema_node().get_path());
+  }
 
-    YLOG_INFO("Performing GET on URL {}", url);
-    return handle_crud_read_reply( client->execute("GET", url, ""), *root_schema, encoding);
+  YLOG_INFO("Performing GET on URL {}", url);
+  return handle_crud_read_reply(client->execute("GET", url, ""), *root_schema,
+                                encoding);
 }
 
-std::shared_ptr<path::DataNode> RestconfSession::handle_crud_edit(path::Rpc& rpc, const string & operation) const
-{
-    path::Codec codec_service{};
-    auto entity = rpc.get_input_node().find("entity");
-    if(entity.empty()){
-        YLOG_ERROR("Failed to get entity node");
-        throw(YInvalidArgumentError{"Failed to get entity node"});
-    }
+std::shared_ptr<path::DataNode> RestconfSession::handle_crud_edit(
+    path::Rpc& rpc, const string& operation) const {
+  path::Codec codec_service{};
+  auto entity = rpc.get_input_node().find("entity");
+  if (entity.empty()) {
+    YLOG_ERROR("Failed to get entity node");
+    throw(YInvalidArgumentError{"Failed to get entity node"});
+  }
 
-    path::DataNode* entity_node = entity[0].get();
-    string header_data = entity_node->get_value();
+  path::DataNode* entity_node = entity[0].get();
+  string header_data = entity_node->get_value();
 
-    auto datanode = codec_service.decode(*root_schema, header_data, encoding);
-    string url = config_url_root + get_module_url_path(datanode->get_children()[0]->get_schema_node().get_path());
+  auto datanode = codec_service.decode(*root_schema, header_data, encoding);
+  string url = config_url_root +
+               get_module_url_path(
+                   datanode->get_children()[0]->get_schema_node().get_path());
 
-    YLOG_INFO("Performing {} on URL {}. Payload:\n{}", operation, url, header_data);
-    client->execute(operation, url, header_data);
+  YLOG_INFO("Performing {} on URL {}. Payload:\n{}", operation, url,
+            header_data);
+  client->execute(operation, url, header_data);
 
-    return nullptr;
+  return nullptr;
 }
 
-static std::shared_ptr<path::DataNode> handle_crud_read_reply(const string & reply, path::RootSchemaNode & root_schema, EncodingFormat encoding)
-{
-    path::Codec codec_service{};
+static std::shared_ptr<path::DataNode> handle_crud_read_reply(
+    const string& reply, path::RootSchemaNode& root_schema,
+    EncodingFormat encoding) {
+  path::Codec codec_service{};
 
-    auto datanode = std::shared_ptr<path::DataNode>(codec_service.decode(root_schema, reply, encoding));
+  auto datanode = std::shared_ptr<path::DataNode>(
+      codec_service.decode(root_schema, reply, encoding));
 
-    if(!datanode){
-        YLOG_INFO("Codec service failed to decode datanode");
-        throw(YError{"Problems deserializing output"});
-    }
-    return datanode;
+  if (!datanode) {
+    YLOG_INFO("Codec service failed to decode datanode");
+    throw(YError{"Problems deserializing output"});
+  }
+  return datanode;
 }
 
-static path::SchemaNode* get_schema_for_operation(path::RootSchemaNode & root_schema, const string & operation)
-{
-    auto c = root_schema.find(operation);
-    if(c.empty())
-    {
-        YLOG_ERROR("{} rpc schema not found!", operation);
-        throw(YIllegalStateError{operation + " rpc schema not found!"});
-    }
-    return c[0];
+static path::SchemaNode* get_schema_for_operation(
+    path::RootSchemaNode& root_schema, const string& operation) {
+  auto c = root_schema.find(operation);
+  if (c.empty()) {
+    YLOG_ERROR("{} rpc schema not found!", operation);
+    throw(YIllegalStateError{operation + " rpc schema not found!"});
+  }
+  return c[0];
 }
 
-static string get_encoding_string(EncodingFormat encoding)
-{
-    return (encoding == EncodingFormat::XML)?
-        ("application/yang-data+xml"):
-        ("application/yang-data+json");
+static string get_encoding_string(EncodingFormat encoding) {
+  return (encoding == EncodingFormat::XML) ? ("application/yang-data+xml")
+                                           : ("application/yang-data+json");
 }
 
-static string get_module_url_path(const string & path)
-{
-    auto top = path.find_last_of("/");
-    auto t = path.substr(top+1, path.size()-top);
+static string get_module_url_path(const string& path) {
+  auto top = path.find_last_of("/");
+  auto t = path.substr(top + 1, path.size() - top);
 
-    if(t.find(":") != string::npos)
-        return "/"+t;
+  if (t.find(":") != string::npos) return "/" + t;
 
-    auto begin = path.find(":");
-    auto mod = path.substr(0,begin);
+  auto begin = path.find(":");
+  auto mod = path.substr(0, begin);
 
-    return mod+string(":")+t;
+  return mod + string(":") + t;
 }
 
-static bool is_config(path::Rpc & rpc)
-{
-    if(!rpc.get_input_node().find("only-config").empty())
-    {
-        return true;
-    }
-    return false;
+static bool is_config(path::Rpc& rpc) {
+  if (!rpc.get_input_node().find("only-config").empty()) {
+    return true;
+  }
+  return false;
 }
 
-} //namespace path
+}  // namespace path
 
-} //namespace ydk
+}  // namespace ydk

@@ -21,15 +21,14 @@
 //
 //////////////////////////////////////////////////////////////////
 
+#include <spdlog/spdlog.h>
+
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <spdlog/spdlog.h>
-
+#include <ydk/crud_service.hpp>
 #include <ydk/gnmi_provider.hpp>
 #include <ydk/gnmi_service.hpp>
-#include <ydk/crud_service.hpp>
-
 #include <ydk_ydktest/openconfig_bgp.hpp>
 #include <ydk_ydktest/openconfig_bgp_types.hpp>
 
@@ -39,70 +38,71 @@ using namespace std;
 using namespace ydk;
 using namespace ydktest;
 
-void config_bgp(openconfig_bgp::Bgp & bgp)
-{
-    bgp.global->config->as = 65172;
+void config_bgp(openconfig_bgp::Bgp& bgp) {
+  bgp.global->config->as = 65172;
 
-    auto neighbor = make_shared<openconfig_bgp::Bgp::Neighbors::Neighbor>();
-    neighbor->neighbor_address = "172.16.255.2";
-    neighbor->config->neighbor_address = "172.16.255.2";
-    neighbor->config->peer_as = 65172;
+  auto neighbor = make_shared<openconfig_bgp::Bgp::Neighbors::Neighbor>();
+  neighbor->neighbor_address = "172.16.255.2";
+  neighbor->config->neighbor_address = "172.16.255.2";
+  neighbor->config->peer_as = 65172;
 
-    bgp.neighbors->neighbor.append(neighbor);
+  bgp.neighbors->neighbor.append(neighbor);
 }
 
-void gnmi_service_subscribe_callback(const char * subscribe_response)
-{
-    string response = subscribe_response;
-    cout << "====> Received SubscribeResponse <====" << endl;
-    cout << response << endl;
+void gnmi_service_subscribe_callback(const char* subscribe_response) {
+  string response = subscribe_response;
+  cout << "====> Received SubscribeResponse <====" << endl;
+  cout << response << endl;
 }
 
-int main(int argc, char* argv[]) 
-{
-    vector<string> args = parse_args(argc, argv);
-    if(args.empty()) return 1;
-    
-    string host, username, password, sport, address, mode;
-    username = args[0]; password = args[1]; host = args[2]; sport = args[3]; mode = args[5];
+int main(int argc, char* argv[]) {
+  vector<string> args = parse_args(argc, argv);
+  if (args.empty()) return 1;
 
-    bool verbose = (args[4]=="--verbose");
-    if (verbose) {
-        auto logger = spdlog::stdout_color_mt("ydk");
-        logger->set_level(spdlog::level::debug);
-    }
-    if (mode == "")
-        mode = "ONCE";
+  string host, username, password, sport, address, mode;
+  username = args[0];
+  password = args[1];
+  host = args[2];
+  sport = args[3];
+  mode = args[5];
 
-    ydk::path::Repository repo{TEST_HOME};
-    int port = stoi(sport);
-    gNMIServiceProvider provider{repo, host, port, username, password};
+  bool verbose = (args[4] == "--verbose");
+  if (verbose) {
+    auto logger = spdlog::stdout_color_mt("ydk");
+    logger->set_level(spdlog::level::debug);
+  }
+  if (mode == "") mode = "ONCE";
 
-    gNMIService gs;
+  ydk::path::Repository repo{TEST_HOME};
+  int port = stoi(sport);
+  gNMIServiceProvider provider{repo, host, port, username, password};
 
-    // Set Create Request
-    openconfig_bgp::Bgp bgp;
-    config_bgp(bgp);
-    bgp.yfilter = YFilter::replace;
-    gs.set(provider, bgp);
+  gNMIService gs;
 
-    // Subscribe Request
-    bgp = openconfig_bgp::Bgp();
-    bgp.global->yfilter = YFilter::read;
+  // Set Create Request
+  openconfig_bgp::Bgp bgp;
+  config_bgp(bgp);
+  bgp.yfilter = YFilter::replace;
+  gs.set(provider, bgp);
 
-    gNMISubscription bgp_subscription;
-    bgp_subscription.entity = &bgp;
-    bgp_subscription.subscription_mode = "SAMPLE";
-    bgp_subscription.sample_interval = 20 * 1000000000L;
-    bgp_subscription.suppress_redundant = false;
-    bgp_subscription.heartbeat_interval = 100 * 1000000000L;
+  // Subscribe Request
+  bgp = openconfig_bgp::Bgp();
+  bgp.global->yfilter = YFilter::read;
 
-    gs.subscribe(provider, bgp_subscription, 10, mode, "JSON_IETF", gnmi_service_subscribe_callback);
+  gNMISubscription bgp_subscription;
+  bgp_subscription.entity = &bgp;
+  bgp_subscription.subscription_mode = "SAMPLE";
+  bgp_subscription.sample_interval = 20 * 1000000000L;
+  bgp_subscription.suppress_redundant = false;
+  bgp_subscription.heartbeat_interval = 100 * 1000000000L;
 
-    // Set Delete Request
-    bgp = openconfig_bgp::Bgp();
-    bgp.yfilter = YFilter::delete_;
-    gs.set(provider, bgp);
+  gs.subscribe(provider, bgp_subscription, 10, mode, "JSON_IETF",
+               gnmi_service_subscribe_callback);
 
-    return 0;
+  // Set Delete Request
+  bgp = openconfig_bgp::Bgp();
+  bgp.yfilter = YFilter::delete_;
+  gs.set(provider, bgp);
+
+  return 0;
 }

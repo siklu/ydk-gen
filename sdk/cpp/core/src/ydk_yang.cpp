@@ -28,10 +28,10 @@
 #include "ydk_yang.hpp"
 
 namespace ydk {
-    namespace path {
-    const char* YDK_MODULE_NAME = "ydk";
-    const char* YDK_MODULE_REVISION = "2016-02-26";
-    const char* YDK_MODULE = R"(
+namespace path {
+const char* YDK_MODULE_NAME = "ydk";
+const char* YDK_MODULE_REVISION = "2016-02-26";
+const char* YDK_MODULE = R"(
 
     module ydk {
       namespace "http://cisco.com/ns/yang/ydk";
@@ -1005,11 +1005,11 @@ namespace ydk {
 
     }
     )";
-    }
+}  // namespace path
 
-  const char* IETF_NETCONF_MODULE_NAME = "ietf-netconf";
-  const char* IETF_NETCONF_MODULE_REVISION = "2011-06-01";
-  const char* IETF_NETCONF_MODULE = R"(module ietf-netconf {
+const char* IETF_NETCONF_MODULE_NAME = "ietf-netconf";
+const char* IETF_NETCONF_MODULE_REVISION = "2011-06-01";
+const char* IETF_NETCONF_MODULE = R"(module ietf-netconf {
     // the namespace for NETCONF XML definitions is unchanged
     // from RFC 4741, which this document replaces
     namespace "urn:ietf:params:xml:ns:netconf:base:1.0";
@@ -1834,4 +1834,4 @@ namespace ydk {
     }
 
   })";
-}
+}  // namespace ydk

@@ -14,76 +14,76 @@
  limitations under the License.
  ------------------------------------------------------------------*/
 #include <string.h>
+
 #include <iostream>
-
-#include "config.hpp"
-#include "catch.hpp"
-
+#include <ydk/errors.hpp>
 #include <ydk/path_api.hpp>
 #include <ydk/restconf_provider.hpp>
-#include <ydk/errors.hpp>
+
+#include "catch.hpp"
+#include "config.hpp"
 
 using namespace ydk;
 using namespace std;
 
+TEST_CASE("CreateDelRead") {
+  ydk::path::Repository repo{TEST_HOME};
+  ydk::RestconfServiceProvider provider{
+      repo, "localhost", "admin", "admin", 12306, EncodingFormat::JSON};
 
-TEST_CASE("CreateDelRead")
-{
-    ydk::path::Repository repo{TEST_HOME};
-    ydk::RestconfServiceProvider provider{repo, "localhost", "admin", "admin", 12306, EncodingFormat::JSON};
+  ydk::path::RootSchemaNode& schema = provider.get_session().get_root_schema();
 
-    ydk::path::RootSchemaNode& schema = provider.get_session().get_root_schema();
+  ydk::path::Codec s{};
 
-    ydk::path::Codec s{};
+  auto& runner = schema.create_datanode("ydktest-sanity:runner", "");
 
-    auto & runner = schema.create_datanode("ydktest-sanity:runner", "");
+  // first delete
+  std::shared_ptr<ydk::path::Rpc> delete_rpc{schema.create_rpc("ydk:delete")};
+  auto json = s.encode(runner, EncodingFormat::JSON, false);
+  delete_rpc->get_input_node().create_datanode("entity", json);
+  // call delete
+  (*delete_rpc)(provider.get_session());
 
-    //first delete
-    std::shared_ptr<ydk::path::Rpc> delete_rpc { schema.create_rpc("ydk:delete") };
-    auto json = s.encode(runner, EncodingFormat::JSON, false);
-    delete_rpc->get_input_node().create_datanode("entity", json);
-    //call delete
-    (*delete_rpc)(provider.get_session());
+  auto& number8 = runner.create_datanode("ytypes/built-in-t/number8", "3");
 
-    auto & number8 = runner.create_datanode("ytypes/built-in-t/number8", "3");
+  json = s.encode(runner, EncodingFormat::JSON, false);
+  CHECK(!json.empty());
+  // call create
+  std::shared_ptr<ydk::path::Rpc> create_rpc{schema.create_rpc("ydk:create")};
+  create_rpc->get_input_node().create_datanode("entity", json);
+  (*create_rpc)(provider.get_session());
 
-    json = s.encode(runner, EncodingFormat::JSON, false);
-    CHECK( !json.empty());
-    //call create
-    std::shared_ptr<ydk::path::Rpc> create_rpc { schema.create_rpc("ydk:create") };
-    create_rpc->get_input_node().create_datanode("entity", json);
-    (*create_rpc)(provider.get_session());
+  // read
+  std::shared_ptr<ydk::path::Rpc> read_rpc{schema.create_rpc("ydk:read")};
+  auto& runner_read = schema.create_datanode("ydktest-sanity:runner", "");
 
-    //read
-    std::shared_ptr<ydk::path::Rpc> read_rpc { schema.create_rpc("ydk:read") };
-    auto & runner_read = schema.create_datanode("ydktest-sanity:runner", "");
+  json = s.encode(runner_read, EncodingFormat::JSON, false);
+  REQUIRE(!json.empty());
+  read_rpc->get_input_node().create_datanode("filter", json);
 
-    json = s.encode(runner_read, EncodingFormat::JSON, false);
-    REQUIRE( !json.empty() );
-    read_rpc->get_input_node().create_datanode("filter", json);
+  auto read_result = (*read_rpc)(provider.get_session());
 
-    auto read_result = (*read_rpc)(provider.get_session());
+  runner = schema.create_datanode("ydktest-sanity:runner", "");
+  number8 = runner.create_datanode("ytypes/built-in-t/number8", "5");
 
-    runner = schema.create_datanode("ydktest-sanity:runner", "");
-    number8 = runner.create_datanode("ytypes/built-in-t/number8", "5");
-
-    json = s.encode(runner, EncodingFormat::JSON, false);
-    CHECK( !json.empty());
-    //call update
-    std::shared_ptr<ydk::path::Rpc> update_rpc { schema.create_rpc("ydk:update") };
-    update_rpc->get_input_node().create_datanode("entity", json);
-    (*update_rpc)(provider.get_session());
+  json = s.encode(runner, EncodingFormat::JSON, false);
+  CHECK(!json.empty());
+  // call update
+  std::shared_ptr<ydk::path::Rpc> update_rpc{schema.create_rpc("ydk:update")};
+  update_rpc->get_input_node().create_datanode("entity", json);
+  (*update_rpc)(provider.get_session());
 }
 
-TEST_CASE("ActionRest")
-{
-    ydk::path::Repository repo{TEST_HOME};
-    ydk::RestconfServiceProvider provider{repo, "localhost", "admin", "admin", 12306, EncodingFormat::JSON};
+TEST_CASE("ActionRest") {
+  ydk::path::Repository repo{TEST_HOME};
+  ydk::RestconfServiceProvider provider{
+      repo, "localhost", "admin", "admin", 12306, EncodingFormat::JSON};
 
-    ydk::path::RootSchemaNode& schema = provider.get_session().get_root_schema();
+  ydk::path::RootSchemaNode& schema = provider.get_session().get_root_schema();
 
-    ydk::path::Codec s{};
+  ydk::path::Codec s{};
 
-    auto & runner = schema.create_datanode("ydktest-sanity-action:data");
-    REQUIRE_THROWS_AS((runner)(provider.get_session()), ydk::YOperationNotSupportedError);
+  auto& runner = schema.create_datanode("ydktest-sanity-action:data");
+  REQUIRE_THROWS_AS((runner)(provider.get_session()),
+                    ydk::YOperationNotSupportedError);
 }

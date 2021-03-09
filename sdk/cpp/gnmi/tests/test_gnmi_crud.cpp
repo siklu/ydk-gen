@@ -21,18 +21,16 @@
 //
 //////////////////////////////////////////////////////////////////
 
-#include "../../core/src/catch.hpp"
-#include "../../core/tests/config.hpp"
-
 #include <ydk/codec_provider.hpp>
 #include <ydk/codec_service.hpp>
-#include <ydk/gnmi_provider.hpp>
 #include <ydk/crud_service.hpp>
 #include <ydk/filters.hpp>
-
+#include <ydk/gnmi_provider.hpp>
 #include <ydk_ydktest/openconfig_bgp.hpp>
 #include <ydk_ydktest/openconfig_interfaces.hpp>
 
+#include "../../core/src/catch.hpp"
+#include "../../core/tests/config.hpp"
 #include "test_utils.hpp"
 
 using namespace std;
@@ -40,180 +38,180 @@ using namespace ydk;
 using namespace path;
 using namespace ydktest;
 
-TEST_CASE("gnmi_crud_single_entity")
-{
-    // session
-    Repository repo{TEST_HOME};
-    string address = "127.0.0.1"; int port = 50051;
+TEST_CASE("gnmi_crud_single_entity") {
+  // session
+  Repository repo{TEST_HOME};
+  string address = "127.0.0.1";
+  int port = 50051;
 
-    gNMIServiceProvider provider{repo, address, port, "admin", "admin"};
-    CrudService crud{};
-    CodecServiceProvider codec_provider{EncodingFormat::JSON};
-    CodecService codec_service{};
+  gNMIServiceProvider provider{repo, address, port, "admin", "admin"};
+  CrudService crud{};
+  CodecServiceProvider codec_provider{EncodingFormat::JSON};
+  CodecService codec_service{};
 
-    auto ifc = openconfig_interfaces::Interfaces::Interface();
-    ifc.name = "Loopback10";
-    ifc.config->name = "Loopback10";
+  auto ifc = openconfig_interfaces::Interfaces::Interface();
+  ifc.name = "Loopback10";
+  ifc.config->name = "Loopback10";
 
-    // Set-replace Request
-    ifc.yfilter = YFilter::replace;
-    auto reply = crud.create(provider, ifc);
-    REQUIRE(reply);
+  // Set-replace Request
+  ifc.yfilter = YFilter::replace;
+  auto reply = crud.create(provider, ifc);
+  REQUIRE(reply);
 
-    ifc.config->description = "Test";
-    ifc.yfilter = YFilter::not_set;
-    reply = crud.update(provider, ifc);
-    REQUIRE(reply);
+  ifc.config->description = "Test";
+  ifc.yfilter = YFilter::not_set;
+  reply = crud.update(provider, ifc);
+  REQUIRE(reply);
 
-    // READ and VERIFY
-    openconfig_interfaces::Interfaces filter{};
-    auto ifc_filter = make_shared<openconfig_interfaces::Interfaces::Interface>();
-    ifc_filter->name = "Loopback10";
-    filter.interface.append(ifc_filter);
+  // READ and VERIFY
+  openconfig_interfaces::Interfaces filter{};
+  auto ifc_filter = make_shared<openconfig_interfaces::Interfaces::Interface>();
+  ifc_filter->name = "Loopback10";
+  filter.interface.append(ifc_filter);
 
-    auto ifc_read = crud.read(provider, *ifc_filter);
-    REQUIRE(ifc_read != nullptr);
-    REQUIRE(*ifc_read == ifc);
+  auto ifc_read = crud.read(provider, *ifc_filter);
+  REQUIRE(ifc_read != nullptr);
+  REQUIRE(*ifc_read == ifc);
 
-    ifc_filter->ignore_validation = true;
-    ifc_read = crud.read_config(provider, *ifc_filter);
-    REQUIRE(ifc_read != nullptr);
-    REQUIRE(*ifc_read == ifc);
+  ifc_filter->ignore_validation = true;
+  ifc_read = crud.read_config(provider, *ifc_filter);
+  REQUIRE(ifc_read != nullptr);
+  REQUIRE(*ifc_read == ifc);
 
-    auto ifc_delete = openconfig_interfaces::Interfaces::Interface();
-    ifc_delete.name = "Loopback10";
-    reply = crud.delete_(provider, ifc_delete);
-    REQUIRE(reply);
+  auto ifc_delete = openconfig_interfaces::Interfaces::Interface();
+  ifc_delete.name = "Loopback10";
+  reply = crud.delete_(provider, ifc_delete);
+  REQUIRE(reply);
 }
 
-TEST_CASE("gnmi_crud_read_leaf")
-{
-    Repository repo{TEST_HOME};
-    string address = "127.0.0.1"; int port = 50051;
+TEST_CASE("gnmi_crud_read_leaf") {
+  Repository repo{TEST_HOME};
+  string address = "127.0.0.1";
+  int port = 50051;
 
-    gNMIServiceProvider provider{repo, address, port, "admin", "admin"};
-    CrudService crud{};
+  gNMIServiceProvider provider{repo, address, port, "admin", "admin"};
+  CrudService crud{};
 
-    build_int_config(provider);
+  build_int_config(provider);
 
-    auto ifc = make_shared<openconfig_interfaces::Interfaces::Interface>();
-    ifc->name = "Loopback10";
-    ifc->config->description.yfilter = YFilter::read;
+  auto ifc = make_shared<openconfig_interfaces::Interfaces::Interface>();
+  ifc->name = "Loopback10";
+  ifc->config->description.yfilter = YFilter::read;
 
-    openconfig_interfaces::Interfaces ifcs{};
-    ifcs.interface.append(ifc);
+  openconfig_interfaces::Interfaces ifcs{};
+  ifcs.interface.append(ifc);
 
-    auto ifc_read = crud.read(provider, *ifc);
-    REQUIRE(ifc_read != nullptr);
-    string expected = R"( <interface>
+  auto ifc_read = crud.read(provider, *ifc);
+  REQUIRE(ifc_read != nullptr);
+  string expected = R"( <interface>
    <name>Loopback10</name>
    <config>
      <description>Test</description>
    </config>
  </interface>
 )";
-    REQUIRE(entity2string(ifc_read, provider.get_session().get_root_schema()) == expected);
+  REQUIRE(entity2string(ifc_read, provider.get_session().get_root_schema()) ==
+          expected);
 
-    delete_int_config(provider);
+  delete_int_config(provider);
 }
 
-TEST_CASE("gnmi_crud_multiple_entities")
-{
-    // session
-    Repository repo{TEST_HOME};
-    string address = "127.0.0.1"; int port = 50051;
+TEST_CASE("gnmi_crud_multiple_entities") {
+  // session
+  Repository repo{TEST_HOME};
+  string address = "127.0.0.1";
+  int port = 50051;
 
-    gNMIServiceProvider provider{repo, address, port, "admin", "admin"};
-    CrudService crud{};
-    CodecServiceProvider codec_provider{EncodingFormat::JSON};
-    CodecService codec_service{};
+  gNMIServiceProvider provider{repo, address, port, "admin", "admin"};
+  CrudService crud{};
+  CodecServiceProvider codec_provider{EncodingFormat::JSON};
+  CodecService codec_service{};
 
-    // Configure Interfaces
-    auto ifc = make_shared<openconfig_interfaces::Interfaces::Interface>();
-    ifc->name = "Loopback10";
-    ifc->config->name = "Loopback10";
-    ifc->config->description = "Test";
+  // Configure Interfaces
+  auto ifc = make_shared<openconfig_interfaces::Interfaces::Interface>();
+  ifc->name = "Loopback10";
+  ifc->config->name = "Loopback10";
+  ifc->config->description = "Test";
 
-    openconfig_interfaces::Interfaces ifcs{};
-    ifcs.interface.append(ifc);
+  openconfig_interfaces::Interfaces ifcs{};
+  ifcs.interface.append(ifc);
 
-    // Configure BGP
-    openconfig_bgp::Bgp bgp{};
-    config_bgp(bgp);
+  // Configure BGP
+  openconfig_bgp::Bgp bgp{};
+  config_bgp(bgp);
 
-    vector<Entity*> create_entities;
-    create_entities.push_back(&bgp);
-    create_entities.push_back(&ifcs);
+  vector<Entity*> create_entities;
+  create_entities.push_back(&bgp);
+  create_entities.push_back(&ifcs);
 
-    // Set-replace Request
-    auto reply = crud.create(provider, create_entities);
-    REQUIRE(reply);
+  // Set-replace Request
+  auto reply = crud.create(provider, create_entities);
+  REQUIRE(reply);
 
-    reply = crud.update(provider, create_entities);
-    REQUIRE(reply);
+  reply = crud.update(provider, create_entities);
+  REQUIRE(reply);
 
-    openconfig_bgp::Bgp bgp_filter{};
-    openconfig_interfaces::Interfaces int_filter{};
-    vector<Entity*> filter;
-    filter.push_back(&bgp_filter);
-    filter.push_back(&int_filter);
+  openconfig_bgp::Bgp bgp_filter{};
+  openconfig_interfaces::Interfaces int_filter{};
+  vector<Entity*> filter;
+  filter.push_back(&bgp_filter);
+  filter.push_back(&int_filter);
 
-    auto read_entities = crud.read(provider, filter);
-    REQUIRE(read_entities.size() == 2);
+  auto read_entities = crud.read(provider, filter);
+  REQUIRE(read_entities.size() == 2);
 
-    read_entities = crud.read_config(provider, filter);
-    REQUIRE(read_entities.size() == 2);
+  read_entities = crud.read_config(provider, filter);
+  REQUIRE(read_entities.size() == 2);
 
-    reply = crud.delete_(provider, create_entities);
-    REQUIRE(reply);
+  reply = crud.delete_(provider, create_entities);
+  REQUIRE(reply);
 }
 
-TEST_CASE("gnmi_crud_multiple_entities_no_validation")
-{
-    // session
-    Repository repo{TEST_HOME};
-    string address = "127.0.0.1"; int port = 50051;
+TEST_CASE("gnmi_crud_multiple_entities_no_validation") {
+  // session
+  Repository repo{TEST_HOME};
+  string address = "127.0.0.1";
+  int port = 50051;
 
-    gNMIServiceProvider provider{repo, address, port, "admin", "admin"};
-    CrudService crud{};
-    CodecServiceProvider codec_provider{EncodingFormat::JSON};
-    CodecService codec_service{};
+  gNMIServiceProvider provider{repo, address, port, "admin", "admin"};
+  CrudService crud{};
+  CodecServiceProvider codec_provider{EncodingFormat::JSON};
+  CodecService codec_service{};
 
-    // Configure Interfaces
-    auto ifc = make_shared<openconfig_interfaces::Interfaces::Interface>();
-    ifc->name = "Loopback10";
-    ifc->config->name = "Loopback10";
-    ifc->config->description = "Test";
+  // Configure Interfaces
+  auto ifc = make_shared<openconfig_interfaces::Interfaces::Interface>();
+  ifc->name = "Loopback10";
+  ifc->config->name = "Loopback10";
+  ifc->config->description = "Test";
 
-    openconfig_interfaces::Interfaces ifcs{};
-    ifcs.interface.append(ifc);
+  openconfig_interfaces::Interfaces ifcs{};
+  ifcs.interface.append(ifc);
 
-    // Configure BGP
-    openconfig_bgp::Bgp bgp{};
-    config_bgp(bgp);
-    bgp.ignore_validation = true;
-    ifcs.ignore_validation = true;
+  // Configure BGP
+  openconfig_bgp::Bgp bgp{};
+  config_bgp(bgp);
+  bgp.ignore_validation = true;
+  ifcs.ignore_validation = true;
 
-    vector<Entity*> create_entities;
-    create_entities.push_back(&bgp);
-    create_entities.push_back(&ifcs);
+  vector<Entity*> create_entities;
+  create_entities.push_back(&bgp);
+  create_entities.push_back(&ifcs);
 
-    // Set Request
-    auto reply = crud.update(provider, create_entities);
-    REQUIRE(reply);
+  // Set Request
+  auto reply = crud.update(provider, create_entities);
+  REQUIRE(reply);
 
-    openconfig_bgp::Bgp bgp_filter{};
-    openconfig_interfaces::Interfaces int_filter{};
-    vector<Entity*> filter;
-    filter.push_back(&bgp_filter);
-    filter.push_back(&int_filter);
-    bgp_filter.ignore_validation = true;
-    int_filter.ignore_validation = true;
+  openconfig_bgp::Bgp bgp_filter{};
+  openconfig_interfaces::Interfaces int_filter{};
+  vector<Entity*> filter;
+  filter.push_back(&bgp_filter);
+  filter.push_back(&int_filter);
+  bgp_filter.ignore_validation = true;
+  int_filter.ignore_validation = true;
 
-    auto read_entities = crud.read(provider, filter);
-    REQUIRE(read_entities.size() == 2);
+  auto read_entities = crud.read(provider, filter);
+  REQUIRE(read_entities.size() == 2);
 
-    reply = crud.delete_(provider, create_entities);
-    REQUIRE(reply);
+  reply = crud.delete_(provider, create_entities);
+  REQUIRE(reply);
 }
-

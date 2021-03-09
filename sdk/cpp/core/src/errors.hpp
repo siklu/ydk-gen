@@ -31,35 +31,30 @@
 #include <exception>
 #include <string>
 
-
 namespace ydk {
 ///
 /// @brief Base class for Y Errors
 ///
 /// The subclasses give a specialized view of the error that has occurred.
 ///
-struct YError : public std::exception
-{
-    YError(const std::string& msg);
+struct YError : public std::exception {
+  YError(const std::string& msg);
 
-    const char* what() const noexcept;
+  const char* what() const noexcept;
 
-    std::string err_msg;
+  std::string err_msg;
 };
 
-struct YClientError : public YError
-{
-    YClientError(const std::string& msg);
+struct YClientError : public YError {
+  YClientError(const std::string& msg);
 };
 
-struct YServiceProviderError : public YError
-{
-    YServiceProviderError(const std::string& msg);
+struct YServiceProviderError : public YError {
+  YServiceProviderError(const std::string& msg);
 };
 
-struct YServiceError : public YError
-{
-    YServiceError(const std::string& msg);
+struct YServiceError : public YError {
+  YServiceError(const std::string& msg);
 };
 
 ///
@@ -69,9 +64,8 @@ struct YServiceError : public YError
 /// Thrown when an operation/service is invoked
 /// on an object that is not in the right state. Use the err_msg for the error.
 ///
-struct YIllegalStateError : public YError
-{
-     YIllegalStateError(const std::string& msg);
+struct YIllegalStateError : public YError {
+  YIllegalStateError(const std::string& msg);
 };
 
 ///
@@ -79,9 +73,8 @@ struct YIllegalStateError : public YError
 ///
 /// Use the err_msg for the error.
 ///
-struct YInvalidArgumentError : public YError
-{
-     YInvalidArgumentError(const std::string& msg);
+struct YInvalidArgumentError : public YError {
+  YInvalidArgumentError(const std::string& msg);
 };
 
 ///
@@ -89,9 +82,8 @@ struct YInvalidArgumentError : public YError
 ///
 /// Thrown when an yfilter is not supported.
 ///
-struct YOperationNotSupportedError : public YError
-{
-    YOperationNotSupportedError(const std::string& msg);
+struct YOperationNotSupportedError : public YError {
+  YOperationNotSupportedError(const std::string& msg);
 };
 
 ///
@@ -99,14 +91,13 @@ struct YOperationNotSupportedError : public YError
 ///
 /// Thrown when a model constraint is violated.
 ///
-struct YModelError : public YError
-{
-    YModelError();
-    YModelError(const std::string& msg);
+struct YModelError : public YError {
+  YModelError();
+  YModelError(const std::string& msg);
 };
 
-std::ostream & operator<<(std::ostream& o, const ydk::YError& e);
-std::ostream & operator<<(std::ostream& o, ydk::YError& e);
-}
+std::ostream& operator<<(std::ostream& o, const ydk::YError& e);
+std::ostream& operator<<(std::ostream& o, ydk::YError& e);
+}  // namespace ydk
 
 #endif /* _EXCEPTION_HPP_ */

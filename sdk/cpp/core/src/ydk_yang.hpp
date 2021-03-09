@@ -29,14 +29,14 @@
 #define YDK_YANG_HPP
 
 namespace ydk {
-    namespace path {
-       extern const char* YDK_MODULE_NAME;
-       extern const char* YDK_MODULE_REVISION;
-       extern const char* YDK_MODULE;
-    }
+namespace path {
+extern const char* YDK_MODULE_NAME;
+extern const char* YDK_MODULE_REVISION;
+extern const char* YDK_MODULE;
+}  // namespace path
 
-    extern const char* IETF_NETCONF_MODULE_NAME;
-    extern const char* IETF_NETCONF_MODULE_REVISION;
-    extern const char* IETF_NETCONF_MODULE;
-}
-#endif //YDK_YANG_H
+extern const char* IETF_NETCONF_MODULE_NAME;
+extern const char* IETF_NETCONF_MODULE_REVISION;
+extern const char* IETF_NETCONF_MODULE;
+}  // namespace ydk
+#endif  // YDK_YANG_H

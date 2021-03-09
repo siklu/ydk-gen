@@ -21,16 +21,15 @@
 //
 //////////////////////////////////////////////////////////////////
 
-#include <iostream>
 #include <spdlog/spdlog.h>
 
-#include "config.hpp"
-#include "catch.hpp"
-#include "test_utils.hpp"
-
+#include <iostream>
 #include <ydk/codec_provider.hpp>
 #include <ydk/codec_service.hpp>
 
+#include "catch.hpp"
+#include "config.hpp"
+#include "test_utils.hpp"
 #include "ydk_ydktest_oc_nis/openconfig_network_instance.hpp"
 
 using namespace std;
@@ -69,13 +68,12 @@ const string nis_xml = R"(
 </network-instances>
 )";
 
+TEST_CASE("decode_nis_part") {
+  CodecServiceProvider codec_provider{EncodingFormat::XML};
+  CodecService codec{};
 
-TEST_CASE( "decode_nis_part" )
-{
-    CodecServiceProvider codec_provider{EncodingFormat::XML};
-    CodecService codec{};
-
-    auto nis_top = make_shared<ydktest_oc_nis::openconfig_network_instance::NetworkInstances>();
-    auto entity = codec.decode(codec_provider, nis_xml, nis_top);
-    REQUIRE(entity != nullptr);
+  auto nis_top = make_shared<
+      ydktest_oc_nis::openconfig_network_instance::NetworkInstances>();
+  auto entity = codec.decode(codec_provider, nis_xml, nis_top);
+  REQUIRE(entity != nullptr);
 }

@@ -26,36 +26,35 @@
 //////////////////////////////////////////////////////////////////
 
 #include <iostream>
+
 #include "types.hpp"
 
 using namespace std;
 
-namespace ydk
-{
-LeafData::LeafData(const string & value, YFilter yfilter, bool is_set, const string & name_space, const string & name_space_prefix)
-    : value(value), name_space(name_space), name_space_prefix(name_space_prefix), yfilter(yfilter), is_set(is_set)
-{
+namespace ydk {
+LeafData::LeafData(const string& value, YFilter yfilter, bool is_set,
+                   const string& name_space, const string& name_space_prefix)
+    : value(value),
+      name_space(name_space),
+      name_space_prefix(name_space_prefix),
+      yfilter(yfilter),
+      is_set(is_set) {}
+
+LeafData::~LeafData() {}
+
+bool LeafData::operator==(LeafData& other) const {
+  return value == other.value && yfilter == other.yfilter &&
+         is_set == other.is_set;
 }
 
-LeafData::~LeafData()
-{
+bool LeafData::operator==(const LeafData& other) const {
+  return value == other.value && yfilter == other.yfilter &&
+         is_set == other.is_set;
 }
 
-bool LeafData::operator == (LeafData & other) const
-{
-    return value == other.value && yfilter == other.yfilter && is_set == other.is_set;
+std::ostream& operator<<(std::ostream& stream, const LeafData& value) {
+  stream << value.value;
+  return stream;
 }
 
-bool LeafData::operator == (const LeafData & other) const
-{
-    return value == other.value && yfilter == other.yfilter && is_set == other.is_set;
-}
-
-std::ostream& operator<< (std::ostream& stream, const LeafData& value)
-{
-    stream<<value.value;
-    return stream;
-}
-
-
-}
+}  // namespace ydk

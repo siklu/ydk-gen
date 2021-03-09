@@ -27,11 +27,8 @@
 
 #include "service_provider.hpp"
 
-
 namespace ydk {
 
-ServiceProvider::~ServiceProvider()
-{
-}
+ServiceProvider::~ServiceProvider() {}
 
-} //namespace ydk
+}  // namespace ydk

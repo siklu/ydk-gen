@@ -25,28 +25,26 @@
 #include "network_topology.hpp"
 #include "types.hpp"
 
+namespace ydk {
+class OpenDaylightCapabilitiesJsonParser {
+ public:
+  OpenDaylightCapabilitiesJsonParser();
+  ~OpenDaylightCapabilitiesJsonParser();
 
-namespace ydk
-{
-class OpenDaylightCapabilitiesJsonParser
-{
-    public:
-        OpenDaylightCapabilitiesJsonParser();
-        ~OpenDaylightCapabilitiesJsonParser();
-
-        std::map<std::string, std::unique_ptr<opendaylight::network_topology::NetworkTopology::Topology::Node> > parse(const std::string & capabilities_xml);
-
+  std::map<std::string, std::unique_ptr<opendaylight::network_topology::
+                                            NetworkTopology::Topology::Node> >
+  parse(const std::string& capabilities_xml);
 };
 
-class OpenDaylightCapabilitiesParser : public CapabilitiesParser
-{
-    public:
-        OpenDaylightCapabilitiesParser();
-        ~OpenDaylightCapabilitiesParser();
+class OpenDaylightCapabilitiesParser : public CapabilitiesParser {
+ public:
+  OpenDaylightCapabilitiesParser();
+  ~OpenDaylightCapabilitiesParser();
 
-        std::vector<path::Capability> parse(std::vector<std::string> & capabilities) const;
+  std::vector<path::Capability> parse(
+      std::vector<std::string>& capabilities) const;
 };
 
-}
+}  // namespace ydk
 
 #endif /* _OPENDAYLIGHT_PARSER_H_ */

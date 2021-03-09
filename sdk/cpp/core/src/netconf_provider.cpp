@@ -21,184 +21,167 @@
 //
 //////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <sstream>
-#include <memory>
+#include "netconf_provider.hpp"
+
 #include <libyang/libyang.h>
 
+#include <iostream>
+#include <memory>
+#include <sstream>
+
+#include "common_utilities.hpp"
 #include "entity_data_node_walker.hpp"
 #include "errors.hpp"
 #include "ietf_parser.hpp"
-#include "netconf_provider.hpp"
+#include "logger.hpp"
 #include "netconf_service.hpp"
 #include "types.hpp"
 #include "ydk_yang.hpp"
-#include "logger.hpp"
-#include "common_utilities.hpp"
 
 using namespace std;
 using namespace ydk;
 
-namespace ydk
-{
+namespace ydk {
 
 NetconfServiceProvider::NetconfServiceProvider(const string& address,
                                                const string& username,
-                                               const string& password,
-                                               int port,
+                                               const string& password, int port,
                                                const string& protocol,
                                                bool on_demand,
-                                               bool common_cache,
-                                               int timeout)
-    : session{address, username, password, port, protocol, on_demand, common_cache, timeout}
-{
-}
+                                               bool common_cache, int timeout)
+    : session{address,  username,  password,     port,
+              protocol, on_demand, common_cache, timeout} {}
 
-NetconfServiceProvider::NetconfServiceProvider(path::Repository & repo,
+NetconfServiceProvider::NetconfServiceProvider(path::Repository& repo,
                                                const string& address,
                                                const string& username,
-                                               const string& password,
-                                               int port,
+                                               const string& password, int port,
                                                const string& protocol,
-                                               bool on_demand,
-                                               int timeout)
-    : session{repo, address, username, password, port, protocol, on_demand, timeout}
-{
-}
+                                               bool on_demand, int timeout)
+    : session{repo, address,  username,  password,
+              port, protocol, on_demand, timeout} {}
 
-NetconfServiceProvider::NetconfServiceProvider(path::Repository & repo,
-                                               const string& address,
-                                               const string& username,
-                                               const string& private_key_path,
-                                               const string& public_key_path,
-                                               int port,
-                                               bool on_demand,
-                                               int timeout)
-    : session{
-        repo, address, username, private_key_path, public_key_path,
-        port, on_demand, timeout }
-{
-}
+NetconfServiceProvider::NetconfServiceProvider(
+    path::Repository& repo, const string& address, const string& username,
+    const string& private_key_path, const string& public_key_path, int port,
+    bool on_demand, int timeout)
+    : session{repo, address,   username, private_key_path, public_key_path,
+              port, on_demand, timeout} {}
 
 NetconfServiceProvider::NetconfServiceProvider(const string& address,
                                                const string& username,
                                                const string& private_key_path,
                                                const string& public_key_path,
-                                               int port,
-                                               bool on_demand,
-                                               bool common_cache,
-                                               int timeout)
-    : session{ 
-        address, username, private_key_path, public_key_path,
-        port, on_demand, common_cache, timeout }
-{
+                                               int port, bool on_demand,
+                                               bool common_cache, int timeout)
+    : session{address, username,  private_key_path, public_key_path,
+              port,    on_demand, common_cache,     timeout} {}
+
+NetconfServiceProvider::~NetconfServiceProvider() {}
+
+EncodingFormat NetconfServiceProvider::get_encoding() const {
+  return EncodingFormat::XML;
 }
 
-NetconfServiceProvider::~NetconfServiceProvider()
-{
+const path::Session& NetconfServiceProvider::get_session() const {
+  return session;
 }
 
-EncodingFormat NetconfServiceProvider::get_encoding() const
-{
-    return EncodingFormat::XML;
+std::vector<std::string> NetconfServiceProvider::get_capabilities() const {
+  return session.get_capabilities();
 }
 
-const path::Session& NetconfServiceProvider::get_session() const
-{
-    return session;
+static bool is_candidate_supported(vector<string> capabilities) {
+  const char* CANDIDATE = "urn:ietf:params:netconf:capability:candidate:1.0";
+  if (find(capabilities.begin(), capabilities.end(), CANDIDATE) !=
+      capabilities.end()) {
+    // candidate is supported
+    return true;
+  }
+  return false;
 }
 
-std::vector<std::string> NetconfServiceProvider::get_capabilities() const
-{
-    return session.get_capabilities();
-}
-
-static bool is_candidate_supported(vector<string> capabilities)
-{
-	const char* CANDIDATE = "urn:ietf:params:netconf:capability:candidate:1.0";
-	if(find(capabilities.begin(), capabilities.end(), CANDIDATE) != capabilities.end())
-    {
-        //candidate is supported
-        return true;
+shared_ptr<Entity> NetconfServiceProvider::execute_operation(
+    const string& operation, Entity& entity, map<string, string> params) {
+  NetconfService ns;
+  if (operation == "create" || operation == "update" || operation == "delete") {
+    YFilter original_yfilter = entity.yfilter;
+    if (original_yfilter == YFilter::not_set) {
+      entity.yfilter =
+          (operation == "delete") ? YFilter::delete_ : YFilter::merge;
     }
-    return false;
+    DataStore target = (is_candidate_supported(session.get_capabilities()))
+                           ? DataStore::candidate
+                           : DataStore::running;
+    if (ns.edit_config(*this, target, entity)) {
+      if (target == DataStore::candidate) ns.commit(*this);
+    } else {
+      ns.discard_changes(*this);
+      YLOG_ERROR(
+          "NetconfServiceProvider::execute_operation: Operation '{}' failed; "
+          "discarding changes.",
+          operation);
+      throw(YServiceProviderError("NetconfServiceProvider: Operation failed"));
+    }
+    entity.yfilter = original_yfilter;
+  } else if (operation == "read") {
+    if (params["mode"] == "config")
+      return ns.get_config(*this, DataStore::running, entity);
+    else
+      return ns.get(*this, entity);
+  } else {
+    YLOG_ERROR(
+        "NetconfServiceProvider::execute_operation: Operation '{}' is not "
+        "supported",
+        operation);
+    throw(YServiceProviderError(
+        "NetconfServiceProvider: Requested operation is not supported"));
+  }
+  return nullptr;
 }
 
-shared_ptr<Entity>
-NetconfServiceProvider::execute_operation(const string & operation, Entity & entity, map<string,string> params)
-{
-    NetconfService ns;
-    if (operation == "create" || operation == "update" || operation == "delete") {
-        YFilter original_yfilter = entity.yfilter;
-        if (original_yfilter == YFilter::not_set) {
-            entity.yfilter = (operation == "delete") ? YFilter::delete_ : YFilter::merge;
-        }
-        DataStore target = (is_candidate_supported(session.get_capabilities())) ?
-                           DataStore::candidate : DataStore::running;
-        if (ns.edit_config(*this, target, entity)) {
-            if (target == DataStore::candidate)
-                ns.commit(*this);
-        }
-        else {
-            ns.discard_changes(*this);
-            YLOG_ERROR("NetconfServiceProvider::execute_operation: Operation '{}' failed; discarding changes.", operation);
-            throw(YServiceProviderError("NetconfServiceProvider: Operation failed"));
-        }
-        entity.yfilter = original_yfilter;
+vector<shared_ptr<Entity>> NetconfServiceProvider::execute_operation(
+    const string& operation, vector<Entity*> entity_list,
+    map<string, string> params) {
+  vector<shared_ptr<Entity>> result;
+  NetconfService ns;
+  if (operation == "create" || operation == "update" || operation == "delete") {
+    YFilter original_yfilters[entity_list.size()];
+    size_t item = 0;
+    for (auto entity : entity_list) {
+      original_yfilters[item++] = entity->yfilter;
+      if (entity->yfilter == YFilter::not_set) {
+        entity->yfilter =
+            (operation == "delete") ? YFilter::delete_ : YFilter::merge;
+      }
     }
-    else if (operation == "read") {
-        if (params["mode"] == "config")
-            return ns.get_config(*this, DataStore::running, entity);
-        else
-            return ns.get(*this, entity);
+    DataStore target = (is_candidate_supported(session.get_capabilities()))
+                           ? DataStore::candidate
+                           : DataStore::running;
+    if (ns.edit_config(*this, target, entity_list)) {
+      if (target == DataStore::candidate) ns.commit(*this);
+    } else {
+      ns.discard_changes(*this);
     }
-    else {
-        YLOG_ERROR("NetconfServiceProvider::execute_operation: Operation '{}' is not supported", operation);
-        throw(YServiceProviderError("NetconfServiceProvider: Requested operation is not supported"));
+    // Restore original yfilter setting
+    item = 0;
+    for (auto entity : entity_list) {
+      entity->yfilter = original_yfilters[item++];
     }
-    return nullptr;
+  } else if (operation == "read") {
+    if (params["mode"] == "config")
+      return ns.get_config(*this, DataStore::running, entity_list);
+    else
+      return ns.get(*this, entity_list);
+  } else {
+    YLOG_ERROR(
+        "NetconfServiceProvider::execute_operation: Operation '{}' is not "
+        "supported",
+        operation);
+    throw(YServiceProviderError(
+        "NetconfServiceProvider: Requested operation is not supported"));
+  }
+  return result;
 }
 
-vector<shared_ptr<Entity>>
-NetconfServiceProvider::execute_operation(const string & operation, vector<Entity*> entity_list, map<string,string> params)
-{
-    vector<shared_ptr<Entity>> result;
-    NetconfService ns;
-    if (operation == "create" || operation == "update" || operation == "delete") {
-        YFilter original_yfilters[entity_list.size()];
-        size_t item = 0;
-        for (auto entity : entity_list) {
-            original_yfilters[item++] = entity->yfilter;
-            if (entity->yfilter == YFilter::not_set) {
-                entity->yfilter = (operation == "delete") ? YFilter::delete_ : YFilter::merge;
-            }
-        }
-        DataStore target = (is_candidate_supported(session.get_capabilities())) ?
-                           DataStore::candidate : DataStore::running;
-        if (ns.edit_config(*this, target, entity_list)) {
-            if (target == DataStore::candidate)
-                ns.commit(*this);
-        }
-        else {
-            ns.discard_changes(*this);
-        }
-        // Restore original yfilter setting
-        item = 0;
-        for (auto entity : entity_list) {
-            entity->yfilter = original_yfilters[item++];
-        }
-    }
-    else if (operation == "read") {
-        if (params["mode"] == "config")
-            return ns.get_config(*this, DataStore::running, entity_list);
-        else
-            return ns.get(*this, entity_list);
-    }
-    else {
-        YLOG_ERROR("NetconfServiceProvider::execute_operation: Operation '{}' is not supported", operation);
-        throw(YServiceProviderError("NetconfServiceProvider: Requested operation is not supported"));
-    }
-    return result;
-}
-
-}
+}  // namespace ydk

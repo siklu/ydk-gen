@@ -22,79 +22,66 @@
 //////////////////////////////////////////////////////////////////
 
 #include <iostream>
+
 #include "../src/netconf_model_provider.hpp"
-#include "../src/path_api.hpp"
 #include "../src/path/path_private.hpp"
-#include "config.hpp"
+#include "../src/path_api.hpp"
 #include "catch.hpp"
 #include "common_utilities.hpp"
+#include "config.hpp"
 
-TEST_CASE( "test_segmentalize"  )
-{
-    std::string test_string = "Cisco-IOS-XR-clns-isis-cfg:isis/instances/instance/interfaces[active='act'][interface-name='GigabitEthernet0/0/0/0']";
-    std::vector<std::string> segments = ydk::path::segmentalize(test_string);
-    std::vector<std::string> expected {"Cisco-IOS-XR-clns-isis-cfg:isis", "instances", "instance", "interfaces[active='act'][interface-name='GigabitEthernet0/0/0/0']"};
+TEST_CASE("test_segmentalize") {
+  std::string test_string =
+      "Cisco-IOS-XR-clns-isis-cfg:isis/instances/instance/"
+      "interfaces[active='act'][interface-name='GigabitEthernet0/0/0/0']";
+  std::vector<std::string> segments = ydk::path::segmentalize(test_string);
+  std::vector<std::string> expected{
+      "Cisco-IOS-XR-clns-isis-cfg:isis", "instances", "instance",
+      "interfaces[active='act'][interface-name='GigabitEthernet0/0/0/0']"};
 
-    REQUIRE(segments==expected);
+  REQUIRE(segments == expected);
 }
 
-TEST_CASE( "test_segmentalize_relative_path"  )
-{
-    std::string test_string = "interface-configuration[active='act'][interface-name='GigabitEthernet0/0/0/0']";
-    std::vector<std::string> segments = ydk::path::segmentalize(test_string);
-    std::vector<std::string> expected {"interface-configuration[active='act'][interface-name='GigabitEthernet0/0/0/0']"};
+TEST_CASE("test_segmentalize_relative_path") {
+  std::string test_string =
+      "interface-configuration[active='act'][interface-name='GigabitEthernet0/"
+      "0/0/0']";
+  std::vector<std::string> segments = ydk::path::segmentalize(test_string);
+  std::vector<std::string> expected{
+      "interface-configuration[active='act'][interface-name='GigabitEthernet0/"
+      "0/0/0']"};
 
-    REQUIRE(segments == expected);
+  REQUIRE(segments == expected);
 }
 
-TEST_CASE( "test_replace_xml_escape_sequences"  )
-{
-    std::string source   = R"(Testing: &lt;tag&gt;; ampersand - &amp;; &quot;quotes&quot;; huawei end-of-line&#13;)";
-    std::string expected = R"(Testing: <tag>; ampersand - &; "quotes"; huawei end-of-line)";
+TEST_CASE("test_replace_xml_escape_sequences") {
+  std::string source =
+      R"(Testing: &lt;tag&gt;; ampersand - &amp;; &quot;quotes&quot;; huawei end-of-line&#13;)";
+  std::string expected =
+      R"(Testing: <tag>; ampersand - &; "quotes"; huawei end-of-line)";
 
-    REQUIRE( ydk::has_xml_escape_sequences(source) != std::string::npos);
-    REQUIRE( ydk::has_xml_escape_sequences(expected) == std::string::npos);
+  REQUIRE(ydk::has_xml_escape_sequences(source) != std::string::npos);
+  REQUIRE(ydk::has_xml_escape_sequences(expected) == std::string::npos);
 
-    std::string converted = ydk::replace_xml_escape_sequences(source);
+  std::string converted = ydk::replace_xml_escape_sequences(source);
 
-    REQUIRE(converted == expected);
+  REQUIRE(converted == expected);
 }
 
-class TestClient: public ydk::NetconfClient
-{
-public:
-    TestClient()
-    {
-    }
-    ~TestClient()
-    {
-    }
-    void perform_session_check(const std::string & message)
-    {
-        return;
-    }
-    int connect()
-    {
-        return 0;
-    }
-    std::string execute_payload(const std::string & payload)
-    {
-        return payload;
-    }
-    std::vector<std::string> get_capabilities()
-    {
-        return {};
-    }
-    std::string get_hostname_port()
-    {
-        return "";
-    }
+class TestClient : public ydk::NetconfClient {
+ public:
+  TestClient() {}
+  ~TestClient() {}
+  void perform_session_check(const std::string& message) { return; }
+  int connect() { return 0; }
+  std::string execute_payload(const std::string& payload) { return payload; }
+  std::vector<std::string> get_capabilities() { return {}; }
+  std::string get_hostname_port() { return ""; }
 };
 
-TEST_CASE("static_model_provider")
-{
-    TestClient t{};
-    ydk::path::StaticModelProvider s{t};
-    REQUIRE_NOTHROW(s.get_model("","",ydk::path::ModelProvider::Format::YANG));
-    REQUIRE_NOTHROW(s.get_hostname_port());
+TEST_CASE("static_model_provider") {
+  TestClient t{};
+  ydk::path::StaticModelProvider s{t};
+  REQUIRE_NOTHROW(s.get_model("", "", ydk::path::ModelProvider::Format::YANG));
+  REQUIRE_NOTHROW(s.get_hostname_port());
 }

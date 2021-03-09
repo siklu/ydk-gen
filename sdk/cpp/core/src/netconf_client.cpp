@@ -23,10 +23,9 @@
 
 #include "netconf_client.hpp"
 
-namespace ydk
-{
+namespace ydk {
 
 NetconfClient::NetconfClient() {}
 NetconfClient::~NetconfClient() {}
 
-}
+}  // namespace ydk
