@@ -25,8 +25,6 @@
 
 #include <unordered_map>
 
-#include "path_api.hpp"
-
 namespace ydk {
 
 std::unordered_map<std::string, path::Capability>

@@ -36,9 +36,6 @@
 #include "errors.hpp"
 #include "logger.hpp"
 #include "netconf_provider.hpp"
-#include "opendaylight_provider.hpp"
-#include "path/path_private.hpp"
-#include "path_api.hpp"
 #include "restconf_provider.hpp"
 #include "types.hpp"
 

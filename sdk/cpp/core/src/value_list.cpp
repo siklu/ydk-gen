@@ -28,7 +28,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "errors.hpp"
 #include "logger.hpp"
 #include "types.hpp"
 
@@ -203,7 +202,7 @@ bool YLeafList::operator==(const YLeafList& other) const {
 
 YLeaf& YLeafList::operator[](size_t key) {
   if (key >= values.size()) {
-    throw(YInvalidArgumentError{"List index out of range"});
+    throw(std::runtime_error{"List index out of range"});
   }
   return values[key];
 }
@@ -349,7 +348,7 @@ shared_ptr<Entity> YList::pop(const std::size_t item) {
   } else {
     YLOG_ERROR("Index value {} is out of range [0,{}]", item,
                key_vector.size());
-    throw(YInvalidArgumentError{"Index value is out of range"});
+    throw(std::runtime_error{"Index value is out of range"});
   }
   return nullptr;
 }

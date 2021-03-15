@@ -28,7 +28,6 @@
 #include <vector>
 
 #include "logger.hpp"
-#include "service_provider.hpp"
 
 namespace ydk {
 std::string trim(const std::string& str);

@@ -133,53 +133,14 @@ endif()
 # Set LibYDK variables
 set(libydk_src
     src/bits.cpp
-    src/codec_provider.cpp
-    src/codec_service.cpp
     src/capabilities_parser.cpp
-    src/common_utilities.cpp
-    src/crud_service.cpp
     src/entity.cpp
-    src/entity_data_node_walker.cpp
-    src/entity_lookup.cpp
-    src/entity_util.cpp
-    src/errors.cpp
-    src/executor_service.cpp
-    src/ietf_parser.cpp
-    src/leaf_data.cpp
-    src/logging_callback.cpp
-    src/service_provider.cpp
-    src/netconf_client.cpp
-#    src/netconf_ssh_client.cpp
-#    src/netconf_tcp_client.cpp
-    src/netconf_provider.cpp
-    src/netconf_service.cpp
-    src/netconf_session.cpp
-#    src/network_topology.cpp
-#    src/opendaylight_parser.cpp
-#    src/opendaylight_provider.cpp
-    src/restconf_client.cpp
-    src/restconf_provider.cpp
-    src/restconf_session.cpp
-    src/validation_service.cpp
+ #   src/entity_lookup.cpp
+ #   src/entity_util.cpp
     src/value.cpp
     src/value_list.cpp
-    src/json_subtree_codec.cpp
     src/xml_subtree_codec.cpp
-    src/xml_util.cpp
-    src/ydk_operation.cpp
-    src/ydk.cpp
-    src/ydk_yang.cpp
-    src/path/annotation.cpp
-    src/path/capability.cpp
-    src/path/data_node.cpp
-    src/netconf_model_provider.cpp
-    src/path/path.cpp
-    src/path/repository.cpp
-    src/path/root_data_node.cpp
-    src/path/root_schema_node.cpp
-    src/path/rpc.cpp
-    src/path/schema_node.cpp
-    src/path/statement.cpp)
+    src/xml_util.cpp)
 
 
 file(GLOB SPDLOG_HEADERS src/spdlog/*.h)
@@ -197,32 +158,14 @@ set(spdlog_sinks_include_location include/spdlog/sinks)
 set(libydk_install_headers
     src/netconf_model_provider.hpp
     src/capabilities_parser.hpp
-    src/codec_provider.hpp
-    src/codec_service.hpp
     src/common_utilities.hpp
-    src/crud_service.hpp
     src/entity_data_node_walker.hpp
     src/entity_lookup.hpp
     src/entity_util.hpp
-    src/errors.hpp
     src/executor_service.hpp
     src/filters.hpp
-    src/ietf_parser.hpp
-    src/json.hpp
     src/logger.hpp
-    src/logging_callback.hpp
-    src/netconf_client.hpp
-    src/netconf_provider.hpp
-    src/netconf_service.hpp
-    src/network_topology.hpp
-    src/opendaylight_parser.hpp
-    src/opendaylight_provider.hpp
-    src/path_api.hpp
-    src/restconf_client.hpp
-    src/restconf_provider.hpp
-    src/service_provider.hpp
     src/types.hpp
-    src/json_subtree_codec.hpp
     src/xml_subtree_codec.hpp
     src/xml_util.hpp
     src/validation_service.hpp
@@ -233,16 +176,12 @@ set(libyang_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/src/project_lib
 set(libyang_build_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/src/project_libyang-build)
 
 # Find dependent libraries
-find_library(curl_location curl)
-find_library(ssh_threads_location ssh_threads)
 find_library(xslt_location xslt)
 find_library(pcre_location pcre)
 find_library(pthread_location pthread)
 find_library(dl_location dl)
 find_library(m_location m)
 find_package(LibXml2 REQUIRED)
-find_package(LibSSH REQUIRED)
-find_library(LIBYANG libyang)
 
 
 include_directories(
@@ -261,14 +200,9 @@ add_library(ydk STATIC ${libydk_src})
 
 target_link_libraries(ydk
     ${LIBXML2_LIBRARIES}
-    ${LIBSSH_LIBRARIES}
-    ${curl_location}
     ${pcre_location}
     ${xslt_location}
     ${pthread_location}
-    ${LIBYANG_LIBRARIES}
-    libnetconf
-    libyang
     -rdynamic
     ${dl_location}
 )
@@ -306,7 +240,7 @@ add_custom_target(cclean
     COMMAND rm -rf Makefile Doxyfile
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-if(ENABLE_BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
-endif(ENABLE_BUILD_TESTS)
+#if(ENABLE_BUILD_TESTS)
+#    enable_testing()
+#    add_subdirectory(tests)
+#endif(ENABLE_BUILD_TESTS)

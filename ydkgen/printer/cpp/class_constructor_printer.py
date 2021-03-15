@@ -21,7 +21,7 @@ source_printer.py
 
 """
 from ydkgen.api_model import Bits, Class, DataType, Enum
-from ydkgen.common import get_module_name, has_list_ancestor, is_top_level_class
+from ydkgen.common import get_module_name, has_list_ancestor, is_top_level_class, clazz_yang_name
 
 
 def get_type_name(prop_type):
@@ -51,7 +51,7 @@ def get_type_name(prop_type):
 def get_yang_name_for_leaf(clazz, prop):
     if all((prop.stmt.top.arg != clazz.stmt.top.arg,
             hasattr(prop.stmt.top, 'i_aug_targets') and
-                    clazz.stmt.top in prop.stmt.top.i_aug_targets)):
+            clazz.stmt.top in prop.stmt.top.i_aug_targets)):
         name = ':'.join([prop.stmt.top.arg, prop.stmt.arg])
     else:
         name = prop.stmt.arg
@@ -74,7 +74,8 @@ class ClassConstructorPrinter(object):
         if clazz.is_identity():
             module_name = get_module_name(clazz.stmt)
             namespace = self.module_namespace_lookup[module_name]
-            self.ctx.writeln(' : Identity("%s", "%s", "%s:%s")' % (namespace, module_name, module_name, clazz.stmt.arg))
+            self.ctx.writeln(' : Identity("%s", "%s", "%s:%s")' % (
+                namespace, module_name, module_name, clazz.stmt.arg))
         else:
             self._print_class_inits(clazz, leafs, children)
         self.ctx.lvl_dec()
@@ -84,8 +85,10 @@ class ClassConstructorPrinter(object):
     def _print_class_constructor_body(self, clazz, leafs, children):
         self._print_init_children(children)
         if not clazz.is_identity():
-            self.ctx.writeln('yang_name = "%s"; yang_parent_name = "%s"; is_top_level_class = %s; has_list_ancestor = %s; %s' \
-                             % (clazz.stmt.arg, clazz.owner.stmt.arg, ('true' if is_top_level_class(clazz) else 'false'),
+            yang_name = clazz_yang_name(clazz)
+            yang_parent_name = clazz_yang_name(clazz.owner)
+            self.ctx.writeln('yang_name = "%s"; yang_parent_name = "%s"; is_top_level_class = %s; has_list_ancestor = %s; %s'
+                             % (yang_name, yang_parent_name, ('true' if is_top_level_class(clazz) else 'false'),
                                 ('true' if has_list_ancestor(clazz) else 'false'),
                                 ('is_presence_container = true;' if clazz.stmt.search_one('presence') is not None else '')))
 
@@ -113,7 +116,7 @@ class ClassConstructorPrinter(object):
                 else:
                     leaf_name = prop.stmt.arg
                 self.ctx.writeln('%s{YType::%s, "%s"}%s' % (prop.name,
-                            get_type_name(prop.property_type), leaf_name, (',' if index != len(leafs) - 1 else '')))
+                                                            get_type_name(prop.property_type), leaf_name, (',' if index != len(leafs) - 1 else '')))
                 index += 1
 
         init_stmts = []
@@ -126,12 +129,15 @@ class ClassConstructorPrinter(object):
                         if key_str.__len__() > 0:
                             key_str += ', '
                         key_str += '"%s"' % key.stmt.arg
-                    init_stmts.append('%s(this, {%s})' % (child.name,  key_str))
+                    init_stmts.append(
+                        '%s(this, {%s})' % (child.name,  key_str))
             else:
                 if (child.stmt.search_one('presence') is None):
-                    init_stmts.append('%s(std::make_shared<%s>())' % (child.name, child.property_type.qualified_cpp_name()))
+                    init_stmts.append('%s(std::make_shared<%s>())' % (
+                        child.name, child.property_type.qualified_cpp_name()))
                 else:
-                    init_stmts.append('%s(nullptr) // presence node' % (child.name))
+                    init_stmts.append(
+                        '%s(nullptr) // presence node' % (child.name))
         if len(init_stmts) > 0:
             if len(leafs) == 0:
                 self.ctx.writeln(':')

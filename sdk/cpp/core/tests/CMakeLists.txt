@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.0.0)
 cmake_policy(SET CMP0048 NEW)
 set(YDK_UNITTEST_TARGET_NAME "ydk_core_test")
 
-set(core_tests_src bgptest.cpp
-               core_test.cpp
-               test_codec.cpp
+set(core_tests_src 
+            #   core_test.cpp
+            #   test_codec.cpp
                test_entity.cpp
                test_value.cpp
                test_value_list.cpp

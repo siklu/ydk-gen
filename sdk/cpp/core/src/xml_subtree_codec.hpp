@@ -23,17 +23,13 @@
 
 #include <iostream>
 
-#include "path_api.hpp"
 #include "types.hpp"
 
 namespace ydk {
 class XmlSubtreeCodec {
  public:
-  XmlSubtreeCodec();
-  ~XmlSubtreeCodec();
-
-  std::string encode(Entity& entity, path::RootSchemaNode& root_schema);
-  std::shared_ptr<Entity> decode(const std::string& payload,
-                                 std::shared_ptr<Entity> entity);
+  static std::string Encode(const Entity& entity);
+  static void Decode(const std::string& payload,
+                     std::shared_ptr<Entity> entity);
 };
 }  // namespace ydk

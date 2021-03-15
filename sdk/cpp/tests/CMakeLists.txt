@@ -9,29 +9,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
 set(bundle_tests_src
         main.cpp
         test_c_api.cpp
-        test_crud.cpp
-        test_entity_diff.cpp
-        test_errors.cpp
-        test_executor_service.cpp
-        test_netconf_operations.cpp
-        test_netconf_provider.cpp
-        test_netconf_service.cpp
-        test_netconf_ssh_client.cpp
-#        test_netconf_tcp_client.cpp
-        test_on_demand_loading.cpp
-        test_opendaylight.cpp
-        test_path_api.cpp
-        test_restconf_client.cpp
-        test_restconf_provider.cpp
-        test_sanity_codec.cpp
         test_sanity_levels.cpp
         test_sanity_types.cpp
-        test_json_codec.cpp
         test_xml_subtree.cpp
         testsanitynctest.cpp
-        testsanityvalidationtest.cpp
         test_utils.cpp
-        test_oc_nis.cpp
         )
 
 find_library(xml2_location xml2)

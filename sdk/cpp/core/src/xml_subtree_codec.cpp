@@ -28,7 +28,7 @@
 
 #include <unordered_map>
 
-#include "entity_lookup.hpp"
+// #include "entity_lookup.hpp"
 #include "entity_util.hpp"
 #include "logger.hpp"
 #include "xml_util.hpp"
@@ -43,21 +43,15 @@ struct XmlDocDeleter {
 static void decode_xml(xmlDocPtr doc, xmlNodePtr root, Entity &entity,
                        Entity *parent, const string &leaf_name);
 
-static void walk_children(Entity &entity, xmlNodePtr root_node);
+static void walk_children(const Entity &entity, xmlNodePtr root_node);
 static void populate_xml_node(Entity &entity, xmlNodePtr xml_node);
-static void populate_xml_node_contents(Entity &entity, EntityPath &path,
+static void populate_xml_node_contents(const Entity &entity, EntityPath &path,
                                        xmlNodePtr xml_node);
-
-XmlSubtreeCodec::XmlSubtreeCodec() {}
-
-XmlSubtreeCodec::~XmlSubtreeCodec() {}
 
 //////////////////////////////////////////////////////////////////
 // XmlSubtreeCodec::encode
 //////////////////////////////////////////////////////////////////
-std::string XmlSubtreeCodec::encode(Entity &entity,
-                                    path::RootSchemaNode &root_schema) {
-  (void)root_schema;
+std::string XmlSubtreeCodec::Encode(const Entity &entity) {
   EntityPath root_path = get_entity_path(entity, nullptr);
   std::unique_ptr<xmlDoc, XmlDocDeleter> doc(xmlNewDoc(to_xmlchar("1.0")));
   xmlNodePtr root_node = xmlNewNode(NULL, to_xmlchar(entity.yang_name));
@@ -73,7 +67,7 @@ std::string XmlSubtreeCodec::encode(Entity &entity,
   return xml_str;
 }
 
-static void walk_children(Entity &entity, xmlNodePtr xml_node) {
+static void walk_children(const Entity &entity, xmlNodePtr xml_node) {
   std::map<string, shared_ptr<Entity>> children = entity.get_children();
   YLOG_DEBUG("XMLCodec: Children count for: {} : {}",
              get_entity_path(entity, entity.parent).path, children.size());
@@ -96,7 +90,8 @@ static void set_operation_from_yfilter(YFilter yfilter, xmlNodePtr xml_node) {
   }
 }
 
-static xmlNodePtr create_and_populate_xml_node(Entity &entity, YFilter yfilter,
+static xmlNodePtr create_and_populate_xml_node(const Entity &entity,
+                                               YFilter yfilter,
                                                xmlNodePtr parent_xml_node,
                                                const xmlChar *content,
                                                const std::string &yang_name) {
@@ -149,7 +144,7 @@ static void set_prefixed_namespace_from_leafdata(LeafData &leaf_data,
   }
 }
 
-static void populate_xml_node_contents(Entity &entity, EntityPath &path,
+static void populate_xml_node_contents(const Entity &entity, EntityPath &path,
                                        xmlNodePtr xml_node) {
   YLOG_DEBUG("XMLCodec: Leaf count: {}", path.value_paths.size());
   for (const std::pair<std::string, LeafData> &name_value : path.value_paths) {
@@ -174,8 +169,8 @@ static void populate_xml_node_contents(Entity &entity, EntityPath &path,
 //////////////////////////////////////////////////////////////////
 // XmlSubtreeCodec::decode
 //////////////////////////////////////////////////////////////////
-std::shared_ptr<Entity> XmlSubtreeCodec::decode(
-    const std::string &payload, std::shared_ptr<Entity> entity) {
+void XmlSubtreeCodec::Decode(const std::string &payload,
+                             std::shared_ptr<Entity> entity) {
   if (entity->get_augment_capabilities_function()) {
     entity->get_augment_capabilities_function()();
   }
@@ -187,10 +182,9 @@ std::shared_ptr<Entity> XmlSubtreeCodec::decode(
   if (entity->yang_name != to_string(root->name)) {
     YLOG_ERROR("XMLCodec: Top entity '{}' does not match the payload",
                entity->yang_name);
-    throw YServiceProviderError{"Top entity does not match the payload"};
+    throw std::runtime_error{"Top entity does not match the payload"};
   }
   decode_xml(doc.get(), root->children, *entity, nullptr, "");
-  return entity;
 }
 
 static void check_and_set_leaf(Entity &entity, Entity *parent,
@@ -261,7 +255,7 @@ static void check_payload_to_raise_exception(Entity &entity,
     os << "XMLCodec: Wrong payload! No element '" << current_node_name
        << "' found in '" << entity.yang_name << "'";
     YLOG_ERROR(os.str().c_str());
-    throw YServiceProviderError{os.str()};
+    throw std::runtime_error{os.str()};
   }
 }
 
@@ -271,20 +265,21 @@ static void check_and_set_node(Entity &entity, Entity *parent,
              to_string(xml_node->name), entity.yang_name);
   check_payload_to_raise_exception(entity, xml_node->name);
   auto child_name = to_string(xml_node->name);
-  if (xml_node->ns->href && xml_node->parent && xml_node->parent->ns->href) {
-    auto child_ns = to_string(xml_node->ns->href);
-    if (child_ns != to_string(xml_node->parent->ns->href)) {
-      string module_name;
-      auto capabilities_lookup_table = get_global_capabilities_lookup_tables();
-      auto it = capabilities_lookup_table.find(child_ns);
-      if (it != capabilities_lookup_table.end()) {
-        module_name = it->second.module;
-      } else {
-        module_name = child_ns.substr(child_ns.rfind("/") + 1);
-      }
-      child_name = module_name + ":" + child_name;
-    }
-  }
+  // if (xml_node->ns->href && xml_node->parent && xml_node->parent->ns->href) {
+  //   auto child_ns = to_string(xml_node->ns->href);
+  //   if (child_ns != to_string(xml_node->parent->ns->href)) {
+  //     string module_name;
+  //     auto capabilities_lookup_table =
+  //     get_global_capabilities_lookup_tables(); auto it =
+  //     capabilities_lookup_table.find(child_ns); if (it !=
+  //     capabilities_lookup_table.end()) {
+  //       module_name = it->second.module;
+  //     } else {
+  //       module_name = child_ns.substr(child_ns.rfind("/") + 1);
+  //     }
+  //     child_name = module_name + ":" + child_name;
+  //   }
+  // }
   auto child = entity.get_child_by_name(child_name);
   if (child) {
     YLOG_DEBUG("XMLCodec: Creating child entity '{}' in '{}'", child_name,
@@ -308,13 +303,7 @@ static void decode_xml(xmlDocPtr doc, xmlNodePtr root, Entity &entity,
       check_and_set_content(entity, leaf_name, xml_node->parent,
                             xml_node->content, doc);
     } else {
-      // We skip the decode of "input"
-      auto input = entity.get_child_by_name("input");
-      if (!parent && input) {
-        decode_xml(doc, xml_node, *input, &entity, leaf_name);
-      } else {
-        check_and_set_node(entity, parent, xml_node, doc);
-      }
+      check_and_set_node(entity, parent, xml_node, doc);
     }
   }
 }
