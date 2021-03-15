@@ -37,7 +37,7 @@ std::string get_relative_entity_path(const Entity* current_node,
   std::ostringstream path_buffer;
   path_buffer << path;
   if (ancestor == nullptr) {
-    throw YInvalidArgumentError{"ancestor should not be null."};
+    throw std::runtime_error{"ancestor should not be null."};
   }
   auto p = current_node->parent;
   std::vector<Entity*> parents{};
@@ -47,7 +47,7 @@ std::string get_relative_entity_path(const Entity* current_node,
   }
 
   if (p == nullptr) {
-    throw YInvalidArgumentError{"parent is not in the ancestor hierarchy."};
+    throw std::runtime_error{"parent is not in the ancestor hierarchy."};
   }
 
   std::reverse(parents.begin(), parents.end());
@@ -96,9 +96,9 @@ const EntityPath get_entity_path(const Entity& entity, Entity* ancestor) {
   if (is_absolute_path(ancestor)) {
     if (entity.has_list_ancestor) {
       throw(
-          YInvalidArgumentError{"ancestor for entity cannot be nullptr as one "
-                                "of the ancestors is a list. Path: " +
-                                entity.get_segment_path()});
+          std::runtime_error{"ancestor for entity cannot be nullptr as one "
+                             "of the ancestors is a list. Path: " +
+                             entity.get_segment_path()});
     }
     auto a = entity.get_absolute_path();
     if (a.size() == 0) {
@@ -108,7 +108,7 @@ const EntityPath get_entity_path(const Entity& entity, Entity* ancestor) {
     }
   } else {
     if (entity.is_top_level_class) {
-      throw(YInvalidArgumentError{
+      throw(std::runtime_error{
           "ancestor has to be nullptr for top-level node. Path: " +
           entity.get_segment_path()});
     }

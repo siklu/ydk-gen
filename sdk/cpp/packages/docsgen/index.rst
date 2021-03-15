@@ -1,0 +1,1 @@
+../../../cpp/core/docsgen/index.rst

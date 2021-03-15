@@ -135,12 +135,14 @@ set(libydk_src
     src/bits.cpp
     src/capabilities_parser.cpp
     src/entity.cpp
- #   src/entity_lookup.cpp
- #   src/entity_util.cpp
+    src/entity_util.cpp
     src/value.cpp
     src/value_list.cpp
     src/xml_subtree_codec.cpp
-    src/xml_util.cpp)
+    src/leaf_data.cpp
+    src/xml_util.cpp
+    src/ydk_operation.cpp
+    )
 
 
 file(GLOB SPDLOG_HEADERS src/spdlog/*.h)

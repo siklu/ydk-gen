@@ -103,8 +103,6 @@ struct EntityPath {
   bool operator!=(const EntityPath& other) const;
 };
 
-typedef void (*augment_capabilities_function)();
-
 class YList;
 
 class Entity {
@@ -140,12 +138,8 @@ class Entity {
   virtual void set_parent(Entity* p);
   virtual Entity* get_parent() const;
 
-  virtual augment_capabilities_function get_augment_capabilities_function()
-      const;
   virtual std::string get_bundle_yang_models_location() const;
   virtual std::string get_bundle_name() const;
-  virtual std::map<std::pair<std::string, std::string>, std::string>
-  get_namespace_identity_lookup() const;
 
   virtual void set_child_by_name(const std::string& yang_name,
                                  std::shared_ptr<Entity> _ent) = 0;

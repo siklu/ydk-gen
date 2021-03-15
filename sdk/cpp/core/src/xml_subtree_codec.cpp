@@ -171,10 +171,6 @@ static void populate_xml_node_contents(const Entity &entity, EntityPath &path,
 //////////////////////////////////////////////////////////////////
 void XmlSubtreeCodec::Decode(const std::string &payload,
                              std::shared_ptr<Entity> entity) {
-  if (entity->get_augment_capabilities_function()) {
-    entity->get_augment_capabilities_function()();
-  }
-
   std::unique_ptr<xmlDoc, XmlDocDeleter> doc(
       xmlParseDoc(reinterpret_cast<const xmlChar *>(payload.c_str())));
 
@@ -208,17 +204,6 @@ static string resolve_leaf_value_namespace(const string &content,
         content.find(":") != string::npos) {
       auto s = content.find(":");
       c = content.substr(s + 1);
-    }
-    Entity *p = entity;
-    while (p->parent != nullptr) {
-      p = p->parent;
-    }
-    auto m = p->get_namespace_identity_lookup();
-    YLOG_DEBUG("XMLCodec: Got namespace identity lookup with '{}' elements",
-               m.size());
-    if (m.find({c, name_space}) != m.end()) {
-      string module_name = m[{c, name_space}];
-      c = module_name + ":" + c;
     }
   }
   return c;

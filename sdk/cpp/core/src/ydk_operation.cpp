@@ -1,6 +1,6 @@
 //
-// @file entity.hpp
-// @brief Header for ydk entity
+// @file ydk_operation.cpp
+// @brief The main ydk public header.
 //
 // YANG Development Kit
 // Copyright 2016 Cisco Systems. All rights reserved
@@ -25,25 +25,27 @@
 //
 //////////////////////////////////////////////////////////////////
 
-#ifndef _WALKER_HPP_
-#define _WALKER_HPP_
-
-#include <map>
-#include <vector>
-
-#include "filters.hpp"
-#include "path_api.hpp"
+#include "types.hpp"
 
 namespace ydk {
-
-class Entity;
-
-path::DataNode& get_data_node_from_entity(Entity& entity,
-                                          path::RootSchemaNode& root_schema);
-
-void get_entity_from_data_node(path::DataNode* node,
-                               std::shared_ptr<Entity> entity);
-
-YFilter get_data_node_yfilter(path::DataNode* node);
+std::string to_string(YFilter yfilter) {
+#define TOSTR(a)   \
+  case YFilter::a: \
+    return #a;
+  switch (yfilter) {
+    TOSTR(merge)
+    TOSTR(create)
+    TOSTR(remove)
+    TOSTR(replace)
+    TOSTR(not_set)
+    TOSTR(read)
+    TOSTR(update)
+    case YFilter::delete_:
+      return "delete";
+    default:
+      return "unknown";
+  }
+#undef TOSTR
+  return {};
+}
 }  // namespace ydk
-#endif /* _WALKER_HPP_ */

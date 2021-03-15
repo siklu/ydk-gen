@@ -81,12 +81,8 @@ class ClassMembersPrinter(object):
             self.ctx.writeln(
                 'std::shared_ptr<ydk::Entity> clone_ptr() const override;')
             self.ctx.writeln(
-                'ydk::augment_capabilities_function get_augment_capabilities_function() const override;')
-            self.ctx.writeln(
                 'std::string get_bundle_yang_models_location() const override;')
             self.ctx.writeln('std::string get_bundle_name() const override;')
-            self.ctx.writeln(
-                'std::map<std::pair<std::string, std::string>, std::string> get_namespace_identity_lookup() const override;')
 
     def _print_class_value_members(self, clazz):
         if clazz.is_identity():

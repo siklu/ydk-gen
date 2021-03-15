@@ -1,5 +1,5 @@
 /// YANG Development Kit
-// Copyright 2019 Cisco Systems. All rights reserved
+// Copyright 2016 Cisco Systems. All rights reserved
 //
 ////////////////////////////////////////////////////////////////
 // Licensed to the Apache Software Foundation (ASF) under one
@@ -21,20 +21,13 @@
 //
 //////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#ifndef _BUNDLE_INFO_HPP_
+#define _BUNDLE_INFO_HPP_
 
-#include "path_api.hpp"
-#include "types.hpp"
 
-namespace ydk {
-class JsonSubtreeCodec {
- public:
-  JsonSubtreeCodec();
-  ~JsonSubtreeCodec();
+namespace ydk
+{
+#define @PROJECT_NAME@_models_path "@CMAKE_INSTALL_PREFIX@/@YANG_INSTALL_DIR@"
+}
 
-  std::string encode(Entity& entity, path::RootSchemaNode& root_schema,
-                     bool pretty = true);
-  std::shared_ptr<Entity> decode(const std::string& payload,
-                                 std::shared_ptr<Entity> entity);
-};
-}  // namespace ydk
+#endif /* _BUNDLE_INFO_HPP_ */

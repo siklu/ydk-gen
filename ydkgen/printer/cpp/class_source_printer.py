@@ -78,8 +78,6 @@ class ClassSourcePrinter(object):
             self._print_clone_ptr_function(clazz)
             self._print_yang_models_function(clazz)
             self._print_bundle_name_function(clazz)
-            self._print_capabilities_lookup_function(clazz)
-            self._print_namespace_identity_lookup_function(clazz)
 
     def _print_clone_ptr_function(self, clazz):
         self.ctx.writeln(
@@ -109,28 +107,6 @@ class ClassSourcePrinter(object):
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
         self.ctx.writeln('return "%s";' % snake_case(self.bundle_name))
-        self.ctx.lvl_dec()
-        self.ctx.writeln('}')
-        self.ctx.bline()
-
-    def _print_capabilities_lookup_function(self, clazz):
-        self.ctx.writeln(
-            'augment_capabilities_function %s::get_augment_capabilities_function() const' % clazz.qualified_cpp_name())
-        self.ctx.writeln('{')
-        self.ctx.lvl_inc()
-        self.ctx.writeln("return %s_augment_lookup_tables;" %
-                         snake_case(self.bundle_name))
-        self.ctx.lvl_dec()
-        self.ctx.writeln('}')
-        self.ctx.bline()
-
-    def _print_namespace_identity_lookup_function(self, clazz):
-        self.ctx.writeln(
-            'std::map<std::pair<std::string, std::string>, std::string> %s::get_namespace_identity_lookup() const' % clazz.qualified_cpp_name())
-        self.ctx.writeln('{')
-        self.ctx.lvl_inc()
-        self.ctx.writeln("return %s_namespace_identity_lookup;" %
-                         snake_case(self.bundle_name))
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
         self.ctx.bline()
