@@ -129,7 +129,6 @@ endif()
 # Set LibYDK variables
 set(libydk_src
     src/bits.cpp
-    src/capabilities_parser.cpp
     src/entity.cpp
     src/entity_util.cpp
     src/value.cpp
