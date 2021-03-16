@@ -25,6 +25,7 @@ from ydkgen.api_model import Enum
 from ydkgen.common import get_module_name
 from ydkgen.printer.meta_data_util import get_enum_class_docstring
 
+
 class EnumPrinter(object):
 
     def __init__(self, ctx):
@@ -55,7 +56,8 @@ class EnumPrinter(object):
         for literal in enum_class.literals:
             self.ctx.writeln("'%s':'%s'," % (literal.stmt.arg, literal.name))
         self.ctx.lvl_dec()
-        self.ctx.writeln("}, '%s', _yang_ns.NAMESPACE_LOOKUP['%s'])," % (get_module_name(enum_class.stmt), get_module_name(enum_class.stmt)))
+        self.ctx.writeln("}, '%s', _yang_ns.NAMESPACE_LOOKUP['%s'])," % (
+            get_module_name(enum_class.stmt), get_module_name(enum_class.stmt)))
         self.ctx.lvl_dec()
 
     def _print_enum_header(self, enum_class):
@@ -86,7 +88,8 @@ class EnumPrinter(object):
     def _print_enum_literal(self, enum_literal):
         name = enum_literal.name
         value = enum_literal.value
-        self.ctx.writeln('%s = Enum.YLeaf(%s, "%s")' % (name, value, enum_literal.stmt.arg))
+        self.ctx.writeln('%s = Enum.YLeaf(%s, "%s")' %
+                         (name, value, enum_literal.stmt.arg))
         self.ctx.bline()
 
     def _print_enum_meta_assignment(self, enum_class):

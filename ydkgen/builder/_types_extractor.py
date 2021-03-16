@@ -26,11 +26,14 @@ from pyang.types import EnumerationTypeSpec, BitsTypeSpec, UnionTypeSpec, PathTy
 
 class TypesExtractor(object):
     def __init__(self):
-        self.get_enum_type_stmt = lambda stmt: self._get_type_stmt(stmt, EnumerationTypeSpec)
+        self.get_enum_type_stmt = lambda stmt: self._get_type_stmt(
+            stmt, EnumerationTypeSpec)
         self.get_identity_ref_type_stmt = lambda stmt: self._get_type_stmt(
             stmt, IdentityrefTypeSpec)
-        self.get_bits_type_stmt = lambda stmt: self._get_type_stmt(stmt, BitsTypeSpec)
-        self.get_union_type_stmt = lambda stmt: self._get_type_stmt(stmt, UnionTypeSpec)
+        self.get_bits_type_stmt = lambda stmt: self._get_type_stmt(
+            stmt, BitsTypeSpec)
+        self.get_union_type_stmt = lambda stmt: self._get_type_stmt(
+            stmt, UnionTypeSpec)
 
     def _get_type_stmt(self, stmt, typeSpec):
         if stmt.keyword == 'type':

@@ -22,10 +22,10 @@ Build an individual test case within a test program file.
 import sys
 from ydkgen import api_model as atypes
 from ydkgen.common import is_pkg_element, get_top_class, get_obj_name, get_qn, \
-                        is_presence_element, is_list_element, is_mandatory_element, \
-                        is_class_prop, is_class_element, is_config_prop, \
-                        is_reference_prop, is_terminal_prop, is_leaflist_prop, \
-                        is_union_prop, get_element_path
+    is_presence_element, is_list_element, is_mandatory_element, \
+    is_class_prop, is_class_element, is_config_prop, \
+    is_reference_prop, is_terminal_prop, is_leaflist_prop, \
+    is_union_prop, get_element_path
 
 from .test_value_builder import ValueBuilder, BitsValue, IdentityValue
 

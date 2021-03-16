@@ -83,7 +83,8 @@ class ClassMetaPrinter(object):
             mtype = 'REFERENCE_IDENTITY_CLASS'
         self.ctx.writeln('\'%s\' : {' % (clazz.qn()))
         self.ctx.lvl_inc()
-        self.ctx.writeln("'meta_info' : _MetaInfoClass('%s', %s," % (clazz.qn(), mtype))
+        self.ctx.writeln(
+            "'meta_info' : _MetaInfoClass('%s', %s," % (clazz.qn(), mtype))
         self.ctx.lvl_inc()
         description = " "
         for st in clazz.stmt.substmts:
@@ -98,7 +99,8 @@ class ClassMetaPrinter(object):
         self.ctx.writeln('[')
 
         if self.is_rpc:
-            prop_list = [p for p in clazz.owned_elements if isinstance(p, Property)]
+            prop_list = [
+                p for p in clazz.owned_elements if isinstance(p, Property)]
         else:
             prop_list = clazz.properties()
 
@@ -151,7 +153,8 @@ class ClassMetaPrinter(object):
         min_elements = meta_info_data.min_elements
         default_value_object = meta_info_data.default_value_object
 
-        ctx.writeln("_MetaInfoClassMember('%s', %s, '%s', '%s'," % (name, mtype, ptype, ytype))
+        ctx.writeln("_MetaInfoClassMember('%s', %s, '%s', '%s'," %
+                    (name, mtype, ptype, ytype))
         ctx.lvl_inc()
         ctx.writeln("%s, %s," % (pmodule_name, clazz_name))
         ctx.writeln("%s, %s," % (str(prange), str(pattern)))

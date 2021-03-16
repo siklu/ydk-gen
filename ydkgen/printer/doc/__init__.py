@@ -14,4 +14,3 @@
 # limitations under the License.
 # ------------------------------------------------------------------
 from .doc_printer import DocPrinter
-

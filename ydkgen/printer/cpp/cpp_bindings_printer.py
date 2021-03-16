@@ -74,9 +74,9 @@ class CppBindingsPrinter(LanguageBindingsPrinter):
             package, builder.multi_file_data, self.models_dir)
         self._print_source_file(
             package, builder.multi_file_data, self.models_dir)
-        # self._print_cpp_rst_doc(package)
-        # if self.generate_tests:
-        #     self._print_tests(package, self.test_dir)
+        self._print_cpp_rst_doc(package)
+        if self.generate_tests:
+            self._print_tests(package, self.test_dir)
 
     def _print_header_file(self, package, multi_file_data, path):
         hp = HeaderPrinter(self.ypy_ctx,
