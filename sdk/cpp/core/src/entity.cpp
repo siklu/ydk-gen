@@ -63,7 +63,7 @@ std::vector<std::string> Entity::get_order_of_children() const { return {}; }
 
 std::string Entity::get_absolute_path() const { return ""; }
 
-std::string Entity::get_namespace() const { return ""; }
+std::string Entity::get_namespace() const { return std::string(); }
 
 bool Entity::operator==(Entity &other) const {
   if (!has_data() && !other.has_data()) return true;

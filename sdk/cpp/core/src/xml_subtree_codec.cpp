@@ -28,7 +28,6 @@
 
 #include <unordered_map>
 
-// #include "entity_lookup.hpp"
 #include "entity_util.hpp"
 #include "logger.hpp"
 #include "xml_util.hpp"
@@ -250,21 +249,6 @@ static void check_and_set_node(Entity &entity, Entity *parent,
              to_string(xml_node->name), entity.yang_name);
   check_payload_to_raise_exception(entity, xml_node->name);
   auto child_name = to_string(xml_node->name);
-  // if (xml_node->ns->href && xml_node->parent && xml_node->parent->ns->href) {
-  //   auto child_ns = to_string(xml_node->ns->href);
-  //   if (child_ns != to_string(xml_node->parent->ns->href)) {
-  //     string module_name;
-  //     auto capabilities_lookup_table =
-  //     get_global_capabilities_lookup_tables(); auto it =
-  //     capabilities_lookup_table.find(child_ns); if (it !=
-  //     capabilities_lookup_table.end()) {
-  //       module_name = it->second.module;
-  //     } else {
-  //       module_name = child_ns.substr(child_ns.rfind("/") + 1);
-  //     }
-  //     child_name = module_name + ":" + child_name;
-  //   }
-  // }
   auto child = entity.get_child_by_name(child_name);
   if (child) {
     YLOG_DEBUG("XMLCodec: Creating child entity '{}' in '{}'", child_name,
