@@ -20,6 +20,8 @@ source_printer.py
  prints Go functions
 
 """
+
+
 class FunctionPrinter(object):
     def __init__(self, ctx, clazz, leafs=None, children=None):
         self.ctx = ctx

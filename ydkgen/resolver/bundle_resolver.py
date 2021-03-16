@@ -83,7 +83,8 @@ class BundleDefinition(object):
         self._name = data['name'].replace('-', '_')
         self._version = Version(*tuple(data['version'].split('.')))
         self._core_version = Version(*tuple(data['core-version'].split('.')))
-        self._description = data['description'] if 'description' in data else str()
+        self._description = data['description'] if 'description' in data else str(
+        )
         self._long_description = data['long-description'] if 'long-description' in data else str()
 
     @property

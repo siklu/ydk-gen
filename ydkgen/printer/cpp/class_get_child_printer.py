@@ -34,7 +34,8 @@ class ClassGetChildPrinter(object):
         self._print_class_get_child_trailer(clazz)
 
     def _print_class_get_child_header(self, clazz):
-        self.ctx.writeln('std::shared_ptr<ydk::Entity> %s::get_child_by_name(const std::string & child_yang_name, const std::string & segment_path)' % clazz.qualified_cpp_name())
+        self.ctx.writeln(
+            'std::shared_ptr<ydk::Entity> %s::get_child_by_name(const std::string & child_yang_name, const std::string & segment_path)' % clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
 
@@ -44,7 +45,8 @@ class ClassGetChildPrinter(object):
             self.ctx.bline()
 
     def _print_class_get_child(self, child):
-        self.ctx.writeln('if(child_yang_name == "%s")' % get_qualified_yang_name(child))
+        self.ctx.writeln('if(child_yang_name == "%s")' %
+                         get_qualified_yang_name(child))
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
         if child.is_many:
@@ -55,7 +57,8 @@ class ClassGetChildPrinter(object):
         self.ctx.writeln('}')
 
     def _print_class_get_child_many(self, child):
-        self.ctx.writeln('auto ent_ = std::make_shared<%s>();' % (child.property_type.qualified_cpp_name()))
+        self.ctx.writeln('auto ent_ = std::make_shared<%s>();' %
+                         (child.property_type.qualified_cpp_name()))
         self.ctx.writeln('ent_->parent = this;')
         self.ctx.writeln('%s.append(ent_);' % child.name)
         self.ctx.writeln('return ent_;')
@@ -64,7 +67,8 @@ class ClassGetChildPrinter(object):
         self.ctx.writeln('if(%s == nullptr)' % child.name)
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
-        self.ctx.writeln('%s = std::make_shared<%s>();' % (child.name, child.property_type.qualified_cpp_name()))
+        self.ctx.writeln('%s = std::make_shared<%s>();' %
+                         (child.name, child.property_type.qualified_cpp_name()))
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
         self.ctx.writeln('return %s;' % child.name)

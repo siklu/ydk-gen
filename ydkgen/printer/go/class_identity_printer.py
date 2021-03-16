@@ -20,6 +20,7 @@ identity_printer.py
   print yang Identity classes
 """
 
+
 class IdentityPrinter(object):
     def __init__(self, ctx, bundle_name, identity_subclasses):
         self.ctx = ctx
@@ -36,7 +37,9 @@ class IdentityPrinter(object):
         self.ctx.bline()
 
     def _print_identity_class_string(self, clazz):
-        self.ctx.writeln('func (id {}) String() string {{'.format(clazz.qualified_go_name()))
-        self.ctx.writeln('\treturn "{}:{}"'.format(clazz.module.arg, clazz.stmt.arg))
+        self.ctx.writeln('func (id {}) String() string {{'.format(
+            clazz.qualified_go_name()))
+        self.ctx.writeln('\treturn "{}:{}"'.format(
+            clazz.module.arg, clazz.stmt.arg))
         self.ctx.writeln('}')
         self.ctx.bline()

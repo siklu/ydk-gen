@@ -38,7 +38,8 @@ class ClassSetYLeafPrinter(object):
         self._print_trailer(clazz)
 
     def _print_class_set_value_header(self, clazz):
-        self.ctx.writeln('void %s::set_value(const std::string & value_path, const std::string & value, const std::string & name_space, const std::string & name_space_prefix)' % clazz.qualified_cpp_name())
+        self.ctx.writeln(
+            'void %s::set_value(const std::string & value_path, const std::string & value, const std::string & name_space, const std::string & name_space_prefix)' % clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
 
@@ -47,7 +48,8 @@ class ClassSetYLeafPrinter(object):
             self._print_class_set_values(leaf)
 
     def _print_class_set_values(self, leaf):
-        self.ctx.writeln('if(value_path == "%s")' % (get_qualified_yang_name(leaf)))
+        self.ctx.writeln('if(value_path == "%s")' %
+                         (get_qualified_yang_name(leaf)))
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
         if isinstance(leaf.property_type, Bits):
@@ -59,19 +61,22 @@ class ClassSetYLeafPrinter(object):
                 self.ctx.writeln('%s[value] = true;' % leaf.name)
         elif leaf.is_many:
             if isinstance(leaf.property_type, Class) and leaf.property_type.is_identity():
-                self.ctx.writeln('Identity identity{name_space, name_space_prefix, value};')
+                self.ctx.writeln(
+                    'Identity identity{name_space, name_space_prefix, value};')
                 self.ctx.writeln('%s.append(identity);' % leaf.name)
             else:
                 self.ctx.writeln('%s.append(value);' % leaf.name)
         else:
             self.ctx.writeln('%s = value;' % leaf.name)
             self.ctx.writeln('%s.value_namespace = name_space;' % leaf.name)
-            self.ctx.writeln('%s.value_namespace_prefix = name_space_prefix;' % leaf.name)
+            self.ctx.writeln(
+                '%s.value_namespace_prefix = name_space_prefix;' % leaf.name)
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
 
     def _print_class_set_filter_header(self, clazz):
-        self.ctx.writeln('void %s::set_filter(const std::string & value_path, YFilter yfilter)' % clazz.qualified_cpp_name())
+        self.ctx.writeln(
+            'void %s::set_filter(const std::string & value_path, YFilter yfilter)' % clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
 

@@ -21,7 +21,7 @@ Build test case fixture.
 """
 from ydkgen.api_model import Class, Enum, Bits
 from ydkgen.common import is_class_element, is_identity_prop, is_path_prop, \
-        is_union_prop, get_typedef_stmt, is_union_type_spec, is_identityref_type_spec
+    is_union_prop, get_typedef_stmt, is_union_type_spec, is_identityref_type_spec
 
 
 class FixtureBuilder(object):
@@ -135,4 +135,3 @@ class FixtureBuilder(object):
     @property
     def cpp_bundle_fmt(self):
         return '#include "ydk_{0}/{1}"'
-

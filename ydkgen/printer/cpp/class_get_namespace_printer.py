@@ -14,7 +14,8 @@ class GetNamespacePrinter(object):
             namespace_stmt = package.stmt.search_one('namespace')
             if namespace_stmt:
                 namespace = namespace_stmt.arg
-        self.ctx.writeln('const std::string %s::get_namespace() const' % clazz.qualified_cpp_name())
+        self.ctx.writeln('const std::string %s::get_namespace() const' %
+                         clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
         if namespace is not None:
