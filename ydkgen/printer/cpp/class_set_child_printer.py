@@ -34,7 +34,8 @@ class ClassSetChildPrinter(object):
         self._print_class_set_child_trailer(clazz)
 
     def _print_class_set_child_header(self, clazz):
-        self.ctx.writeln('void %s::set_child_by_name(const std::string & child_yang_name, std::shared_ptr<ydk::Entity> _ent)' % clazz.qualified_cpp_name())
+        self.ctx.writeln(
+            'void %s::set_child_by_name(const std::string & child_yang_name, std::shared_ptr<ydk::Entity> _ent)' % clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
 
@@ -44,7 +45,8 @@ class ClassSetChildPrinter(object):
             self.ctx.bline()
 
     def _print_class_set_child(self, child):
-        self.ctx.writeln('if(child_yang_name == "%s")' % get_qualified_yang_name(child))
+        self.ctx.writeln('if(child_yang_name == "%s")' %
+                         get_qualified_yang_name(child))
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
         if child.is_many:
@@ -59,7 +61,8 @@ class ClassSetChildPrinter(object):
         self.ctx.writeln('%s.append(std::move(_ent));' % child.name)
 
     def _print_class_set_child_unique(self, child):
-        self.ctx.writeln('%s = std::static_pointer_cast<%s>(_ent);' % (child.name, child.property_type.qualified_cpp_name()))
+        self.ctx.writeln('%s = std::static_pointer_cast<%s>(_ent);' % (
+            child.name, child.property_type.qualified_cpp_name()))
 
     def _print_class_set_child_trailer(self, clazz):
         self.ctx.lvl_dec()

@@ -45,7 +45,8 @@ class ClassPrinter(object):
         self._print_child_enums(clazz)
 
     def _print_class_constructor(self, clazz, leafs, children):
-        ClassConstructorPrinter(self.ctx, clazz, leafs, self.identity_subclasses).print_all()
+        ClassConstructorPrinter(self.ctx, clazz, leafs,
+                                self.identity_subclasses).print_all()
 
     def _print_class_method_definitions(self, clazz, leafs, children):
         self._print_class_get_entity_data(clazz, leafs, children)
@@ -63,16 +64,23 @@ class ClassPrinter(object):
         data_alias = '%s.EntityData' % fp.class_alias
         bundle_name = snake_case(self.bundle_name)
 
-        fp.print_function_header_helper('GetEntityData', return_type='*types.CommonEntityData')
-        fp.ctx.writeln('%s.YFilter = %s.YFilter' % (data_alias, fp.class_alias))
+        fp.print_function_header_helper(
+            'GetEntityData', return_type='*types.CommonEntityData')
+        fp.ctx.writeln('%s.YFilter = %s.YFilter' %
+                       (data_alias, fp.class_alias))
         fp.ctx.writeln('%s.YangName = "%s"' % (data_alias, fp.clazz.stmt.arg))
-        fp.ctx.writeln('%s.BundleName = "%s"' % (data_alias, self.bundle_name.lower()))
-        fp.ctx.writeln('%s.ParentYangName = "%s"' % (data_alias, clazz.owner.stmt.arg))
+        fp.ctx.writeln('%s.BundleName = "%s"' %
+                       (data_alias, self.bundle_name.lower()))
+        fp.ctx.writeln('%s.ParentYangName = "%s"' %
+                       (data_alias, clazz.owner.stmt.arg))
         self._print_segment_path(fp, data_alias)
         self._print_absolute_path(fp, data_alias)
-        fp.ctx.writeln('%s.CapabilitiesTable = %s.GetCapabilities()' % (data_alias, bundle_name))
-        fp.ctx.writeln('%s.NamespaceTable = %s.GetNamespaces()' % (data_alias, bundle_name))
-        fp.ctx.writeln('%s.BundleYangModelsLocation = %s.GetModelsPath()' % (data_alias, bundle_name))
+        fp.ctx.writeln('%s.CapabilitiesTable = %s.GetCapabilities()' %
+                       (data_alias, bundle_name))
+        fp.ctx.writeln('%s.NamespaceTable = %s.GetNamespaces()' %
+                       (data_alias, bundle_name))
+        fp.ctx.writeln('%s.BundleYangModelsLocation = %s.GetModelsPath()' % (
+            data_alias, bundle_name))
         fp.ctx.bline()
         self._print_children(fp, children, data_alias)
         self._print_leafs(fp, leafs, data_alias)
@@ -103,7 +111,8 @@ class ClassPrinter(object):
                     key_name += ':'
                 key_name += key_prop.stmt.arg
 
-                path.append(" + types.AddKeyToken(%s.%s, \"%s\")" % (fp.class_alias, key_prop.go_name(), key_name))
+                path.append(" + types.AddKeyToken(%s.%s, \"%s\")" %
+                            (fp.class_alias, key_prop.go_name(), key_name))
         elif is_list_element(fp.clazz):
             # list element with no keys
             path.append(" + types.AddNoKeyToken(%s)" % fp.class_alias)
@@ -134,9 +143,11 @@ class ClassPrinter(object):
                 path += p.stmt.arg
 
         if len(path) == 0:
-            fp.ctx.writeln('%s.AbsolutePath = %s.SegmentPath' % (data_alias, data_alias))
+            fp.ctx.writeln('%s.AbsolutePath = %s.SegmentPath' %
+                           (data_alias, data_alias))
         else:
-            fp.ctx.writeln('%s.AbsolutePath = "%s/" + %s.SegmentPath' % (data_alias, path, data_alias))
+            fp.ctx.writeln('%s.AbsolutePath = "%s/" + %s.SegmentPath' %
+                           (data_alias, path, data_alias))
 
     @staticmethod
     def _print_children(fp, children, data_alias):
@@ -147,13 +158,14 @@ class ClassPrinter(object):
                 fp.ctx.writeln('%s.Children.Append("%s", types.YChild{"%s", nil})' % (
                     data_alias, path, child.property_type.go_name()))
 
-                child_stmt = '%s.%s' % (fp.class_alias, child.property_type.go_name())
+                child_stmt = '%s.%s' % (
+                    fp.class_alias, child.property_type.go_name())
                 fp.ctx.writeln('for i := range %s {' % (child_stmt))
                 fp.ctx.lvl_inc()
                 child_stmt = '%s[i]' % child_stmt
                 if child.stmt.keyword == 'list' and len(child.stmt.i_key) == 0:
                     fp.ctx.writeln('types.SetYListKey(%s, i)' % child_stmt)
-                fp.ctx.writeln('%s.Children.Append(types.GetSegmentPath(%s), types.YChild{"%s", %s})' %(
+                fp.ctx.writeln('%s.Children.Append(types.GetSegmentPath(%s), types.YChild{"%s", %s})' % (
                     data_alias, child_stmt, child.property_type.go_name(), child_stmt))
                 fp.ctx.lvl_dec()
                 fp.ctx.writeln('}')
@@ -178,17 +190,19 @@ class ClassPrinter(object):
         self.ctx.writeln("%s.YListKeys = []string {%s}" % (data_alias, keys))
 
     def _print_child_classes(self, parent):
-        unsorted_classes = [nested_class for nested_class in parent.owned_elements if isinstance(nested_class, Class)]
+        unsorted_classes = [
+            nested_class for nested_class in parent.owned_elements if isinstance(nested_class, Class)]
         sorted_classes = sort_classes_at_same_level(unsorted_classes)
 
         for clazz in sorted_classes:
-            cp = ClassPrinter(self.ctx, self.bundle_name, self.identity_subclasses)
+            cp = ClassPrinter(self.ctx, self.bundle_name,
+                              self.identity_subclasses)
             cp.print_output(clazz)
 
     def _print_child_enums(self, parent):
         enumz = []
         enumz.extend([nested_enum for nested_enum in parent.owned_elements
-                        if isinstance(nested_enum, Enum)])
+                      if isinstance(nested_enum, Enum)])
 
         for nested_enum in sorted(enumz, key=lambda e: e.name):
             self.enum_printer.print_enum(nested_enum)

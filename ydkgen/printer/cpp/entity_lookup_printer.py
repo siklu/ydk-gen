@@ -39,7 +39,8 @@ class EntityLookUpPrinter(FilePrinter):
 
     def print_header(self, bundle_name):
         self.bundle_name = bundle_name
-        self._print_include_guard_header(get_include_guard_name('entity_lookup'))
+        self._print_include_guard_header(
+            get_include_guard_name('entity_lookup'))
         self.ctx.writeln('#include <map>')
         self.ctx.writeln('#include <string>')
         self.ctx.writeln('#include <vector>')
@@ -48,11 +49,14 @@ class EntityLookUpPrinter(FilePrinter):
         self.ctx.writeln('namespace %s' % bundle_name)
         self.ctx.writeln('{')
         self.ctx.bline()
-        self.ctx.writeln("void {}_augment_lookup_tables();".format(snake_case(self.bundle_name)))
-        self.ctx.writeln("extern std::map<std::pair<std::string, std::string>, std::string> {0}_namespace_identity_lookup;".format(snake_case(self.bundle_name)))
+        self.ctx.writeln("void {}_augment_lookup_tables();".format(
+            snake_case(self.bundle_name)))
+        self.ctx.writeln("extern std::map<std::pair<std::string, std::string>, std::string> {0}_namespace_identity_lookup;".format(
+            snake_case(self.bundle_name)))
         self.ctx.bline()
         self.ctx.writeln('}')
-        self._print_include_guard_trailer(get_include_guard_name('entity_lookup'))
+        self._print_include_guard_trailer(
+            get_include_guard_name('entity_lookup'))
 
     def print_source(self, packages, bundle_name):
         self.bundle_name = bundle_name
@@ -157,7 +161,8 @@ class EntityLookUpPrinter(FilePrinter):
     def _print_namespace_identity_lookup_statement(self, identity):
         module_name = get_module_name(identity.stmt)
         namespace = self.module_namespace_lookup[module_name]
-        self.ctx.writeln('{ {"%s", "%s"},  "%s"},' % (identity.stmt.arg, namespace, module_name))
+        self.ctx.writeln('{ {"%s", "%s"},  "%s"},' %
+                         (identity.stmt.arg, namespace, module_name))
 
     def _get_identities(self, element):
         identities = set()

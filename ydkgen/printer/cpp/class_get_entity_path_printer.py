@@ -35,7 +35,8 @@ def get_leafs_children(clazz, leafs, children):
         l.append(leaf.name)
 
     leaf_names = '{%s}' % (', '.join(['&%s' % n for n in leaf_names_list]))
-    leaflist_names = '{%s}' % (', '.join(['&%s' % n for n in leaflist_names_list]))
+    leaflist_names = '{%s}' % (
+        ', '.join(['&%s' % n for n in leaflist_names_list]))
     child_names = '{%s}' % (', '.join(['"%s"' % n.stmt.arg for n in children]))
 
     return (leaf_names, leaflist_names, child_names)
@@ -66,7 +67,8 @@ class GetAbsolutePathPrinter(object):
             self._print_get_entity_path_trailer(clazz)
 
     def _print_get_entity_path_header(self, clazz):
-        self.ctx.writeln('std::string %s::get_absolute_path() const' % clazz.qualified_cpp_name())
+        self.ctx.writeln('std::string %s::get_absolute_path() const' %
+                         clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
 
@@ -95,7 +97,8 @@ class GetAbsolutePathPrinter(object):
         slash = ""
         if len(path) > 0:
             slash = "/"
-        self.ctx.writeln('path_buffer << "%s%s" << get_segment_path();' % (path, slash))
+        self.ctx.writeln(
+            'path_buffer << "%s%s" << get_segment_path();' % (path, slash))
 
         self.ctx.writeln('return path_buffer.str();')
 
@@ -110,10 +113,12 @@ class GetEntityInfoPrinter(object):
         self.ctx = ctx
 
     def print_output(self, clazz, leafs, children):
-        self.ctx.writeln('EntityInfo %s::get_info()' % clazz.qualified_cpp_name())
+        self.ctx.writeln('EntityInfo %s::get_info()' %
+                         clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
-        self.ctx.writeln('return {%s, %s, %s};' % get_leafs_children(clazz, leafs, children))
+        self.ctx.writeln('return {%s, %s, %s};' %
+                         get_leafs_children(clazz, leafs, children))
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
         self.ctx.bline()
@@ -143,16 +148,19 @@ class GetEntityPathPrinter(object):
         self._print_get_entity_path_trailer(clazz)
 
     def _print_get_entity_path_header(self, clazz):
-        self.ctx.writeln('std::vector<std::pair<std::string, LeafData> > %s::get_name_leaf_data() const' % clazz.qualified_cpp_name())
+        self.ctx.writeln(
+            'std::vector<std::pair<std::string, LeafData> > %s::get_name_leaf_data() const' % clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
 
     def _print_get_entity_path_body(self, clazz, leafs):
-        self.ctx.writeln('std::vector<std::pair<std::string, LeafData> > leaf_name_data {};')
+        self.ctx.writeln(
+            'std::vector<std::pair<std::string, LeafData> > leaf_name_data {};')
         self.ctx.bline()
         for prop in leafs:
             if not prop.is_many:
-                self.ctx.writeln('if (%s.is_set || is_set(%s.yfilter)) leaf_name_data.push_back(%s.get_name_leafdata());' % (prop.name, prop.name, prop.name))
+                self.ctx.writeln('if (%s.is_set || is_set(%s.yfilter)) leaf_name_data.push_back(%s.get_name_leafdata());' % (
+                    prop.name, prop.name, prop.name))
         self._print_get_entity_path_leaflists(leafs)
         self.ctx.writeln('return leaf_name_data;')
 
@@ -160,8 +168,10 @@ class GetEntityPathPrinter(object):
         leaf_lists = [leaf for leaf in leafs if leaf.is_many]
         self.ctx.bline()
         for leaf in leaf_lists:
-            self.ctx.writeln('auto %s_name_datas = %s.get_name_leafdata();' % (leaf.name, leaf.name))
-            self.ctx.writeln('leaf_name_data.insert(leaf_name_data.end(), %s_name_datas.begin(), %s_name_datas.end());' % (leaf.name, leaf.name))
+            self.ctx.writeln(
+                'auto %s_name_datas = %s.get_name_leafdata();' % (leaf.name, leaf.name))
+            self.ctx.writeln('leaf_name_data.insert(leaf_name_data.end(), %s_name_datas.begin(), %s_name_datas.end());' % (
+                leaf.name, leaf.name))
 
     def _print_get_entity_path_trailer(self, clazz):
         self.ctx.lvl_dec()
@@ -194,21 +204,21 @@ class GetSegmentPathPrinter(object):
         self._print_get_ydk_segment_path_trailer(clazz)
 
     def _print_get_ydk_segment_path_header(self, clazz):
-        self.ctx.writeln('std::string %s::get_segment_path() const' % clazz.qualified_cpp_name())
+        self.ctx.writeln('std::string %s::get_segment_path() const' %
+                         clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
 
-
     def _print_get_ydk_segment_path_body(self, clazz):
         self.ctx.writeln('std::ostringstream path_buffer;')
-        path='"'
+        path = '"'
         if clazz.owner is not None:
             if isinstance(clazz.owner, Package):
-                path+= clazz.owner.stmt.arg + ':'
+                path += clazz.owner.stmt.arg + ':'
             elif clazz.owner.stmt.i_module.arg != clazz.stmt.i_module.arg:
-                path+=clazz.stmt.i_module.arg + ':'
+                path += clazz.stmt.i_module.arg + ':'
 
-        path+= clazz.stmt.arg + '";'
+        path += clazz.stmt.arg + '";'
         self.ctx.writeln('path_buffer << %s' % (path))
 
         key_props = clazz.get_key_props()
@@ -219,7 +229,8 @@ class GetSegmentPathPrinter(object):
                     predicate += key_prop.stmt.i_module.arg
                     predicate += ':'
                 predicate += key_prop.stmt.arg
-                self.ctx.writeln('ADD_KEY_TOKEN(%s, "%s");' % (key_prop.name, predicate))
+                self.ctx.writeln('ADD_KEY_TOKEN(%s, "%s");' %
+                                 (key_prop.name, predicate))
         elif is_list_element(clazz):
             # list element with no keys
             predicate = '"[" << get_ylist_key() << "]";'
@@ -230,4 +241,3 @@ class GetSegmentPathPrinter(object):
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
         self.ctx.bline()
-

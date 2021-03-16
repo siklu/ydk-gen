@@ -67,7 +67,8 @@ class DocPrinter(object):
             self.bundle_name, self.bundle_version)
         self._print_title(title)
         self._append(description)
-        self._print_toctree(sorted(packages, key=attrgetter('name')), None, is_package=True)
+        self._print_toctree(
+            sorted(packages, key=attrgetter('name')), None, is_package=True)
 
         self.ctx.writelns(self.lines)
         del self.lines
@@ -97,13 +98,17 @@ class DocPrinter(object):
             self.ctx.bline()
             if len(augments) == 1:
                 for aug_class in augments:
-                    line = '\nThis module contains augment: ' + get_class_crossref_tag(aug_class.qn(), aug_class, self.lang) + '\n'
+                    line = '\nThis module contains augment: ' + \
+                        get_class_crossref_tag(
+                            aug_class.qn(), aug_class, self.lang) + '\n'
                     self._append(line)
             else:
                 line = '\nThis module contains the following augments:\n'
                 self._append(line)
                 for aug_class in augments:
-                    line = '\t - ' + get_class_crossref_tag(aug_class.qn(), aug_class, self.lang) + '\n'
+                    line = '\t - ' + \
+                        get_class_crossref_tag(
+                            aug_class.qn(), aug_class, self.lang) + '\n'
                     self._append(line)
 
     def _print_bits_rst(self, bitz):
@@ -123,14 +128,16 @@ class DocPrinter(object):
             self._print_bases(clazz)
             self._print_class_hierarchy(clazz)
         if clazz.stmt.search_one('presence') is not None:
-            self._append('This class is a :ref:`presence class<presence-class>`\n')
+            self._append(
+                'This class is a :ref:`presence class<presence-class>`\n')
         if clazz.stmt.keyword != 'rpc':
             if is_config_stmt(clazz.stmt):
                 self._append('This class represents configuration data.\n')
             else:
                 self._append('This class represents state data.\n')
         else:
-            self._append('This class defines parameters to the RPC operation\n')
+            self._append(
+                'This class defines parameters to the RPC operation\n')
 
         docstring = get_class_docstring(
             clazz, self.lang, identity_subclasses=self.identity_subclasses)
@@ -241,13 +248,13 @@ class DocPrinter(object):
             leafs = sorted(leafs, key=attrgetter('name'))
             children = sorted(children, key=attrgetter('name'))
 
-            if len(keys)>0:
+            if len(keys) > 0:
                 self._append('**{}**\n'.format('Keys'))
                 self._print_attribute_list(keys)
-            if len(leafs)>0:
+            if len(leafs) > 0:
                 self._append('**{}**\n'.format('Leafs'))
                 self._print_attribute_list(leafs)
-            if len(children)>0:
+            if len(children) > 0:
                 self._append('**{}**\n'.format('Children'))
                 self._print_attribute_list(children)
 
@@ -289,7 +296,8 @@ class DocPrinter(object):
 
     def _print_namespace(self, clazz):
         if self.lang == 'cpp':
-            self._append('\n.. cpp:namespace:: {0}\n'.format(clazz.get_package().name))
+            self._append('\n.. cpp:namespace:: {0}\n'.format(
+                clazz.get_package().name))
 
     def _print_bases(self, clazz):
         bases = get_class_bases(clazz, self.lang)

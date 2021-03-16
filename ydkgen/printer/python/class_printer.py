@@ -29,7 +29,6 @@ from .class_inits_printer import ClassInitsPrinter, ClassSetAttrPrinter
 from .enum_printer import EnumPrinter
 
 
-
 class ClassPrinter(FilePrinter):
 
     def __init__(self, ctx, module_namespace_lookup, one_class_per_module, generate_meta, identity_subclasses):
@@ -138,7 +137,8 @@ class ClassPrinter(FilePrinter):
                           self.identity_subclasses).print_output(clazz, leafs, children)
 
     def _print_class_setattr(self, clazz, leafs):
-        ClassSetAttrPrinter(self.ctx, self.one_class_per_module).print_setattr(clazz, leafs)
+        ClassSetAttrPrinter(
+            self.ctx, self.one_class_per_module).print_setattr(clazz, leafs)
 
     def _print_class_clone_ptr(self, clazz):
         if clazz.owner is not None and isinstance(clazz.owner, Package):

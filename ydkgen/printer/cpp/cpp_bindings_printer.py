@@ -42,7 +42,8 @@ class CppBindingsPrinter(LanguageBindingsPrinter):
         if sys.version_info > (3,):
             super().__init__(ydk_root_dir, bundle, generate_tests, one_class_per_module)
         else:
-            super(CppBindingsPrinter, self).__init__(ydk_root_dir, bundle, generate_tests, one_class_per_module)
+            super(CppBindingsPrinter, self).__init__(
+                ydk_root_dir, bundle, generate_tests, one_class_per_module)
         self.source_files = []
         self.header_files = []
 
@@ -58,17 +59,21 @@ class CppBindingsPrinter(LanguageBindingsPrinter):
         # RST documentation
         self._print_cpp_rst_toc()
         if self.generate_tests:
-            self._print_cmake_file(self.packages, self.bundle_name, self.test_dir)
+            self._print_cmake_file(
+                self.packages, self.bundle_name, self.test_dir)
         return (self.source_files, self.header_files)
 
     def _print_module(self, index, package, size):
-        print('Processing %d of %d %s' % (index + 1, size, package.stmt.pos.ref))
+        print('Processing %d of %d %s' %
+              (index + 1, size, package.stmt.pos.ref))
         # Skip generating module for empty modules
         if len(package.owned_elements) == 0:
             return
         builder = MultiFileBuilder(package, self.classes_per_source_file)
-        self._print_header_file(package, builder.multi_file_data, self.models_dir)
-        self._print_source_file(package, builder.multi_file_data, self.models_dir)
+        self._print_header_file(
+            package, builder.multi_file_data, self.models_dir)
+        self._print_source_file(
+            package, builder.multi_file_data, self.models_dir)
         self._print_cpp_rst_doc(package)
         if self.generate_tests:
             self._print_tests(package, self.test_dir)
@@ -78,21 +83,22 @@ class CppBindingsPrinter(LanguageBindingsPrinter):
                            self.identity_subclasses, self.bundle_name)
         for multi_file_header in [x for x in multi_file_data.multi_file_list if isinstance(x, MultiFileHeader)]:
             hp.print_output(
-                            package,
-                            multi_file_header,
-                            path
-                            )
+                package,
+                multi_file_header,
+                path
+            )
             if not multi_file_header.fragmented:
                 self.header_files.append(multi_file_header.file_name)
 
     def _print_source_file(self, package, multi_file_data, path):
-        sp = SourcePrinter(self.ypy_ctx, self.bundle_name, self.module_namespace_lookup)
+        sp = SourcePrinter(self.ypy_ctx, self.bundle_name,
+                           self.module_namespace_lookup)
         for multi_file_source in [x for x in multi_file_data.multi_file_list if isinstance(x, MultiFileSource)]:
             sp.print_output(
-                            package,
-                            multi_file_source,
-                            path
-                            )
+                package,
+                multi_file_source,
+                path
+            )
             file_name = multi_file_source.file_name
             if multi_file_source.fragmented:
                 file_name = os.path.join('fragmented', file_name)
@@ -178,7 +184,8 @@ def emit_header(ctx, package, extra_args):
 
 
 def emit_entity_lookup_source(ctx, packages, extra_args):
-    EntityLookUpPrinter(ctx, extra_args[1]).print_source(packages, extra_args[0])
+    EntityLookUpPrinter(ctx, extra_args[1]).print_source(
+        packages, extra_args[0])
 
 
 def emit_entity_lookup_header(ctx, packages, bundle_name):
@@ -186,12 +193,14 @@ def emit_entity_lookup_header(ctx, packages, bundle_name):
 
 
 def emit_cpp_doc(ctx, named_element, identity_subclasses):
-    DocPrinter(ctx, 'cpp').print_module_documentation(named_element, identity_subclasses)
+    DocPrinter(ctx, 'cpp').print_module_documentation(
+        named_element, identity_subclasses)
 
 
 def emit_table_of_contents(ctx, packages, extra_args):
     bundle_name, bundle_version = extra_args
-    DocPrinter(ctx, 'cpp', bundle_name, bundle_version).print_table_of_contents(packages)
+    DocPrinter(ctx, 'cpp', bundle_name,
+               bundle_version).print_table_of_contents(packages)
 
 
 def emit_test_cases(ctx, package, identity_subclasses):
