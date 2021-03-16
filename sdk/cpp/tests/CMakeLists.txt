@@ -18,10 +18,6 @@ set(bundle_tests_src
 
 find_library(xml2_location xml2)
 find_library(curl_location curl)
-find_library(ssh_location ssh)
-find_library(ssh_threads_location ssh_threads)
-find_library(pcre_location pcre)
-find_library(xslt_location xslt)
 find_library(pthread_location pthread)
 find_library(dl_location dl)
 find_library(ydk_location ydk)
@@ -55,11 +51,6 @@ target_link_libraries(${YDK_UNITTEST_TARGET_NAME}
     ${ydk_ydktest_location}
     ${ydktest_oc_nis_location}
     ${xml2_location}
-    ${curl_location}
-    ${ssh_location}
-    ${ssh_threads_location}
-    ${pcre_location}
-    ${xslt_location}
     ${pthread_location}
     ${dl_location}
     -rdynamic

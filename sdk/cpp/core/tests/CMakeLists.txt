@@ -25,12 +25,7 @@ foreach(test_name IN LISTS core_tests)
     set_property(TARGET ${test_name} PROPERTY CXX_STANDARD 11)
     set_property(TARGET ${test_name} PROPERTY CXX_STANDARD_REQUIRED ON)
     target_link_libraries(${test_name} ydk
-        curl
-        xslt
-        pcre
-        ssh_threads
         xml2
-        ssh
         dl)
     
     add_test(NAME ${test_name} COMMAND $<TARGET_FILE:${test_name}>)

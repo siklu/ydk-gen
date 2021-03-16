@@ -46,11 +46,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         set (CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION})
         set (CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
         set (CPACK_DEBIAN_PACKAGE_DEPENDS
-            "libcurl4-openssl-dev,
-            libpcre3-dev,
-            libssh-dev,
             libxml2-dev,
-            libxslt1-dev,
             libtool-bin,
             cmake (>=3),
             git,
@@ -83,7 +79,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         set (CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
         set (CPACK_RPM_PACKAGE_VENDOR ${CPACK_PACKAGE_VENDOR})
         set (CPACK_RPM_PACKAGE_URL "https://github.com/CiscoDevNet/ydk-cpp")
-        set (CPACK_RPM_PACKAGE_REQUIRES "python-pip, python-devel, libxml2-devel, libxslt-devel, libssh-devel, libcurl-devel, libtool, cmake3, pcre-devel")
+        set (CPACK_RPM_PACKAGE_REQUIRES "python-pip, python-devel, libxml2-devel, libtool, cmake3)
 
         # <name>-<version>-<release>.<architecture>.(src).rpm
         # libydk-0.6.0-0.1.alpha.x86_64.rpm  // RPM
@@ -144,42 +140,16 @@ set(libydk_src
     src/ydk_operation.cpp
     )
 
-
-file(GLOB SPDLOG_HEADERS src/spdlog/*.h)
-file(GLOB SPDLOG_DETAILS_HEADERS src/spdlog/details/*.h)
-file(GLOB SPDLOG_FMT_HEADERS src/spdlog/fmt/*.h)
-file(GLOB SPDLOG_FMT_BUNDLED_HEADERS src/spdlog/fmt/bundled/*.h src/spdlog/fmt/bundled/*.cc)
-file(GLOB SPDLOG_SINKS_HEADERS src/spdlog/sinks/*.h)
-
-set(spdlog_include_location include/spdlog)
-set(spdlog_details_include_location include/spdlog/details)
-set(spdlog_fmt_include_location include/spdlog/fmt)
-set(spdlog_fmt_bundled_include_location include/spdlog/fmt/bundled)
-set(spdlog_sinks_include_location include/spdlog/sinks)
-
 set(libydk_install_headers
-    src/netconf_model_provider.hpp
-    src/capabilities_parser.hpp
-    src/common_utilities.hpp
-    src/entity_data_node_walker.hpp
-    src/entity_lookup.hpp
     src/entity_util.hpp
-    src/executor_service.hpp
     src/filters.hpp
     src/logger.hpp
     src/types.hpp
     src/xml_subtree_codec.hpp
     src/xml_util.hpp
-    src/validation_service.hpp
-    src/ydk.h)
-
-# Set LibYang variables
-set(libyang_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/src/project_libyang)
-set(libyang_build_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/src/project_libyang-build)
+    src/types.hpp)
 
 # Find dependent libraries
-find_library(xslt_location xslt)
-find_library(pcre_location pcre)
 find_library(pthread_location pthread)
 find_library(dl_location dl)
 find_library(m_location m)
@@ -187,12 +157,7 @@ find_package(LibXml2 REQUIRED)
 
 
 include_directories(
-    ${LIBYANG_INCLUDE_DIRS}
     ${LIBXML2_INCLUDE_DIR}
-    ${libnetconf_headers_location}
-    ${libnetconf_location}/headers
-    ${libyang_headers_location}
-    ${libyang_location}/headers
     ${PROJECT_SOURCE_DIR}/src
 )
 
@@ -202,8 +167,6 @@ add_library(ydk STATIC ${libydk_src})
 
 target_link_libraries(ydk
     ${LIBXML2_LIBRARIES}
-    ${pcre_location}
-    ${xslt_location}
     ${pthread_location}
     -rdynamic
     ${dl_location}
@@ -211,19 +174,9 @@ target_link_libraries(ydk
 
 set_property(TARGET ydk PROPERTY CXX_STANDARD 11)
 set_property(TARGET ydk PROPERTY CXX_STANDARD_REQUIRED ON)
-set(libyang_extension_lib 
-	${libyang_build_location}/src/extensions/libyang_ext_test${CMAKE_SHARED_LIBRARY_SUFFIX}
-	${libyang_build_location}/src/extensions/metadata${CMAKE_SHARED_LIBRARY_SUFFIX}
-	${libyang_build_location}/src/extensions/nacm${CMAKE_SHARED_LIBRARY_SUFFIX}
-)
 
 install(TARGETS ydk DESTINATION ${LIB_INSTALL_DIR})
 install(FILES ${libydk_install_headers} DESTINATION ${INCLUDE_INSTALL_DIR})
-install(FILES ${SPDLOG_HEADERS} DESTINATION ${spdlog_include_location})
-install(FILES ${SPDLOG_DETAILS_HEADERS} DESTINATION ${spdlog_details_include_location})
-install(FILES ${SPDLOG_FMT_HEADERS} DESTINATION ${spdlog_fmt_include_location})
-install(FILES ${SPDLOG_FMT_BUNDLED_HEADERS} DESTINATION ${spdlog_fmt_bundled_include_location})
-install(FILES ${SPDLOG_SINKS_HEADERS} DESTINATION ${spdlog_sinks_include_location})
 
 # generate doxygen documentation for ydk_core API
 find_package(Doxygen)
@@ -242,7 +195,7 @@ add_custom_target(cclean
     COMMAND rm -rf Makefile Doxyfile
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-#if(ENABLE_BUILD_TESTS)
-#    enable_testing()
-#    add_subdirectory(tests)
-#endif(ENABLE_BUILD_TESTS)
+if(ENABLE_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif(ENABLE_BUILD_TESTS)

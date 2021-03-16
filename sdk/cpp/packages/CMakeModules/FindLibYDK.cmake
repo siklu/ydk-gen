@@ -32,13 +32,7 @@ else (LIBYDK_LIBRARIES AND LIBYDK_INCLUDE_DIRS)
 
   find_path(LIBYDK_INCLUDE_DIR
     NAMES
-      ydk/netconf_provider.hpp
-      ydk/netconf_client.hpp
-      ydk/core.hpp
-      ydk/value.hpp
-      ydk/entity_data_node_walker.hpp
-      ydk/crud_service.hpp
-      ydk/top_entity_lookup.hpp
+      ydk/types.hpp
     PATHS
       /usr/include
       /usr/local/include
