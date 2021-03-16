@@ -126,7 +126,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-Os -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG   "-g -O0")
 
 
-set(libydk_@BRIEF_NAME@_src ydk/models/@BRIEF_NAME@/generated_entity_lookup.cpp @SOURCE_FILES@)
+set(libydk_@BRIEF_NAME@_src @SOURCE_FILES@)
 
 set(libydk_@BRIEF_NAME@_headers ydk/models/@BRIEF_NAME@/bundle_info.hpp @HEADER_FILES@)
 

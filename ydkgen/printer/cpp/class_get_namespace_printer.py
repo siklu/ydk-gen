@@ -1,6 +1,6 @@
 # Copyright 2021 Siklu
 
-from ydkgen.api_model import Package
+from ydkgen.common import get_class_namespace
 
 
 class GetNamespacePrinter(object):
@@ -8,13 +8,8 @@ class GetNamespacePrinter(object):
         self.ctx = ctx
 
     def print_output(self, clazz):
-        namespace = None
-        if clazz.owner is not None and isinstance(clazz.owner, Package):
-            package = clazz.owner
-            namespace_stmt = package.stmt.search_one('namespace')
-            if namespace_stmt:
-                namespace = namespace_stmt.arg
-        self.ctx.writeln('const std::string %s::get_namespace() const' %
+        namespace = get_class_namespace(clazz)
+        self.ctx.writeln('std::string %s::get_namespace() const' %
                          clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()

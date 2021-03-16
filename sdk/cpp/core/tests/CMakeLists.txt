@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.0.0)
 cmake_policy(SET CMP0048 NEW)
 set(YDK_UNITTEST_TARGET_NAME "ydk_core_test")
 
-set(core_tests_src bgptest.cpp
-               core_test.cpp
-               test_codec.cpp
+set(core_tests_src 
+            #   core_test.cpp
+            #   test_codec.cpp
                test_entity.cpp
                test_value.cpp
                test_value_list.cpp
@@ -25,12 +25,7 @@ foreach(test_name IN LISTS core_tests)
     set_property(TARGET ${test_name} PROPERTY CXX_STANDARD 11)
     set_property(TARGET ${test_name} PROPERTY CXX_STANDARD_REQUIRED ON)
     target_link_libraries(${test_name} ydk
-        curl
-        xslt
-        pcre
-        ssh_threads
         xml2
-        ssh
         dl)
     
     add_test(NAME ${test_name} COMMAND $<TARGET_FILE:${test_name}>)

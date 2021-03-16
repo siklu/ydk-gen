@@ -75,7 +75,6 @@ class HeaderPrinter(MultiFilePrinter):
         self.ctx.writeln('#include <vector>')
         self.ctx.writeln('#include <string>')
         self.ctx.writeln('#include <ydk/types.hpp>')
-        self.ctx.writeln('#include <ydk/errors.hpp>')
         self.ctx.bline()
 
     def _print_unique_imports(self, package, imports_to_print):

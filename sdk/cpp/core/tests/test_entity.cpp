@@ -25,12 +25,12 @@
 //
 //////////////////////////////////////////////////////////////////
 
+#include <cassert>
 #include <iostream>
 
 #include "../src/entity_util.hpp"
 #include "../src/types.hpp"
-#include "catch.hpp"
-
+#define REQUIRE assert
 using namespace ydk;
 using namespace std;
 

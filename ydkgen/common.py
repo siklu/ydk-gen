@@ -259,7 +259,7 @@ def sort_classes_at_same_level(classes):
     if len(classes) <= 1:
         return classes
 
-    #classes = sorted(classes, key=lambda cls: cls.name)
+    # classes = sorted(classes, key=lambda cls: cls.name)
     classes_processed = []
     classes_not_processed = OrderedDict()
     for clazz in classes:
@@ -423,7 +423,7 @@ def get_typedef_stmt(type_stmt):
 
 
 def get_top_class(clazz):
-    while not isinstance(clazz.owner, atypes.Package):
+    while clazz is not None and not isinstance(clazz.owner, atypes.Package):
         clazz = clazz.owner
     return clazz
 
@@ -508,6 +508,16 @@ def is_top_level_class(clazz):
     return clazz.owner is not None and isinstance(clazz.owner, atypes.Package)
 
 
+def get_class_namespace(clazz):
+    top_class = get_top_class(clazz)
+    package = top_class.owner
+    namespace_stmt = package.stmt.search_one('namespace')
+    if namespace_stmt:
+        return namespace_stmt.arg
+    else:
+        return None
+
+
 def get_qualified_yang_name(clazz):
     yang_name = clazz.stmt.arg
     if clazz.owner.stmt.i_module.arg != clazz.stmt.i_module.arg:
@@ -528,3 +538,16 @@ def snake_case(input_text):
     s = input_text.replace('-', '_')
     s = s.replace('.', '_')
     return s.lower()
+
+
+def clazz_yang_name(clazz: atypes.Class):
+    yang_name = clazz.stmt.arg
+    top_level = get_top_class(clazz)
+    if top_level is None:
+        return yang_name
+
+    is_rpc = top_level.is_rpc()
+    if is_rpc and clazz.owner is top_level:
+        yang_name = "rpc-reply" if clazz.stmt.arg == "output" else top_level.stmt.arg
+
+    return yang_name

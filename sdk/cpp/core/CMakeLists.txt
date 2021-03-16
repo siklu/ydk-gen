@@ -46,11 +46,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         set (CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION})
         set (CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
         set (CPACK_DEBIAN_PACKAGE_DEPENDS
-            "libcurl4-openssl-dev,
-            libpcre3-dev,
-            libssh-dev,
             libxml2-dev,
-            libxslt1-dev,
             libtool-bin,
             cmake (>=3),
             git,
@@ -83,7 +79,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         set (CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
         set (CPACK_RPM_PACKAGE_VENDOR ${CPACK_PACKAGE_VENDOR})
         set (CPACK_RPM_PACKAGE_URL "https://github.com/CiscoDevNet/ydk-cpp")
-        set (CPACK_RPM_PACKAGE_REQUIRES "python-pip, python-devel, libxml2-devel, libxslt-devel, libssh-devel, libcurl-devel, libtool, cmake3, pcre-devel")
+        set (CPACK_RPM_PACKAGE_REQUIRES "python-pip, python-devel, libxml2-devel, libtool, cmake3)
 
         # <name>-<version>-<release>.<architecture>.(src).rpm
         # libydk-0.6.0-0.1.alpha.x86_64.rpm  // RPM
@@ -133,125 +129,35 @@ endif()
 # Set LibYDK variables
 set(libydk_src
     src/bits.cpp
-    src/codec_provider.cpp
-    src/codec_service.cpp
     src/capabilities_parser.cpp
-    src/common_utilities.cpp
-    src/crud_service.cpp
     src/entity.cpp
-    src/entity_data_node_walker.cpp
-    src/entity_lookup.cpp
     src/entity_util.cpp
-    src/errors.cpp
-    src/executor_service.cpp
-    src/ietf_parser.cpp
-    src/leaf_data.cpp
-    src/logging_callback.cpp
-    src/service_provider.cpp
-    src/netconf_client.cpp
-#    src/netconf_ssh_client.cpp
-#    src/netconf_tcp_client.cpp
-    src/netconf_provider.cpp
-    src/netconf_service.cpp
-    src/netconf_session.cpp
-#    src/network_topology.cpp
-#    src/opendaylight_parser.cpp
-#    src/opendaylight_provider.cpp
-    src/restconf_client.cpp
-    src/restconf_provider.cpp
-    src/restconf_session.cpp
-    src/validation_service.cpp
     src/value.cpp
     src/value_list.cpp
-    src/json_subtree_codec.cpp
     src/xml_subtree_codec.cpp
+    src/leaf_data.cpp
     src/xml_util.cpp
     src/ydk_operation.cpp
-    src/ydk.cpp
-    src/ydk_yang.cpp
-    src/path/annotation.cpp
-    src/path/capability.cpp
-    src/path/data_node.cpp
-    src/netconf_model_provider.cpp
-    src/path/path.cpp
-    src/path/repository.cpp
-    src/path/root_data_node.cpp
-    src/path/root_schema_node.cpp
-    src/path/rpc.cpp
-    src/path/schema_node.cpp
-    src/path/statement.cpp)
-
-
-file(GLOB SPDLOG_HEADERS src/spdlog/*.h)
-file(GLOB SPDLOG_DETAILS_HEADERS src/spdlog/details/*.h)
-file(GLOB SPDLOG_FMT_HEADERS src/spdlog/fmt/*.h)
-file(GLOB SPDLOG_FMT_BUNDLED_HEADERS src/spdlog/fmt/bundled/*.h src/spdlog/fmt/bundled/*.cc)
-file(GLOB SPDLOG_SINKS_HEADERS src/spdlog/sinks/*.h)
-
-set(spdlog_include_location include/spdlog)
-set(spdlog_details_include_location include/spdlog/details)
-set(spdlog_fmt_include_location include/spdlog/fmt)
-set(spdlog_fmt_bundled_include_location include/spdlog/fmt/bundled)
-set(spdlog_sinks_include_location include/spdlog/sinks)
+    )
 
 set(libydk_install_headers
-    src/netconf_model_provider.hpp
-    src/capabilities_parser.hpp
-    src/codec_provider.hpp
-    src/codec_service.hpp
-    src/common_utilities.hpp
-    src/crud_service.hpp
-    src/entity_data_node_walker.hpp
-    src/entity_lookup.hpp
     src/entity_util.hpp
-    src/errors.hpp
-    src/executor_service.hpp
     src/filters.hpp
-    src/ietf_parser.hpp
-    src/json.hpp
     src/logger.hpp
-    src/logging_callback.hpp
-    src/netconf_client.hpp
-    src/netconf_provider.hpp
-    src/netconf_service.hpp
-    src/network_topology.hpp
-    src/opendaylight_parser.hpp
-    src/opendaylight_provider.hpp
-    src/path_api.hpp
-    src/restconf_client.hpp
-    src/restconf_provider.hpp
-    src/service_provider.hpp
     src/types.hpp
-    src/json_subtree_codec.hpp
     src/xml_subtree_codec.hpp
     src/xml_util.hpp
-    src/validation_service.hpp
-    src/ydk.h)
-
-# Set LibYang variables
-set(libyang_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/src/project_libyang)
-set(libyang_build_location ${CMAKE_CURRENT_BINARY_DIR}/project_libyang/src/project_libyang-build)
+    src/types.hpp)
 
 # Find dependent libraries
-find_library(curl_location curl)
-find_library(ssh_threads_location ssh_threads)
-find_library(xslt_location xslt)
-find_library(pcre_location pcre)
 find_library(pthread_location pthread)
 find_library(dl_location dl)
 find_library(m_location m)
 find_package(LibXml2 REQUIRED)
-find_package(LibSSH REQUIRED)
-find_library(LIBYANG libyang)
 
 
 include_directories(
-    ${LIBYANG_INCLUDE_DIRS}
     ${LIBXML2_INCLUDE_DIR}
-    ${libnetconf_headers_location}
-    ${libnetconf_location}/headers
-    ${libyang_headers_location}
-    ${libyang_location}/headers
     ${PROJECT_SOURCE_DIR}/src
 )
 
@@ -261,33 +167,16 @@ add_library(ydk STATIC ${libydk_src})
 
 target_link_libraries(ydk
     ${LIBXML2_LIBRARIES}
-    ${LIBSSH_LIBRARIES}
-    ${curl_location}
-    ${pcre_location}
-    ${xslt_location}
     ${pthread_location}
-    ${LIBYANG_LIBRARIES}
-    libnetconf
-    libyang
     -rdynamic
     ${dl_location}
 )
 
 set_property(TARGET ydk PROPERTY CXX_STANDARD 11)
 set_property(TARGET ydk PROPERTY CXX_STANDARD_REQUIRED ON)
-set(libyang_extension_lib 
-	${libyang_build_location}/src/extensions/libyang_ext_test${CMAKE_SHARED_LIBRARY_SUFFIX}
-	${libyang_build_location}/src/extensions/metadata${CMAKE_SHARED_LIBRARY_SUFFIX}
-	${libyang_build_location}/src/extensions/nacm${CMAKE_SHARED_LIBRARY_SUFFIX}
-)
 
 install(TARGETS ydk DESTINATION ${LIB_INSTALL_DIR})
 install(FILES ${libydk_install_headers} DESTINATION ${INCLUDE_INSTALL_DIR})
-install(FILES ${SPDLOG_HEADERS} DESTINATION ${spdlog_include_location})
-install(FILES ${SPDLOG_DETAILS_HEADERS} DESTINATION ${spdlog_details_include_location})
-install(FILES ${SPDLOG_FMT_HEADERS} DESTINATION ${spdlog_fmt_include_location})
-install(FILES ${SPDLOG_FMT_BUNDLED_HEADERS} DESTINATION ${spdlog_fmt_bundled_include_location})
-install(FILES ${SPDLOG_SINKS_HEADERS} DESTINATION ${spdlog_sinks_include_location})
 
 # generate doxygen documentation for ydk_core API
 find_package(Doxygen)

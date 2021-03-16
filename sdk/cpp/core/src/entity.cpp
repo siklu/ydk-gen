@@ -55,25 +55,15 @@ void Entity::set_parent(Entity *p) { parent = p; }
 
 Entity *Entity::get_parent() const { return parent; }
 
-augment_capabilities_function Entity::get_augment_capabilities_function()
-    const {
-  return nullptr;
-}
-
 std::string Entity::get_bundle_yang_models_location() const { return ""; }
 
 std::string Entity::get_bundle_name() const { return ""; }
 
 std::vector<std::string> Entity::get_order_of_children() const { return {}; }
 
-std::map<std::pair<std::string, std::string>, std::string>
-Entity::get_namespace_identity_lookup() const {
-  return {};
-}
-
 std::string Entity::get_absolute_path() const { return ""; }
 
-const std::string Entity::get_namespace() const { return ""; }
+std::string Entity::get_namespace() const { return std::string(); }
 
 bool Entity::operator==(Entity &other) const {
   if (!has_data() && !other.has_data()) return true;

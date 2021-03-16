@@ -21,7 +21,7 @@ source_printer.py
 
 """
 from ydkgen.api_model import Bits, Class, DataType, Enum
-from ydkgen.common import get_module_name, has_list_ancestor, is_top_level_class
+from ydkgen.common import get_module_name, has_list_ancestor, is_top_level_class, clazz_yang_name
 
 
 def get_type_name(prop_type):
@@ -85,8 +85,10 @@ class ClassConstructorPrinter(object):
     def _print_class_constructor_body(self, clazz, leafs, children):
         self._print_init_children(children)
         if not clazz.is_identity():
+            yang_name = clazz_yang_name(clazz)
+            yang_parent_name = clazz_yang_name(clazz.owner)
             self.ctx.writeln('yang_name = "%s"; yang_parent_name = "%s"; is_top_level_class = %s; has_list_ancestor = %s; %s'
-                             % (clazz.stmt.arg, clazz.owner.stmt.arg, ('true' if is_top_level_class(clazz) else 'false'),
+                             % (yang_name, yang_parent_name, ('true' if is_top_level_class(clazz) else 'false'),
                                 ('true' if has_list_ancestor(clazz) else 'false'),
                                 ('is_presence_container = true;' if clazz.stmt.search_one('presence') is not None else '')))
 

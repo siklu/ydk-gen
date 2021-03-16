@@ -25,7 +25,6 @@
 
 #include <algorithm>
 
-#include "errors.hpp"
 #include "logger.hpp"
 
 using namespace std;
@@ -38,7 +37,7 @@ std::string get_relative_entity_path(const Entity* current_node,
   std::ostringstream path_buffer;
   path_buffer << path;
   if (ancestor == nullptr) {
-    throw(YInvalidArgumentError{"ancestor should not be null."});
+    throw std::runtime_error{"ancestor should not be null."};
   }
   auto p = current_node->parent;
   std::vector<Entity*> parents{};
@@ -48,7 +47,7 @@ std::string get_relative_entity_path(const Entity* current_node,
   }
 
   if (p == nullptr) {
-    throw(YInvalidArgumentError{"parent is not in the ancestor hierarchy."});
+    throw std::runtime_error{"parent is not in the ancestor hierarchy."};
   }
 
   std::reverse(parents.begin(), parents.end());
@@ -97,9 +96,9 @@ const EntityPath get_entity_path(const Entity& entity, Entity* ancestor) {
   if (is_absolute_path(ancestor)) {
     if (entity.has_list_ancestor) {
       throw(
-          YInvalidArgumentError{"ancestor for entity cannot be nullptr as one "
-                                "of the ancestors is a list. Path: " +
-                                entity.get_segment_path()});
+          std::runtime_error{"ancestor for entity cannot be nullptr as one "
+                             "of the ancestors is a list. Path: " +
+                             entity.get_segment_path()});
     }
     auto a = entity.get_absolute_path();
     if (a.size() == 0) {
@@ -109,7 +108,7 @@ const EntityPath get_entity_path(const Entity& entity, Entity* ancestor) {
     }
   } else {
     if (entity.is_top_level_class) {
-      throw(YInvalidArgumentError{
+      throw(std::runtime_error{
           "ancestor has to be nullptr for top-level node. Path: " +
           entity.get_segment_path()});
     }
@@ -125,124 +124,6 @@ std::string absolute_path(Entity& entity) {
     path = absolute_path(*entity.parent) + "/" + path;
   }
   return path;
-}
-
-std::map<std::string, std::string> entity_to_dict(Entity& entity) {
-  std::map<std::string, std::string> edict{};
-  auto abs_path = absolute_path(entity);
-  if (entity.is_presence_container ||
-      abs_path.rfind("]") == abs_path.length() - 1) {
-    edict[abs_path] = "";
-  }
-  auto name_leaf_data_vector = entity.get_name_leaf_data();
-  for (auto name_leaf_data : name_leaf_data_vector) {
-    auto leaf_name = name_leaf_data.first;
-    auto leaf_value = name_leaf_data.second.value;
-    std::ostringstream key_buffer;
-    key_buffer << "[" << leaf_name << "=";
-    if (abs_path.find(key_buffer.str()) == string::npos) {
-      std::string path = abs_path + "/" + leaf_name;
-      edict[path] = leaf_value;
-    }
-  }
-  for (auto const& entry : entity.get_children()) {
-    auto child = entry.second;
-    auto child_dict = entity_to_dict(*child);
-    for (auto const& e : child_dict) {
-      edict[e.first] = e.second;
-    }
-  }
-  return edict;
-}
-
-static bool key_in_vector(string& k, vector<string> v) {
-  for (auto e : v) {
-    if (e == k) {
-      return true;
-    }
-  }
-  return false;
-}
-
-static void remove_key_from_vector(string& k, vector<string>& v) {
-  for (vector<string>::iterator it = v.begin(); it != v.end(); ++it) {
-    if (k == *it) {
-      v.erase(it);
-      break;
-    }
-  }
-}
-
-std::map<std::string, std::pair<std::string, std::string>> entity_diff(
-    Entity& ent1, Entity& ent2) {
-  if (typeid(ent1) != typeid(ent2)) {
-    throw(
-        YInvalidArgumentError{"entity_diff: Incompatible arguments provided."});
-  }
-  std::map<std::string, std::pair<std::string, std::string>> diffs{};
-  auto ent1_dict = entity_to_dict(ent1);
-  auto ent2_dict = entity_to_dict(ent2);
-  vector<string> ent1_keys;
-  for (auto entry : ent1_dict) ent1_keys.push_back(entry.first);
-  vector<string> ent2_keys;
-  for (auto entry : ent2_dict) ent2_keys.push_back(entry.first);
-  vector<string> ent1_skip_keys;
-  for (auto key : ent1_keys) {
-    if (key_in_vector(key, ent1_skip_keys)) continue;
-    if (key_in_vector(key, ent2_keys)) {
-      if (ent1_dict[key] != ent2_dict[key]) {
-        diffs[key] = make_pair(ent1_dict[key], ent2_dict[key]);
-      }
-      remove_key_from_vector(key, ent2_keys);
-    } else {
-      diffs[key] = make_pair(ent1_dict[key], "None");
-      for (auto dup_key : ent1_keys) {
-        if (dup_key.find(key) == 0) {
-          ent1_skip_keys.push_back(dup_key);
-        }
-      }
-    }
-  }
-  vector<string> ent2_skip_keys;
-  for (auto key : ent2_keys) {
-    if (key_in_vector(key, ent2_skip_keys)) continue;
-    diffs[key] = make_pair("None", ent2_dict[key]);
-    for (auto dup_key : ent2_keys) {
-      if (dup_key.find(key) == 0) {
-        ent2_skip_keys.push_back(dup_key);
-      }
-    }
-  }
-  return diffs;
-}
-
-Entity* path_to_entity(Entity& entity, string& abs_path) {
-  auto top_abs_path = absolute_path(entity);
-  if (top_abs_path == abs_path) return &entity;
-
-  if (!abs_path.compare(0, top_abs_path.length(), top_abs_path)) {
-    auto name_leaf_data_vector = entity.get_name_leaf_data();
-    for (auto name_leaf_data : name_leaf_data_vector) {
-      auto leaf_name = name_leaf_data.first;
-      std::ostringstream key_buffer;
-      key_buffer << "[" << leaf_name << "=";
-      if (abs_path.find(key_buffer.str()) == string::npos) {
-        std::string path = top_abs_path + "/" + leaf_name;
-        if (path == abs_path) return &entity;
-      }
-    }
-
-    for (auto const& entry : entity.get_children()) {
-      auto& child = *entry.second;
-      auto child_abs_path = absolute_path(child);
-      if (abs_path == child_abs_path) return &child;
-      if (abs_path.compare(0, child_abs_path.length(), child_abs_path))
-        continue;
-      auto matching_entity = path_to_entity(child, abs_path);
-      if (matching_entity) return matching_entity;
-    }
-  }
-  return nullptr;
 }
 
 }  // namespace ydk

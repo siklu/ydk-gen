@@ -25,7 +25,6 @@
 
 #include <iostream>
 
-#include "errors.hpp"
 #include "logger.hpp"
 
 using namespace std;
@@ -56,7 +55,7 @@ string to_string(xmlDocPtr doc, xmlNodePtr root) {
     xmlBufferFree(buf);
   } else {
     YLOG_ERROR("Error creating the xml buffer");
-    throw YServiceProviderError{"Error creating the xml buffer"};
+    throw std::runtime_error{"Error creating the xml buffer"};
   }
   return str;
 }

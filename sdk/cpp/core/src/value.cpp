@@ -28,8 +28,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "errors.hpp"
-#include "path_api.hpp"
 #include "types.hpp"
 
 namespace ydk {

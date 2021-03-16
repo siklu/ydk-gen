@@ -72,7 +72,7 @@ class ClassMembersPrinter(object):
             'std::map<std::string, std::shared_ptr<ydk::Entity>> get_children() const override;')
         self.ctx.writeln(
             'bool has_leaf_or_child_of_name(const std::string & name) const override;')
-        self.ctx.writeln('const std::string get_namespace() const override;')
+        self.ctx.writeln('std::string get_namespace() const override;')
         if not is_top_level_class(clazz) and not has_list_ancestor(clazz):
             self.ctx.writeln('std::string get_absolute_path() const override;')
 
@@ -81,12 +81,8 @@ class ClassMembersPrinter(object):
             self.ctx.writeln(
                 'std::shared_ptr<ydk::Entity> clone_ptr() const override;')
             self.ctx.writeln(
-                'ydk::augment_capabilities_function get_augment_capabilities_function() const override;')
-            self.ctx.writeln(
                 'std::string get_bundle_yang_models_location() const override;')
             self.ctx.writeln('std::string get_bundle_name() const override;')
-            self.ctx.writeln(
-                'std::map<std::pair<std::string, std::string>, std::string> get_namespace_identity_lookup() const override;')
 
     def _print_class_value_members(self, clazz):
         if clazz.is_identity():
