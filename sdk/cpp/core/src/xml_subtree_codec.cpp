@@ -174,6 +174,7 @@ void XmlSubtreeCodec::Decode(const std::string &payload,
       xmlParseDoc(reinterpret_cast<const xmlChar *>(payload.c_str())));
 
   xmlNodePtr root = xmlDocGetRootElement(doc.get());
+  if (!root) return;
   if (entity->yang_name != to_string(root->name)) {
     YLOG_ERROR("XMLCodec: Top entity '{}' does not match the payload",
                entity->yang_name);
