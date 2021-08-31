@@ -170,10 +170,17 @@ static void populate_xml_node_contents(const Entity &entity, EntityPath &path,
 //////////////////////////////////////////////////////////////////
 void XmlSubtreeCodec::Decode(const std::string &payload,
                              std::shared_ptr<Entity> entity) {
-  std::unique_ptr<xmlDoc, XmlDocDeleter> doc(
-      xmlParseDoc(reinterpret_cast<const xmlChar *>(payload.c_str())));
+  auto xml_parse_doc = xmlParseDoc(reinterpret_cast<const xmlChar *>(payload.c_str()));
+  if (!xml_parse_doc) {
+    throw std::runtime_error{"Couldn't parse xml payload"};
+  }
+  std::unique_ptr<xmlDoc, XmlDocDeleter> doc(xml_parse_doc);
 
   xmlNodePtr root = xmlDocGetRootElement(doc.get());
+  if (!root) {
+    throw std::runtime_error{"Couldn't get the root element"};
+  }
+
   if (entity->yang_name != to_string(root->name)) {
     YLOG_ERROR("XMLCodec: Top entity '{}' does not match the payload",
                entity->yang_name);
