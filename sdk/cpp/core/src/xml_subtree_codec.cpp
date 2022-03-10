@@ -168,9 +168,9 @@ static void populate_xml_node_contents(const Entity &entity, EntityPath &path,
 //////////////////////////////////////////////////////////////////
 // XmlSubtreeCodec::decode
 //////////////////////////////////////////////////////////////////
-void XmlSubtreeCodec::Decode(const std::string &payload,
-                             std::shared_ptr<Entity> entity) {
-  auto xml_parse_doc = xmlParseDoc(reinterpret_cast<const xmlChar *>(payload.c_str()));
+void XmlSubtreeCodec::Decode(const std::string &payload, Entity &entity) {
+  auto xml_parse_doc =
+      xmlParseDoc(reinterpret_cast<const xmlChar *>(payload.c_str()));
   if (!xml_parse_doc) {
     throw std::runtime_error{"Couldn't parse xml payload"};
   }
@@ -181,12 +181,12 @@ void XmlSubtreeCodec::Decode(const std::string &payload,
     throw std::runtime_error{"Couldn't get the root element"};
   }
 
-  if (entity->yang_name != to_string(root->name)) {
+  if (entity.yang_name != to_string(root->name)) {
     YLOG_ERROR("XMLCodec: Top entity '{}' does not match the payload",
-               entity->yang_name);
+               entity.yang_name);
     throw std::runtime_error{"Top entity does not match the payload"};
   }
-  decode_xml(doc.get(), root->children, *entity, nullptr, "");
+  decode_xml(doc.get(), root->children, entity, nullptr, "");
 }
 
 static void check_and_set_leaf(Entity &entity, Entity *parent,

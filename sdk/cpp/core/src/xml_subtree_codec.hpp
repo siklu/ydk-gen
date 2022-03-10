@@ -29,7 +29,6 @@ namespace ydk {
 class XmlSubtreeCodec {
  public:
   static std::string Encode(const Entity& entity);
-  static void Decode(const std::string& payload,
-                     std::shared_ptr<Entity> entity);
+  static void Decode(const std::string& payload, Entity& entity);
 };
 }  // namespace ydk
