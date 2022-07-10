@@ -38,10 +38,8 @@ class ModulePrinter(FilePrinter):
             super(ModulePrinter, self).__init__(ctx)
         self.bundle_name = bundle_name
         self.identity_subclasses = identity_subclasses
-        self.class_printer = ClassPrinter(
-            ctx, bundle_name, identity_subclasses)
-        self.identity_printer = IdentityPrinter(
-            ctx, bundle_name, identity_subclasses)
+        self.class_printer = ClassPrinter(ctx, bundle_name, identity_subclasses)
+        self.identity_printer = IdentityPrinter(ctx, bundle_name, identity_subclasses)
         self.enum_printer = EnumPrinter(ctx)
 
     def print_header(self, package):
@@ -92,15 +90,12 @@ class ModulePrinter(FilePrinter):
     def _print_init(self, package):
         self.ctx.writeln('func init() {')
         self.ctx.lvl_inc()
-        self.ctx.writeln(
-            'ydk.YLogDebug(fmt.Sprintf("Registering top level entities for package {}"))'.format(package.name))
+        self.ctx.writeln('ydk.YLogDebug(fmt.Sprintf("Registering top level entities for package {}"))'.format(package.name))
         for e in package.owned_elements:
             ns = package.stmt.search_one('namespace')
             if ns is not None and isinstance(e, Class) and not e.is_identity():
-                self.ctx.writeln('ydk.RegisterEntity("{{{} {}}}", reflect.TypeOf({}{{}}))'.format(
-                    ns.arg, e.stmt.arg, e.go_name()))
-                self.ctx.writeln('ydk.RegisterEntity("{}:{}", reflect.TypeOf({}{{}}))'.format(
-                    package.stmt.arg, e.stmt.arg, e.go_name()))
+                self.ctx.writeln('ydk.RegisterEntity("{{{} {}}}", reflect.TypeOf({}{{}}))'.format(ns.arg, e.stmt.arg, e.go_name()))
+                self.ctx.writeln('ydk.RegisterEntity("{}:{}", reflect.TypeOf({}{{}}))'.format(package.stmt.arg, e.stmt.arg, e.go_name()))
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
         self.ctx.bline()
@@ -116,10 +111,8 @@ class ModulePrinter(FilePrinter):
                 break
         if has_top_entity:
             self.ctx.writeln('"github.com/CiscoDevNet/ydk-go/ydk/types"')
-            self.ctx.writeln(
-                '"github.com/CiscoDevNet/ydk-go/ydk/types/yfilter"')
-            self.ctx.writeln(
-                '"github.com/CiscoDevNet/ydk-go/ydk/models/{}"'.format(self.bundle_name))
+            self.ctx.writeln('"github.com/CiscoDevNet/ydk-go/ydk/types/yfilter"')
+            self.ctx.writeln('"github.com/CiscoDevNet/ydk-go/ydk/models/{}"'.format(self.bundle_name))
             self.ctx.writeln('"reflect"')
 
     def _has_bits(self, element):

@@ -35,7 +35,7 @@ class EnumPrinter(object):
             self._print_declarations(clazz, file_name)
         if reset_enum_lookup:
             self.printed_enums = {}
-
+                
     def _print_declarations(self, clazz, file_name):
         self._print_enum_declarations(self._get_enums(clazz, file_name))
 
@@ -46,7 +46,7 @@ class EnumPrinter(object):
 
     def _print_to_string_funcs(self, clazz):
         self._print_enums(self._get_enums(clazz))
-
+                
     def _get_enums(self, element, file_name=''):
         enums = []
         for child in element.owned_elements:
@@ -70,8 +70,7 @@ class EnumPrinter(object):
         self._print_enum_trailer(enum_class)
 
     def _print_enum_header(self, enum_class):
-        self.ctx.writeln('class %s : public ydk::Enum' %
-                         enum_class.qualified_cpp_name())
+        self.ctx.writeln('class %s : public ydk::Enum' % enum_class.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
         self.ctx.writeln('public:')
@@ -80,20 +79,17 @@ class EnumPrinter(object):
     def _print_enum_body(self, enum_class):
         self._print_enum_literals(enum_class)
         self.ctx.bline()
-        self.ctx.writeln(
-            'static int get_enum_value(const std::string & name) {')
+        self.ctx.writeln('static int get_enum_value(const std::string & name) {')
         self.ctx.lvl_inc()
         for enum_literal in enum_class.literals:
-            self.ctx.writeln('if (name == "%s") return %d;' %
-                             (enum_literal.stmt.arg, enum_literal.value))
+            self.ctx.writeln('if (name == "%s") return %d;' % (enum_literal.stmt.arg, enum_literal.value))
         self.ctx.writeln('return -1;')
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
 
     def _print_enum_literals(self, enum_class):
         for enum_literal in enum_class.literals:
-            self.ctx.writeln('static const ydk::Enum::YLeaf %s;' %
-                             enum_literal.name)
+            self.ctx.writeln('static const ydk::Enum::YLeaf %s;' % enum_literal.name)
 
     def _print_enum_trailer(self, enum_class):
         self.ctx.lvl_dec()

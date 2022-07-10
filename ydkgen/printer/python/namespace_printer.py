@@ -35,8 +35,7 @@ class NamespacePrinter(FilePrinter):
         self.one_class_per_module = one_class_per_module
 
     def print_output(self, packages, bundle_name):
-        self.packages = packages = [
-            p for p in packages if p.bundle_name == bundle_name]
+        self.packages = packages = [p for p in packages if p.bundle_name == bundle_name]
         self._print_bundle_name(bundle_name)
         self._print_capabilities(packages)
         self._print_entity_lookup(packages)

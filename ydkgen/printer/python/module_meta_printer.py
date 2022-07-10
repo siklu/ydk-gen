@@ -54,8 +54,7 @@ from ydk._core._importer import _yang_ns
         self.ctx.lvl_inc()
         for nested_enumz in [e for e in packages.owned_elements if isinstance(e, Enum)]:
             self.print_enum_meta(nested_enumz)
-        self.print_classes_meta(
-            [c for c in packages.owned_elements if isinstance(c, Class)])
+        self.print_classes_meta([c for c in packages.owned_elements if isinstance(c, Class)])
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
         self.print_classes_meta_parents(

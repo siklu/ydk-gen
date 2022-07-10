@@ -111,7 +111,6 @@ def yang_id(stmt):
     else:
         return None
 
-
 def merge_file_path_segments(segs):
     '''Merge the segs to form a path '''
     return_seg = ''
@@ -122,25 +121,22 @@ def merge_file_path_segments(segs):
         return_seg = '%s%s' % (return_seg, seg)
     return return_seg
 
-
 def ispythonkeyword(word):
     return keyword.iskeyword(word) or word in ('None', 'parent', 'children', 'operation', 'exec', 'entity')
     # return keyword.iskeyword(word) or word in ('None', 'parent', 'children', 'yfilter', 'exec', 'entity')
-
 
 def iscppkeyword(word):
     return word in ('parent', 'operator', 'inline', 'default', 'virtual',
                     'children', 'value', 'auto', 'entity', 'int', 'signed',
                     'final', 'template', 'index', 'protected', 'true', 'false',
-                    'default', 'auto', 'static', 'or', 'do', 'new', 'delete',
-                    'private', 'public', 'export', 'virtual', 'for', 'and',
+                    'default' , 'auto', 'static', 'or', 'do', 'new', 'delete',
+                    'private', 'public', 'export' , 'virtual', 'for', 'and',
                     'break', 'case', 'catch', 'float', 'long', 'return',
                     'explicit', 'class', 'if', 'try', 'while', 'and', 'or',
                     'const', 'continue', 'double', 'else', 'value', 'namespace',
                     'operation', 'volatile', 'register', 'short', 'extern',
                     'mutable', 'unsigned', 'struct', 'switch', 'void', 'typedef', 'typename',
-                    'typeid', 'using', 'char', 'goto', 'not', 'clock', 'major', 'INFINITY')
-
+                    'typeid', 'using', 'char', 'goto', 'not','clock', 'major', 'INFINITY')
 
 def isgokeyword(word):
     return word in (
@@ -162,10 +158,8 @@ def isgokeyword(word):
         'append', 'cap', 'close', 'complex', 'copy', 'delete', 'imag', 'len',
         'make', 'new', 'panic', 'print', 'println', 'real', 'recover',)
 
-
 def get_sphinx_ref_label(named_element):
     return named_element.fqn().replace('.', '_')
-
 
 def split_to_words(input_text):
     words = []
@@ -213,7 +207,6 @@ def split_to_words(input_text):
     words.append(word)
     return words
 
-
 def convert_to_reStructuredText(yang_text):
     if isinstance(yang_text, bytes):
         yang_text = yang_text.decode('utf-8')
@@ -227,7 +220,6 @@ def convert_to_reStructuredText(yang_text):
         reSt = reSt.replace('|', '\|')
     return reSt
 
-
 def is_config_stmt(stmt):
 
     if hasattr(stmt, 'i_config'):
@@ -240,7 +232,6 @@ def is_config_stmt(stmt):
     else:
         return is_config_stmt(parent)
 
-
 def get_module_name(stmt):
     if stmt.keyword == 'module':
         return stmt.arg
@@ -252,7 +243,6 @@ def get_module_name(stmt):
         return module_stmt.i_including_modulename
     else:
         return module_stmt.arg
-
 
 def sort_classes_at_same_level(classes):
     ''' Returns a list of the classes in the same order  '''
@@ -285,7 +275,6 @@ def sort_classes_at_same_level(classes):
 
     return classes_processed
 
-
 def get_rst_file_name(named_element):
     if hasattr(named_element, 'get_package'):
         package = named_element.get_package()
@@ -295,7 +284,6 @@ def get_rst_file_name(named_element):
     filename = filename.encode('utf-8')
     hex_name = 'gen_doc_%s' % hashlib.sha1(filename).hexdigest()
     return hex_name
-
 
 def has_terminal_nodes(element):
     # has leaf or leaflist
@@ -308,112 +296,87 @@ def has_terminal_nodes(element):
             return True
     return False
 
-
 def is_config_prop(prop):
     is_config = True
     if hasattr(prop.stmt, 'i_config'):
         is_config = prop.stmt.i_config
     return is_config
 
-
 def get_include_guard_name(name, file_index=-1):
-    if file_index > -1:
-        return '_{0}_{1}_'.format(name.upper(), file_index)
-    else:
-        return '_{0}_'.format(name.upper())
-
+        if file_index > -1:
+            return '_{0}_{1}_'.format(name.upper(), file_index)
+        else:
+            return '_{0}_'.format(name.upper())
 
 def is_nonid_class_element(element):
     return isinstance(element, atypes.Class) and not element.is_identity()
 
-
 def is_class_element(element):
     return isinstance(element, atypes.Class)
-
 
 def is_identity_element(element):
     return isinstance(element, atypes.Class) and element.is_identity()
 
-
 def is_list_element(element):
     return element.stmt.keyword == 'list'
-
 
 def is_mandatory_element(element):
     mandatory = element.stmt.search_one('mandatory')
     return mandatory is not None and mandatory.arg == 'true'
 
-
 def is_pkg_element(element):
     return isinstance(element, atypes.Package)
-
 
 def is_presence_element(element):
     return element.stmt.search_one('presence') is not None
 
-
 def is_prop_element(element):
     return isinstance(element, atypes.Property)
-
 
 def is_class_prop(prop):
     return is_class_element(prop.property_type)
 
-
 def is_decimal64_prop(prop):
     return isinstance(prop.property_type, ptypes.Decimal64TypeSpec)
-
 
 def is_empty_prop(prop):
     return isinstance(prop.property_type, ptypes.EmptyTypeSpec)
 
-
 def is_identity_prop(prop):
     return is_identity_element(prop.property_type)
-
 
 def is_identityref_prop(prop):
     return (isinstance(prop.property_type, atypes.Class) and
             prop.property_type.is_identity() and
             prop.stmt.i_leafref_ptr is not None)
 
-
 def is_leaflist_prop(prop):
     return prop.stmt.keyword == 'leaf-list'
-
 
 def is_leafref_prop(prop):
     return (isinstance(prop.property_type, ptypes.PathTypeSpec) and
             prop.stmt.i_leafref_ptr is not None)
 
-
 def is_path_prop(prop):
     return isinstance(prop.property_type, ptypes.PathTypeSpec)
-
 
 def is_reference_prop(prop):
     return (is_leafref_prop(prop) or is_identityref_prop(prop))
 
-
 def is_terminal_prop(prop):
     return prop.stmt.keyword in ('leaf', 'leaflist')
-
 
 def is_union_prop(prop):
     return is_union_type_spec(prop.property_type)
 
-
 def is_union_type_spec(type_spec):
     return isinstance(type_spec, ptypes.UnionTypeSpec)
-
 
 def is_identityref_type_spec(type_spec):
     return isinstance(type_spec, ptypes.IdentityrefTypeSpec)
 
-
 def is_match_all(pattern):
     return pattern in ('[^\*].*', '\*')
-
 
 def get_typedef_stmt(type_stmt):
     while all([hasattr(type_stmt, 'i_typedef') and
@@ -421,12 +384,10 @@ def get_typedef_stmt(type_stmt):
         type_stmt = type_stmt.i_typedef.search_one('type')
     return type_stmt
 
-
 def get_top_class(clazz):
     while clazz is not None and not isinstance(clazz.owner, atypes.Package):
         clazz = clazz.owner
     return clazz
-
 
 def get_obj_name(clazz):
     obj_names = []
@@ -436,7 +397,6 @@ def get_obj_name(clazz):
         clazz = clazz.owner
     return '_'.join(reversed(obj_names))
 
-
 def get_qn(lang, element):
     qn = ''
     if lang == 'py':
@@ -444,7 +404,6 @@ def get_qn(lang, element):
     elif lang == 'cpp':
         qn = element.fully_qualified_cpp_name()
     return qn
-
 
 def get_element_path(lang, element, length=None):
     # path is consists of path segments(seg)
@@ -467,7 +426,6 @@ def get_element_path(lang, element, length=None):
         path = list(reversed(path))[:length]
         return sep.join(path)
 
-
 def _get_element_seg(element):
     seg = ''
     if any((is_pkg_element(element.owner),
@@ -478,7 +436,6 @@ def _get_element_seg(element):
             if prop.stmt == element.stmt:
                 seg = prop.name
     return seg.lower()
-
 
 def get_path_sep(lang):
     sep = ''
@@ -493,7 +450,7 @@ def has_list_ancestor(clazz):
     c = clazz.owner
     parents = []
 
-    while c is not None and not isinstance(c, atypes.Package):
+    while c is not None and not isinstance(c,atypes.Package):
         parents.append(c)
         c = c.owner
 
@@ -526,8 +483,7 @@ def get_qualified_yang_name(clazz):
 
 
 def get_unclashed_name(element, iskeyword):
-    name = snake_case(element.stmt.unclashed_arg if hasattr(
-        element.stmt, 'unclashed_arg') else element.stmt.arg)
+    name = snake_case(element.stmt.unclashed_arg if hasattr(element.stmt, 'unclashed_arg') else element.stmt.arg)
     if iskeyword(name) or iskeyword(name.lower()) or (
             element.owner is not None and element.stmt.arg.lower() == element.owner.stmt.arg.lower()):
         name = '%s_' % name

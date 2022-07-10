@@ -58,14 +58,14 @@ class FilePrinter(object):
         if self._start_tab.pop() != end_tab:
             raise Exception('Tab leak !!!')
 
-    def print_output(self, packages):
+    def print_output(self,packages):
         self._start_tab_leak_check()
         self.print_header(packages)
         self.print_body(packages)
         self.print_trailer(packages)
         self._check_tab_leak()
 
-    def print_header(self, packages):
+    def print_header(self,packages):
         pass
 
     @abc.abstractmethod

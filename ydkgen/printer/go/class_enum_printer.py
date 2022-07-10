@@ -21,7 +21,6 @@ class_enum_printer.py
 
 """
 
-
 class EnumPrinter(object):
 
     def __init__(self, ctx):
@@ -52,9 +51,9 @@ class EnumPrinter(object):
             for c in enum_literal.comment.split('\n'):
                 self.ctx.writeln('// %s' % c)
         self.ctx.writeln('%s_%s %s = "%s"' % (enum_class_prefix,
-                                              name,
-                                              enum_class_prefix,
-                                              enum_literal.stmt.arg))
+                                            name,
+                                            enum_class_prefix,
+                                            enum_literal.stmt.arg))
 
     def _print_enum_trailer(self, enum_class):
         self.ctx.lvl_dec()
@@ -68,8 +67,7 @@ class EnumPrinter(object):
         if enum_class.comment not in (None, ''):
             for c in enum_class.comment.split('\n'):
                 comment = '// %s\n' % c
-            comment = '// %s represents %s' % (
-                enum_class.qualified_go_name(), comment[3:])
+            comment = '// %s represents %s' % (enum_class.qualified_go_name(), comment[3:])
             self.ctx.write(comment)
         else:
             self.ctx.writeln('// %s' % enum_class.qualified_go_name())

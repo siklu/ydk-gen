@@ -45,12 +45,9 @@ class ApiModelBuilder(object):
 
         """
 
-        d_modules = [module for module in modules if hasattr(
-            module, 'is_deviation_module')]
-        modules = [module for module in modules if not hasattr(
-            module, 'is_deviation_module')]
-        only_modules = [
-            module for module in modules if module.keyword == 'module']
+        d_modules = [module for module in modules if hasattr(module, 'is_deviation_module')]
+        modules = [module for module in modules if not hasattr(module, 'is_deviation_module')]
+        only_modules = [module for module in modules if module.keyword == 'module']
 
         packages = []
         deviation_packages = []
@@ -61,8 +58,7 @@ class ApiModelBuilder(object):
             package.stmt = module
 
             if self.language == 'go':
-                package.name = get_go_package_name(
-                    package.name, self.bundle_name)
+                package.name = get_go_package_name(package.name, self.bundle_name)
             deviation_packages.append(package)
 
         for module in only_modules:
@@ -71,10 +67,8 @@ class ApiModelBuilder(object):
             package.stmt = module
 
             if self.language == 'go':
-                package.name = get_go_package_name(
-                    package.name, self.bundle_name)
-            self._create_expanded_api_model(
-                module, package, deviation_packages)
+                package.name = get_go_package_name(package.name, self.bundle_name)
+            self._create_expanded_api_model(module, package, deviation_packages)
             packages.append(package)
 
         packages.extend(deviation_packages)
@@ -91,8 +85,7 @@ class ApiModelBuilder(object):
         if enum_type_stmt is not None:
             enum_class = Enum(self.iskeyword)
             enum_class.stmt = enum_type_stmt
-            disambiguate_class_name_from_ancestors_and_siblings(
-                self.language, enum_class, pe)
+            disambiguate_class_name_from_ancestors_and_siblings(self.language, enum_class, pe)
             enum_type_stmt.parent.i_enum = enum_class
             enum_type_stmt.i_enum = enum_class
             pe.owned_elements.append(enum_class)
@@ -140,8 +133,7 @@ class ApiModelBuilder(object):
 
             else:
                 # check for identity_ref's
-                identity_ref_type = self.types_extractor.get_identity_ref_type_stmt(
-                    element.stmt)
+                identity_ref_type = self.types_extractor.get_identity_ref_type_stmt(element.stmt)
                 if identity_ref_type is not None:
                     if not hasattr(identity_ref_type.i_type_spec.base.i_identity, 'i_class'):
                         raise YdkGenException(
@@ -149,8 +141,7 @@ class ApiModelBuilder(object):
                     element.property_type = identity_ref_type.i_type_spec.base.i_identity.i_class
                 else:
                     # check for bits
-                    bits_ref_type = self.types_extractor.get_bits_type_stmt(
-                        element.stmt)
+                    bits_ref_type = self.types_extractor.get_bits_type_stmt(element.stmt)
                     if bits_ref_type is not None and not isinstance(element.property_type, Bits):
                         if not hasattr(bits_ref_type.parent, 'i_bits'):
                             raise YdkGenException(
@@ -172,8 +163,7 @@ class ApiModelBuilder(object):
             d_obj.d_stmts = set()
             for (d_module, d_stmt) in i_deviation[d_type]:
                 d_module_name = d_module.arg
-                target_package = [
-                    p for p in deviation_packages if p.stmt.arg == d_module_name][0]
+                target_package = [p for p in deviation_packages if p.stmt.arg == d_module_name][0]
                 d_obj.d_stmts.add(d_stmt)
                 if d_stmt.keyword == 'type':
                     d_obj.d_target = target.copy()
@@ -212,8 +202,7 @@ class ApiModelBuilder(object):
             # we have to create the enum
             enum_class = Enum(self.iskeyword)
             enum_class.stmt = enum_type
-            disambiguate_class_name_from_ancestors_and_siblings(
-                self.language, enum_class, parent_element)
+            disambiguate_class_name_from_ancestors_and_siblings(self.language, enum_class, parent_element)
             parent_element.owned_elements.append(enum_class)
             enum_class.owner = parent_element
             prop.property_type = enum_class
@@ -229,18 +218,14 @@ class ApiModelBuilder(object):
         elif union_type is not None and union_type == stmt.search_one('type'):
             def _add_union_type(union_type_stmt, parent_element):
                 for contained_type in union_type_stmt.i_type_spec.types:
-                    contained_enum_type = self.types_extractor.get_enum_type_stmt(
-                        contained_type)
-                    contained_bits_type = self.types_extractor.get_bits_type_stmt(
-                        contained_type)
-                    contained_union_type = self.types_extractor.get_union_type_stmt(
-                        contained_type)
+                    contained_enum_type = self.types_extractor.get_enum_type_stmt(contained_type)
+                    contained_bits_type = self.types_extractor.get_bits_type_stmt(contained_type)
+                    contained_union_type = self.types_extractor.get_union_type_stmt(contained_type)
 
                     if contained_enum_type is not None and contained_enum_type == contained_type:
                         enum_class = Enum(self.iskeyword)
                         enum_class.stmt = contained_enum_type
-                        disambiguate_class_name_from_ancestors_and_siblings(
-                            self.language, enum_class, parent_element)
+                        disambiguate_class_name_from_ancestors_and_siblings(self.language, enum_class, parent_element)
                         parent_element.owned_elements.append(enum_class)
                         enum_class.owner = parent_element
                         contained_enum_type.i_enum = enum_class
@@ -318,6 +303,7 @@ class ApiModelBuilder(object):
                         else:
                             stmt.unclashed_arg = '%s_' % stmt.arg
 
+
                 parent_element.owned_elements.append(clazz)
                 clazz.set_owner(parent_element, self.language)
 
@@ -335,8 +321,7 @@ class ApiModelBuilder(object):
                     for e in parent_element.owned_elements:
                         if isinstance(e, Property):
                             s = snake_case(e.stmt.arg)
-                            stmt_arg = (prop.stmt.unclashed_arg if hasattr(
-                                prop.stmt, 'unclashed_arg') else prop.stmt.arg)
+                            stmt_arg = (prop.stmt.unclashed_arg if hasattr(prop.stmt, 'unclashed_arg') else prop.stmt.arg)
                             if snake_case(stmt_arg) == s:
                                 prop.name = prop.name + '_'
 
@@ -347,16 +332,14 @@ class ApiModelBuilder(object):
             self._add_leaf_leaflist_prop(stmt, parent_element)
 
         if hasattr(stmt, 'i_deviation'):
-            self._add_to_deviation_package(
-                stmt, parent_element, deviation_packages)
+            self._add_to_deviation_package(stmt, parent_element, deviation_packages)
 
         # walk the children
-        _keywords = statements.data_definition_keywords + \
-            ['case', 'rpc', 'input', 'output', 'choice']
+        _keywords = statements.data_definition_keywords + ['case', 'rpc', 'input', 'output', 'choice']
         if hasattr(stmt, 'i_children'):
             self._sanitize_namespace(stmt)
 
-            child_stmts = []
+            child_stmts=[]
             if hasattr(stmt, 'i_key') and stmt.i_key is not None:
                 child_stmts.extend([s for s in stmt.i_key])
 
@@ -364,13 +347,12 @@ class ApiModelBuilder(object):
                 child_stmts = self._walk_children(stmt, _keywords)
 
             else:
-                _children = [child for child in stmt.i_children
-                             if (child not in child_stmts and child.keyword in _keywords)]
+                _children = [child for child in stmt.i_children \
+                    if (child not in child_stmts and child.keyword in _keywords)]
                 child_stmts.extend(_children)
 
             for child_stmt in child_stmts:
-                self._create_expanded_api_model(
-                    child_stmt, element, deviation_packages)
+                self._create_expanded_api_model(child_stmt, element, deviation_packages)
 
     # assumes stmt has attribute 'i_children' and language is 'cpp'
     def _walk_children(self, stmt, keywords):
@@ -381,7 +363,7 @@ class ApiModelBuilder(object):
 
         for child in stmt.i_children:
             if child not in children and child.keyword in keywords:
-                children.append(child)
+                    children.append(child)
 
         return children
 
@@ -407,7 +389,7 @@ class ApiModelBuilder(object):
                     for choice_child in stmt.i_children:
                         if choice_child.keyword == 'case':
                             if len(choice_child.i_children) > 0:
-                                choice_child = choice_child.i_children[0]
+                              choice_child = choice_child.i_children[0]
                         if choice_child.keyword in ['container', 'list', 'leaf', 'leaf-list']:
                             stmts.append(choice_child)
             all_stmts = [stmt for stmt in stmts]
@@ -425,8 +407,7 @@ class ApiModelBuilder(object):
                     if hasattr(stmt, 'i_augment'):
                         stmt.unclashed_arg = '%s_%s' % (stmt.top.arg, stmt.arg)
                     elif stmt.parent.keyword == 'case' and hasattr(stmt.parent.parent, 'i_augment'):
-                        stmt.unclashed_arg = '%s_%s' % (
-                            stmt.parent.parent.top.arg, stmt.arg)
+                        stmt.unclashed_arg = '%s_%s' % (stmt.parent.parent.top.arg, stmt.arg)
 
         clashes, stmts = _get_num_clashes(stmt.i_children)
         if len(clashes) > 0:
@@ -479,3 +460,4 @@ def disambiguate_class_name_from_ancestors_and_siblings(language, clazz, parent_
     for e in parent_element.owned_elements:
         if e.name == clazz.name:
             clazz.name = clazz.name + '_'
+

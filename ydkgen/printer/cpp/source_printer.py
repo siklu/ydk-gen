@@ -54,8 +54,7 @@ class SourcePrinter(MultiFilePrinter):
         self.ctx.writeln('#include <iostream>')
         self.ctx.writeln('#include <ydk/entity_util.hpp>')
         self.ctx.writeln('#include "bundle_info.hpp"')
-        self.ctx.writeln('#include "{0}"'.format(
-            multi_file.file_name.replace('.cpp', '.hpp')))
+        self.ctx.writeln('#include "{0}"'.format(multi_file.file_name.replace('.cpp', '.hpp')))
         for header_import in multi_file.imports:
             self.ctx.writeln(header_import)
         self.ctx.bline()
@@ -73,8 +72,7 @@ class SourcePrinter(MultiFilePrinter):
         self.ctx.bline()
 
     def _print_class(self, clazz):
-        ClassSourcePrinter(self.ctx, self.bundle_name,
-                           self.module_namespace_lookup).print_output(clazz)
+        ClassSourcePrinter(self.ctx, self.bundle_name, self.module_namespace_lookup).print_output(clazz)
 
     def _print_enums(self, package, classes):
         self.enum_printer.print_enum_to_string_funcs(package, classes)

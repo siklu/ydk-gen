@@ -40,8 +40,7 @@ class CppBindingsPrinter(LanguageBindingsPrinter):
         if sys.version_info > (3,):
             super().__init__(ydk_root_dir, bundle, generate_tests, one_class_per_module)
         else:
-            super(CppBindingsPrinter, self).__init__(
-                ydk_root_dir, bundle, generate_tests, one_class_per_module)
+            super(CppBindingsPrinter, self).__init__(ydk_root_dir, bundle, generate_tests, one_class_per_module)
         self.source_files = []
         self.header_files = []
 
@@ -53,21 +52,17 @@ class CppBindingsPrinter(LanguageBindingsPrinter):
             self._print_module(index, package, size)
 
         if self.generate_tests:
-            self._print_cmake_file(
-                self.packages, self.bundle_name, self.test_dir)
+            self._print_cmake_file(self.packages, self.bundle_name, self.test_dir)
         return (self.source_files, self.header_files)
 
     def _print_module(self, index, package, size):
-        print('Processing %d of %d %s' %
-              (index + 1, size, package.stmt.pos.ref))
+        print('Processing %d of %d %s' % (index + 1, size, package.stmt.pos.ref))
         # Skip generating module for empty modules
         if len(package.owned_elements) == 0:
             return
         builder = MultiFileBuilder(package, self.classes_per_source_file)
-        self._print_header_file(
-            package, builder.multi_file_data, self.models_dir)
-        self._print_source_file(
-            package, builder.multi_file_data, self.models_dir)
+        self._print_header_file(package, builder.multi_file_data, self.models_dir)
+        self._print_source_file(package, builder.multi_file_data, self.models_dir)
         if self.generate_tests:
             self._print_tests(package, self.test_dir)
 
@@ -76,22 +71,21 @@ class CppBindingsPrinter(LanguageBindingsPrinter):
                            self.identity_subclasses, self.bundle_name)
         for multi_file_header in [x for x in multi_file_data.multi_file_list if isinstance(x, MultiFileHeader)]:
             hp.print_output(
-                package,
-                multi_file_header,
-                path
-            )
+                            package,
+                            multi_file_header,
+                            path
+                            )
             if not multi_file_header.fragmented:
                 self.header_files.append(multi_file_header.file_name)
 
     def _print_source_file(self, package, multi_file_data, path):
-        sp = SourcePrinter(self.ypy_ctx, self.bundle_name,
-                           self.module_namespace_lookup)
+        sp = SourcePrinter(self.ypy_ctx, self.bundle_name, self.module_namespace_lookup)
         for multi_file_source in [x for x in multi_file_data.multi_file_list if isinstance(x, MultiFileSource)]:
             sp.print_output(
-                package,
-                multi_file_source,
-                path
-            )
+                            package,
+                            multi_file_source,
+                            path
+                            )
             file_name = multi_file_source.file_name
             if multi_file_source.fragmented:
                 file_name = os.path.join('fragmented', file_name)

@@ -234,8 +234,7 @@ class NamedElement(Element):
         if hasattr(self, 'goName'):
             return self.goName
 
-        stmt_name = escape_name(stmt.unclashed_arg if hasattr(
-            stmt, 'unclashed_arg') else stmt.arg)
+        stmt_name = escape_name(stmt.unclashed_arg if hasattr(stmt, 'unclashed_arg') else stmt.arg)
         name = camel_case(stmt_name)
         if stmt_name[-1] == '_':
             name = '%s_' % name
@@ -298,7 +297,6 @@ class Package(NamedElement):
     @property
     def augments_other(self):
         return self._augments_other
-
     @augments_other.setter
     def augments_other(self, augments_other):
         self._augments_other = augments_other
@@ -465,8 +463,7 @@ class Class(NamedElement):
             prop_types = [p.property_type]
             if isinstance(p.property_type, UnionTypeSpec):
                 for child_type_stmt in p.property_type.types:
-                    prop_types.extend(
-                        self._get_union_types(child_type_stmt, p))
+                    prop_types.extend(self._get_union_types(child_type_stmt, p))
             for prop_type in prop_types:
                 if isinstance(prop_type, Class) or isinstance(prop_type, Enum) or isinstance(prop_type, Bits):
                     if prop_type.get_package() != package:
@@ -546,8 +543,7 @@ class Class(NamedElement):
 
     @stmt.setter
     def stmt(self, stmt):
-        name = escape_name(stmt.unclashed_arg if hasattr(
-            stmt, 'unclashed_arg') else stmt.arg)
+        name = escape_name(stmt.unclashed_arg if hasattr(stmt, 'unclashed_arg') else stmt.arg)
         name = camel_case(name)
 
         if self.iskeyword(name):
@@ -737,8 +733,7 @@ class Property(NamedElement):
     def stmt(self, stmt):
         self._stmt = stmt
         # name = snake_case(stmt.arg)
-        name = snake_case(stmt.unclashed_arg if hasattr(
-            stmt, 'unclashed_arg') else stmt.arg)
+        name = snake_case(stmt.unclashed_arg if hasattr(stmt, 'unclashed_arg') else stmt.arg)
 
         if self.iskeyword(name) or self.iskeyword(name.lower()):
             name = '%s_' % name
@@ -811,8 +806,7 @@ class Enum(DataType):
         while stmt.parent is not None and not stmt.keyword in ('leaf', 'leaf-list', 'typedef'):
             stmt = stmt.parent
 
-        name = escape_name(stmt.unclashed_arg if hasattr(
-            stmt, 'unclashed_arg') else stmt.arg)
+        name = escape_name(stmt.unclashed_arg if hasattr(stmt, 'unclashed_arg') else stmt.arg)
         name = camel_case(name)
         if self.iskeyword(name):
             name = '%s%s' % ('Y', name)
@@ -962,8 +956,7 @@ def snake_case(input_text):
 
 
 def get_property_name(element, iskeyword):
-    name = snake_case(element.stmt.unclashed_arg if hasattr(
-        element.stmt, 'unclashed_arg') else element.stmt.arg)
+    name = snake_case(element.stmt.unclashed_arg if hasattr(element.stmt, 'unclashed_arg') else element.stmt.arg)
     if iskeyword(name) or iskeyword(name.lower()) or (
             element.owner is not None and element.stmt.arg.lower() == element.owner.stmt.arg.lower()):
         name = '%s_' % name
@@ -982,7 +975,7 @@ def camel_case(input_text):
     result = ''.join([_capitalize(word) for word in input_text.split('-')])
     result = ''.join([_capitalize(word) for word in result.split('_')])
     if input_text.startswith('_'):
-        result = '_'+result
+        result = '_'+result;
     return result
 
 

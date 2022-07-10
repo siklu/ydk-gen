@@ -104,8 +104,7 @@ class MultiFileBuilder(object):
 
     def _populate_multi_file_data(self, package):
         file_index = -1
-        self._create_and_append_multi_file(
-            MultiFileHeader, package, file_index, False, self.class_list)
+        self._create_and_append_multi_file(MultiFileHeader, package, file_index, False, self.class_list)
 
         if not self.is_all_identities and len(self.class_list) > self.classes_per_source_file:
             index = 0
@@ -118,17 +117,14 @@ class MultiFileBuilder(object):
                 index += 1
                 current_index += 1
                 if current_index >= self.classes_per_source_file or index >= len(self.class_list):
-                    self._create_and_append_multi_file(
-                        MultiFileHeader, package, file_index, True, fragmented_class_list)
-                    self._create_and_append_multi_file(
-                        MultiFileSource, package, file_index, True, fragmented_class_list)
+                    self._create_and_append_multi_file(MultiFileHeader, package, file_index, True, fragmented_class_list)
+                    self._create_and_append_multi_file(MultiFileSource, package, file_index, True, fragmented_class_list)
                     file_index += 1
 
                     fragmented_class_list = []
                     current_index = 0
         else:
-            self._create_and_append_multi_file(
-                MultiFileSource, package, file_index, False, self.class_list)
+            self._create_and_append_multi_file(MultiFileSource, package, file_index, False, self.class_list)
 
     def _create_and_append_multi_file(self, class_type, package, file_index, fragmented, class_list):
         multi_file = class_type(package, file_index, fragmented)
@@ -140,21 +136,18 @@ class MultiFileBuilder(object):
         if isinstance(multi_file, MultiFileHeader):
             while index < len(class_list):
                 clazz = class_list[index]
-                self.class_to_header_lookup[clazz.fully_qualified_cpp_name(
-                )] = multi_file.file_name
+                self.class_to_header_lookup[clazz.fully_qualified_cpp_name()] = multi_file.file_name
                 index += 1
 
         multi_file.class_list = class_list
 
     def _populate_imports_for_fragmented_files(self):
         for header in [x for x in self._multi_file_data.multi_file_list if x.fragmented and isinstance(x, MultiFileHeader)]:
-            header.imports = self._get_imported_headers_for_parents(
-                header.file_name, header.class_list)
+            header.imports = self._get_imported_headers_for_parents(header.file_name, header.class_list)
 
         for source in [x for x in self._multi_file_data.multi_file_list if x.fragmented and isinstance(x, MultiFileSource)]:
-            source.imports = self._get_imported_headers_for_children(
-                source.file_name.replace('.cpp', '.hpp'), source.class_list)
-
+            source.imports = self._get_imported_headers_for_children(source.file_name.replace('.cpp', '.hpp'), source.class_list)
+                    
     def _get_imported_headers_for_parents(self, current_header, classes):
         parents = []
         for clazz in classes:
@@ -167,17 +160,15 @@ class MultiFileBuilder(object):
     def _get_imported_headers_for_children(self, current_header, classes):
         children = []
         for clazz in classes:
-            child_classes = [nested_class for nested_class in clazz.owned_elements if isinstance(
-                nested_class, Class)]
+            child_classes = [nested_class for nested_class in clazz.owned_elements if isinstance(nested_class, Class)]
             for child in child_classes:
                 children.append(child)
         return self._get_imported_headers(current_header, children)
-
+    
     def _get_imported_headers(self, current_header, classes):
         imports_to_print = set()
         for clazz in classes:
-            imported_header = self.class_to_header_lookup[clazz.fully_qualified_cpp_name(
-            )]
+            imported_header = self.class_to_header_lookup[clazz.fully_qualified_cpp_name()]
             if imported_header != current_header:
                 import_stmt = '#include "{0}"'.format(imported_header)
                 imports_to_print.add(import_stmt)
