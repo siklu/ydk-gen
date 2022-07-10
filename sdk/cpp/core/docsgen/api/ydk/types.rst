@@ -114,9 +114,44 @@ YANG leaf, leaf-list, and list
 
         Leaf type from :cpp:enum:`YType<ydk::YType>`
 
-    .. cpp:member:: YFilter filter
+    .. cpp:member:: YFilter yfilter
 
-        Optional attribute of the YLeaf class which can be set to perform various :cpp:class:`filtering<YFilter>`
+        Optional attribute of the YLeaf class, which can be set to perform various :cpp:class:`filtering<ydk::YFilter>` operations
+
+    .. cpp:function:: void operator = (YFilter filter)
+
+        A shortcut operator to set `yfilter` value
+
+.. cpp:class:: YLeafList
+
+    Concrete class that represents a YANG leaf-list, to which multiple instances of data can be appended to.
+
+    .. cpp:function:: YLeafList(YType type, std::string name)
+
+        Constructs an instance of the `YLeafList`.
+
+        :param type: :cpp:enum:`YType<ydk::YType>`, type of the leaves in the leaf-list
+        :param name: YANG name of the leaf-list
+
+    .. cpp:member:: YFilter yfilter
+
+        Optional attribute of the YLeafList class, which can be set to perform various :cpp:class:`filtering<ydk::YFilter>` operations
+
+    .. cpp:function:: void append(Type val)
+
+        Appends a value to the leaf-list; the Type is one of YDK supported data types listed in :cpp:enum:`YType<ydk::YType>`
+
+    .. cpp:function:: void operator = (YFilter filter)
+
+        A shortcut operator to set `yfilter` value
+
+    .. cpp:function:: YLeaf & operator [] (size_t index)
+
+        Access function for the YLeafList elements by their index
+
+    .. cpp:function:: std::vector<YLeaf> getYLeafs() const
+
+        Access function to get all elements in the YLeafList.
 
 .. cpp:class:: ydk::YList
 
@@ -128,6 +163,13 @@ YANG leaf, leaf-list, and list
 
         :param key_names: list of strings, which represent names of keys for the list entities, including empty list.
         
+    .. cpp:function:: bool has_key(const std::string& key) const
+
+       Checks if list element with given key is present in the `YList`.
+
+        :param key: ``strings``, which represent list entity key(s).
+        :return: ``true``, if element with matching key is in the list, ``false`` - otherwise.
+
     .. cpp:function:: std::shared_ptr<Entity> operator [] (const std::string& key) const
 
         Gets `YList` entity, which has matching `key` value.
@@ -186,15 +228,6 @@ YANG leaf, leaf-list, and list
         :return: ``std::shared_ptr<Entity>`` for the found entity.
         :raises: `YInvalidArgumentError` exception if `item` value is out of bounds.
         
-.. cpp:class:: YLeafList
-
-    Concrete class that represents a YANG leaf-list, to which multiple instances of data can be appended to.
-
-    .. cpp:member:: YFilter filter
-
-        Optional attribute of the YLeafList class which can be set to perform various :cpp:class:`filtering<YFilter>`
-
-
 YANG container and list
 =======================
 
@@ -216,7 +249,7 @@ YANG container and list
 
     .. cpp:member:: YFilter yfilter
     
-        Optional attribute of the `Entity` class, which can be set to perform various :cpp:class:`filtering<YFilter>`
+        Optional attribute of the `Entity` class, which can be set to perform various :cpp:class:`filtering<ydk::YFilter>` operations
 
     .. cpp:member:: bool is_presence_container
     
@@ -245,6 +278,14 @@ YANG container and list
     .. cpp:member::     YList* ylist
 
         If this entity is member of a list, the `ylist` is set to a pointer of corresponding `YList` class
+
+    .. cpp:function:: std::shared_ptr<Entity> clone() const
+
+        Returns copy of this entity
+
+    .. cpp:function:: std::shared_ptr<Entity> clone_ptr() const
+
+        Returns new instance of the entity class
 
     .. cpp:function:: std::string get_segment_path() const
 
@@ -276,7 +317,7 @@ YANG container and list
         Sets `yfilter` value in leaf
 
         :param path: YANG name of the leaf
-        :param filter: :cpp:class:`filtering<YFilter>`, filter value
+        :param filter: :cpp:class:`filtering<ydk::YFilter>`, filter value
 
     .. cpp:function:: std::vector<std::pair<std::string, LeafData> > get_name_leaf_data() const
 

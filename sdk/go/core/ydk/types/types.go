@@ -1,22 +1,25 @@
-// Package types provides built-in types specified in
-// YANG RFC 6020 and types used in YDK Go APIs.
-//
-// YANG Development Kit Copyright 2017 Cisco Systems. All rights reserved.
-// Licensed to the Apache Software Foundation (ASF) under one
-// or more contributor license agreements.  See the NOTICE file
-// distributed with this work for additional information
-// regarding copyright ownership.  The ASF licenses this file
-// to you under the Apache License, Version 2.0 (the
-// "License"); you may not use this file except in compliance
-// with the License.  You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
+/*  ----------------------------------------------------------------
+ YDK - YANG Development Kit
+ Copyright 2016-2019 Cisco Systems. All rights reserved.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -------------------------------------------------------------------
+ This file has been modified by Yan Gorelik, YDK Solutions.
+ All modifications in original under CiscoDevNet domain
+ introduced since October 2019 are copyrighted.
+ All rights reserved under Apache License, Version 2.0.
+ ------------------------------------------------------------------*/
+
 package types
 
 import (
@@ -253,7 +256,7 @@ func EntityToCollection (e Entity) *EntityCollection {
 		ec := NewEntityCollection()
 		return &ec
 	}
-	
+
 	ec, ok := e.(EntityCollection)
 	if ok {
 		return &ec
@@ -271,7 +274,7 @@ func IsEntityCollection (e Entity) bool {
 	if e == nil {
 		return false
 	}
-	
+
 	_, ok := e.(EntityCollection)
 	if ok {
 		return true
@@ -280,7 +283,7 @@ func IsEntityCollection (e Entity) bool {
 		if ok {
 			return true
 		}
-	} 
+	}
 	return false
 }
 
@@ -298,6 +301,7 @@ func (ec *EntityCollection) Add(entities ... Entity) {
 }
 
 func (ec *EntityCollection) Append(entities []Entity) {
+	if ec.EcMap == nil { ec.Clear() }
 	for i:=0; i<len(entities); i++ {
 		entity := entities[i]
 		key := GetSegmentPath(entity)
@@ -306,15 +310,17 @@ func (ec *EntityCollection) Append(entities []Entity) {
 }
 
 func (ec *EntityCollection) Len() int {
-    return ec.EcMap.Len()
+	if ec.EcMap == nil { ec.Clear() }
+	return ec.EcMap.Len()
 }
 
 func (ec *EntityCollection) Get(key string) (Entity, bool) {
-    elem, exists := ec.EcMap.Get(key)
-    if exists {
-        return elem.(Entity), exists
-    }
-    return nil, exists
+	if ec.EcMap == nil { ec.Clear() }
+	elem, exists := ec.EcMap.Get(key)
+	if exists {
+		return elem.(Entity), exists
+	}
+	return nil, exists
 }
 
 func (ec *EntityCollection) GetItem(item int) Entity {
@@ -326,16 +332,18 @@ func (ec *EntityCollection) GetItem(item int) Entity {
 }
 
 func (ec *EntityCollection) HasKey(key string) bool {
-    _, exists := ec.EcMap.Get(key)
-    return exists
+	if ec.EcMap == nil { ec.Clear() }
+	_, exists := ec.EcMap.Get(key)
+	return exists
 }
 
 func (ec *EntityCollection) Pop(key string) (Entity, bool) {
-    iEntity, exists := ec.EcMap.Pop(key)
-    if !exists {
-        return nil, exists
-    }
-    return iEntity.(Entity), exists
+	if ec.EcMap == nil { ec.Clear() }
+	iEntity, exists := ec.EcMap.Pop(key)
+	if !exists {
+		return nil, exists
+	}
+	return iEntity.(Entity), exists
 }
 
 func (ec *EntityCollection) Clear() {
@@ -343,10 +351,12 @@ func (ec *EntityCollection) Clear() {
 }
 
 func (ec *EntityCollection) Keys() []string {
-    return ec.EcMap.Keys()
+	if ec.EcMap == nil { ec.Clear() }
+	return ec.EcMap.Keys()
 }
 
 func (ec *EntityCollection) Entities() []Entity {
+	if ec.EcMap == nil { ec.Clear() }
 	entities := make([]Entity, ec.Len())
 	iEntities := ec.EcMap.Values()
 	for i:=0; i<ec.Len(); i++ {
@@ -356,23 +366,24 @@ func (ec *EntityCollection) Entities() []Entity {
 }
 
 func (ec *EntityCollection) String() string {
-    if ec.Len() == 0 {
-        return "EntityCollection is empty"
-    }
-    entities := ec.Entities()
-    entity_str := make([]string, ec.Len())
-    for i, entity := range entities {
-        entity_str[i] = EntityToString(entity)
-    }
-    return fmt.Sprintf("EntityCollection [%s]", strings.Join(entity_str, "; "))
+	if ec.Len() == 0 {
+		return "EntityCollection is empty"
+	}
+	entities := ec.Entities()
+	entity_str := make([]string, ec.Len())
+	for i, entity := range entities {
+		entity_str[i] = EntityToString(entity)
+	}
+	return fmt.Sprintf("EntityCollection [%s]", strings.Join(entity_str, "; "))
 }
 
 func (ec *EntityCollection) SetFilter(filter yfilter.YFilter) {
+	if ec.EcMap == nil { ec.Clear() }
 	iEntities := ec.EcMap.Values()
 	for i:=0; i<ec.Len(); i++ {
 		ent := iEntities[i].(Entity)
 		SetEntityFilter(ent, filter)
-	}	
+	}
 }
 
 type Config = EntityCollection
@@ -473,16 +484,39 @@ func HasDataOrFilter(entity Entity) bool {
 	entityData := entity.GetEntityData()
 	if (entityData.YFilter != yfilter.NotSet) { return true }
 
-	// children
+	// checking leaves
+	leafs := GetYLeafs(entityData)
+	v := reflect.ValueOf(entity).Elem()
+	for _, leaf := range leafs {
+		field := v.FieldByName(leaf.GoName)
+		if field.Kind() != reflect.Slice {
+			if leaf.Value != nil { return true }
+		} else {
+			for _, l := range field.Interface().([]interface{}) {
+				if l != nil { return true }
+			}
+		}
+	}
+
+	// checking children
 	children := GetYChildren(entityData)
 	for _, child := range children {
 		if child.Value != nil {
-			yf := child.Value.GetEntityData().YFilter
-			if (yf != yfilter.NotSet || HasDataOrFilter(child.Value)) {
+			if HasDataOrFilter(child.Value) {
 				return true
 			}
 		}
 	}
+	return false
+}
+
+// HasData returns a bool representing whether the entity
+// or any of its children have data set
+func HasData(entity Entity) bool {
+	if entity == nil { return false }
+	if GetPresenceFlag(entity) { return true }
+
+	entityData := entity.GetEntityData()
 
 	// checking leafs
 	leafs := GetYLeafs(entityData)
@@ -499,7 +533,42 @@ func HasDataOrFilter(entity Entity) bool {
 		}
 	}
 
+	// children
+	children := GetYChildren(entityData)
+	for _, child := range children {
+		if HasData(child.Value) {
+			return true
+		}
+	}
 	return false
+}
+
+func GetLeafValue(value interface{}) LeafData {
+	var leafData LeafData
+	switch value.(type) {
+	case yfilter.YFilter:
+		leafData = LeafData{IsSet: false, Filter: value.(yfilter.YFilter)}
+	case LeafData:
+	    leafData = value.(LeafData)
+	    leafData.IsSet = true
+	case map[string]bool:
+		// bits
+		var used_bits []string
+		for bit, enabled := range(value.(map[string]bool)) {
+			if enabled {
+				used_bits = append(used_bits, bit)
+			}
+		}
+		v := strings.Join(used_bits, " ")
+		leafData = LeafData{IsSet: true, Value: v}
+	default:
+		var v string
+		if reflect.TypeOf(value) != reflect.TypeOf(Empty{}) {
+			v = fmt.Sprintf("%v", value)
+		}
+		leafData = LeafData{IsSet: true, Value: v}
+	}
+	return leafData
 }
 
 // GetEntityPath returns an EntityPath struct for the given entity
@@ -514,37 +583,32 @@ func GetEntityPath(entity Entity) EntityPath {
 	for name, ileaf := range leafs {
 		leaf := ileaf.(YLeaf)
 		field := v.FieldByName(leaf.GoName)
-
-		if leaf.Value != nil && field.Kind() != reflect.Slice {
-			switch leaf.Value.(type) {
-			case yfilter.YFilter:
-				// yfilter
-				leafData = LeafData{
-					IsSet: true, Filter: leaf.Value.(yfilter.YFilter)}
-			case map[string]bool:
-				// bits
-				var used_bits []string
-				for bit, enabled := range(leaf.Value.(map[string]bool)) {
-					if enabled {
-						used_bits = append(used_bits, bit)
-					}
-				}
-				v := strings.Join(used_bits, " ")
-				leafData = LeafData{IsSet: true, Value: v}
-			default:
-				var v string
-				if reflect.TypeOf(leaf.Value) != reflect.TypeOf(Empty{}) {
-					v = fmt.Sprintf("%v", leaf.Value)
-				}
-				leafData = LeafData{
-					IsSet: true, Value: v}
-			}
+	    if !field.IsValid() || leaf.Value == nil  {
+			continue
+		}
+		if field.Kind() != reflect.Slice {
+			leafData = GetLeafValue(leaf.Value)
+            //fmt.Printf("Adding leaf: name: %s, data: %v\n", name, leafData)
 			entityPath.ValuePaths = append(
 				entityPath.ValuePaths,
 				NameLeafData{Name: name, Data: leafData})
+		} else {
+		    // leaf-list
+		    sliceInt := leaf.Value.([]interface{})
+			for i := range sliceInt {
+				leafData = GetLeafValue(sliceInt[i])
+				path := name
+				if len(leafData.Value) > 0 {
+				    path = fmt.Sprintf("%s[.=\"%v\"]", name, leafData.Value)
+				    leafData.Value = ""
+				}
+				//fmt.Printf("Adding leaf-list: path: %s, data: %v\n", path, leafData)
+				entityPath.ValuePaths = append(
+					entityPath.ValuePaths,
+					NameLeafData{Name: path, Data: leafData})
+			}
 		}
 	}
-
 	return entityPath
 }
 
@@ -614,7 +678,7 @@ func SetValue(entity Entity, valuePath string, value interface{}) {
 		} else if v.Type() == reflect.TypeOf(BitsList{}) {
 			bitsValue := make(map[string]bool)
 			bitsValue[value.(string)] = true
-			
+
 			bitslist := v.Interface().(BitsList)
 			bitslist.Value = append(bitslist.Value, bitsValue)
 
@@ -689,8 +753,8 @@ type DataNode struct {
 	Private interface{}
 }
 
-// RootSchemaNode represents the root of the SchemaTree. 
-// It can be used to instantiate a DataNode tree or an Rpc object. 
+// RootSchemaNode represents the root of the SchemaTree.
+// It can be used to instantiate a DataNode tree or an Rpc object.
 // The children of the RootSchemaNode represent the top level SchemaNode in the YANG module submodules.
 type RootSchemaNode struct {
 	Private interface{}
@@ -717,7 +781,7 @@ type COpenDaylightServiceProvider struct {
 
 // Repository represents the Repository of YANG models.
 // A instance of the Repository will be used to create a RootSchemaNode given a set of ©pabilities.
-// Behind the scenes the repository is responsible for loading and parsing the YANG modules and creating the SchemaNode tree. 
+// Behind the scenes the repository is responsible for loading and parsing the YANG modules and creating the SchemaNode tree.
 type Repository struct {
 	Path    string
 	Private interface{}
@@ -782,8 +846,8 @@ func GetRelativeEntityPath(current_node Entity, ancestor Entity, path string) st
 
 }
 
-// IsSet returns whether the given filter is set or not
-func IsSet(Filter yfilter.YFilter) bool {
+// IsFilterSet returns whether the given filter is set or not
+func IsFilterSet(Filter yfilter.YFilter) bool {
 	return Filter != yfilter.NotSet
 }
 
@@ -833,33 +897,28 @@ func deepValueEqual(e1, e2 Entity) bool {
 
 	marker := make(map[string]bool)
 
-	ret := true
 	for k, c1 := range children1 {
 		if c1.Value != nil {
 			marker[k] = true
-			if HasDataOrFilter(c1.Value) {
-				c2, ok := children2[k]
-				if ok && deepValueEqual(c1.Value, c2.Value) {
-					ret = ret && nameValuesEqual(c1.Value, c2.Value)
-				} else {
-					ret = false
-					break
-				}
+			c2, ok := children2[k]
+			if ok && deepValueEqual(c1.Value, c2.Value) {
+				continue
+			} else {
+				return false
 			}
 		}
 	}
 
 	for k := range children2 {
-		if children2[k].Value != nil{
+		if children2[k].Value != nil {
 			_, ok := marker[k]
 			if !ok {
-				ret = false
-				break
+				return false
 			}
 		}
 	}
 
-	return ret
+	return nameValuesEqual(e1, e2)
 }
 
 // EntityEqual returns whether the entities x and y and their children are equal in value
@@ -872,6 +931,10 @@ func EntityEqual(x, y Entity) bool {
 
 func AddKeyToken(attr interface{}, attrName string) string {
     attrStr := fmt.Sprintf("%v", attr)
+    if attrStr == "{}" {
+        // correct key value for type Empty
+        attrStr = ""
+    }
     var token string
     if strings.Index(attrStr, "'") >= 0 {
         token = fmt.Sprintf("[%s=\"%s\"]", attrName, attrStr)
@@ -991,7 +1054,6 @@ func PathToEntity(entity Entity, absPath string) Entity {
 	return nil
 }
 
-
 func keyInSlice(k string, v []string) bool {
 	for _, e := range v {
 		if e == k {
@@ -1018,7 +1080,7 @@ func getMapKeys(m map[string]string) []string {
 		i++
 	}
 	sort.Strings(keys)
-	return keys	
+	return keys
 }
 
 type StringPair struct {
@@ -1068,4 +1130,64 @@ func EntityDiff(ent1 Entity, ent2 Entity) map[string]StringPair {
 		}
 	}
 	return diffs
+}
+
+func copyLeaves(originalEntity, clonedEntity Entity) {
+	entityPath := GetEntityPath(originalEntity)
+	for _, leafData := range entityPath.ValuePaths {
+		if leafData.Data.IsSet {
+			leafName := leafData.Name
+			leafValue := leafData.Data.Value
+			// fmt.Printf("Setting leaf '%s' value '%s'\n", leafName, leafValue)
+			bracketPos := strings.Index(leafName, "[.=")
+			if bracketPos != -1 {
+				// Here we have leaf-list
+				leafValue = leafName[bracketPos+4 : len(leafName)-2]
+				leafName = leafName[0 : bracketPos]
+			}
+			SetValue(clonedEntity, leafName, leafValue)
+		}
+	}
+}
+
+func copyChildren(originalEntity, clonedEntity Entity) {
+	children := GetYChildren(originalEntity.GetEntityData())
+	for _, child := range children {
+		childEntity := child.Value
+		if HasData(childEntity) {
+			childEntityData := childEntity.GetEntityData()
+			childYangName := childEntityData.YangName
+			// fmt.Printf("Cloning child '%s' with path '%s'\n",
+			// 		childYangName, childEntityData.SegmentPath)
+			clonedChild := GetChildByName(clonedEntity, childYangName, childEntityData.SegmentPath)
+			if clonedChild == nil {
+				panic("copyChildren: Failed to get entity child by YANG name")
+			}
+			SetParent(clonedChild, clonedEntity)
+			if IsPresenceContainer(clonedChild) {
+				SetPresenceFlag(clonedChild)
+			}
+			copyLeaves(childEntity, clonedChild);
+			copyChildren(childEntity, clonedChild);
+			clonedChild.GetEntityData()
+		}
+	}
+}
+
+// NewEntityOfType: Function to create new instance of given Entity
+func NewEntityOfType(ent Entity) Entity {
+	entType := reflect.TypeOf(ent).Elem()
+	entPtr := reflect.New(entType)
+	entInt := entPtr.Interface()
+	entClone := entInt.(Entity)
+	return entClone
+}
+
+// EntityClone - Function to clone an Entity
+func EntityClone(ent Entity) Entity {
+    entClone := NewEntityOfType(ent)
+	copyLeaves(ent, entClone);
+	copyChildren(ent, entClone);
+	entClone.GetEntityData()
+	return entClone
 }

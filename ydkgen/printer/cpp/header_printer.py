@@ -1,5 +1,5 @@
 #  ----------------------------------------------------------------
-# Copyright 2016 Cisco Systems
+# Copyright 2016-2019 Cisco Systems
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 
 """
-header_printer.py
+ header_printer.py
 
- prints C++ classes
-
+ Prints C++ classes
 """
-import sys
+
 from ydkgen.api_model import Class
 from ydkgen.builder import MultiFileHeader
 from ydkgen.printer import MultiFilePrinter
@@ -31,10 +35,7 @@ from .class_enum_printer import EnumPrinter
 
 class HeaderPrinter(MultiFilePrinter):
     def __init__(self, ctx, identity_subclasses, bundle_name):
-        if sys.version_info > (3,):
-            super().__init__(ctx)
-        else:
-            super(HeaderPrinter, self).__init__(ctx)
+        super().__init__(ctx)
         self.enum_printer = EnumPrinter(self.ctx)
         self.identity_subclasses = identity_subclasses
         self.bundle_name = bundle_name
@@ -49,7 +50,8 @@ class HeaderPrinter(MultiFilePrinter):
         self._print_enums(package, multi_file.class_list, multi_file.file_name, (not multi_file.fragmented))
 
     def print_header(self, package, multi_file):
-        assert isinstance(multi_file, MultiFileHeader)
+        if not isinstance(multi_file, MultiFileHeader):
+            raise AssertionError()
         self.p = package
         self._print_include_guard_header(multi_file.include_guard)
         self._print_imports(package, multi_file.imports)
@@ -58,7 +60,8 @@ class HeaderPrinter(MultiFilePrinter):
         self.ctx.bline()
 
     def print_trailer(self, package, multi_file):
-        assert isinstance(multi_file, MultiFileHeader)
+        if not isinstance(multi_file, MultiFileHeader):
+            raise AssertionError()
         self.ctx.bline()
         self.ctx.writeln('}')
         self.ctx.writeln('}')
@@ -95,7 +98,6 @@ class HeaderPrinter(MultiFilePrinter):
         self._print_class_trailer(clazz)
 
     def _print_class_header(self, clazz):
-        parents = 'Entity'
         if isinstance(clazz.owner, Class):
             self.ctx.bline()
         class_name = clazz.qualified_cpp_name()

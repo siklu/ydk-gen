@@ -31,6 +31,7 @@
 #include "entity_util.hpp"
 #include "logger.hpp"
 #include "types.hpp"
+#include "errors.hpp"
 
 using namespace std;
 
