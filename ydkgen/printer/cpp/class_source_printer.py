@@ -64,7 +64,6 @@ class ClassSourcePrinter(object):
             return
         self._print_bundle_name_function(clazz)
         self._print_yang_models_function(clazz)
-        self._print_capabilities_lookup_function(clazz)
         self._print_class_has_data(clazz, leafs, children)
         self._print_class_has_operation(clazz, leafs, children)
         self._print_class_get_absolute_path(clazz)
