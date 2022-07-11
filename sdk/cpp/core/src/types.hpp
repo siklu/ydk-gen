@@ -419,8 +419,6 @@ std::string get_bool_string(const std::string& value);
 
 enum class EncodingFormat { XML, JSON };
 
-enum class EncodingFormat { XML, JSON };
-
 std::string to_string(YFilter yfilter);
 
 enum class Protocol { restconf, netconf };
