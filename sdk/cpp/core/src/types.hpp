@@ -283,16 +283,13 @@ class YLeaf {
 
   bool& operator[](std::string key);
 
-
   bool is_set;
 
   std::string value_namespace;
   std::string value_namespace_prefix;
 
- YFilter yfilter;
-    void operator = (YFilter filter) {
-        yfilter = filter;
-    };
+  YFilter yfilter;
+  void operator=(YFilter filter) { yfilter = filter; };
   void store_value(std::string&& val);
   std::string get_bits_string() const;
 
@@ -340,10 +337,8 @@ class YLeafList {
   virtual std::vector<YLeaf> getYLeafs() const;
   virtual void clear();
 
- YFilter yfilter;
-  void operator = (YFilter filter) {
-        yfilter = filter;
-    };
+  YFilter yfilter;
+  void operator=(YFilter filter) { yfilter = filter; };
 
  public:
   std::vector<YLeaf> values;
@@ -361,7 +356,7 @@ class YList {
   std::vector<std::shared_ptr<Entity>> entities() const;
   std::vector<std::string> keys() const;
   bool has_key(const std::string& key) const;
-    std::size_t len() const;
+  std::size_t len() const;
 
   void append(std::shared_ptr<Entity> ep);
   void extend(std::initializer_list<std::shared_ptr<Entity>> ep_list);
@@ -418,12 +413,11 @@ class YListWrapper : public YList {
   MapWrapperIterator end() const {
     return boost::make_transform_iterator(entity_map.cend(), Func());
   }
-std::string get_bool_string(const std::string & value);
-
-enum class EncodingFormat {
-    XML,
-    JSON
 };
+
+std::string get_bool_string(const std::string& value);
+
+enum class EncodingFormat { XML, JSON };
 
 enum class EncodingFormat { XML, JSON };
 
