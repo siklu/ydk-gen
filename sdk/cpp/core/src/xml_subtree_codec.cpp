@@ -202,8 +202,7 @@ static void check_and_set_leaf(Entity &entity, Entity *parent,
 
 static string resolve_leaf_value_namespace(const string &content,
                                            const string &name_space,
-                                           const string &name_space_prefix,
-                                           Entity *entity) {
+                                           const string &name_space_prefix) {
   string c{content};
   if (name_space.size() > 0 && name_space_prefix.size() > 0) {
     if (content.find(name_space_prefix) != string::npos &&
