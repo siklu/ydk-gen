@@ -230,7 +230,7 @@ static void check_and_set_content(Entity &entity, const string &leaf_name,
       xmlFree(nsList);
     }
     string c = resolve_leaf_value_namespace(to_string(content), name_space,
-                                            name_space_prefix, &entity);
+                                            name_space_prefix);
 
     YLOG_DEBUG("XMLCodec: Creating leaf '{}' with value '{}'", leaf_name, c);
     entity.set_value(leaf_name, c, name_space, name_space_prefix);
