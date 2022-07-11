@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "../src/errors.hpp"
 #include "../src/types.hpp"
 #include "catch.hpp"
 
