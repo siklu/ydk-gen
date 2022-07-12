@@ -19,7 +19,6 @@
 #include <iostream>
 #include <string>
 #include <ydk/crud_service.hpp>
-#include <ydk/errors.hpp>
 #include <ydk/path_api.hpp>
 #include <ydk/restconf_provider.hpp>
 #include <ydk/types.hpp>

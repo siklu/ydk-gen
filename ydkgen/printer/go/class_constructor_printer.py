@@ -1,5 +1,5 @@
 #  ----------------------------------------------------------------
-# Copyright 2016 Cisco Systems
+# Copyright 2016-2019 Cisco Systems
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 
 """
-source_printer.py
+ source_printer.py
 
- prints Go class constructor
-
+ Prints Go class constructor
 """
-import sys
+
 from functools import reduce
 from ydkgen.api_model import Bits, Class, DataType, Enum
 from pyang.types import PathTypeSpec, UnionTypeSpec
@@ -31,10 +35,7 @@ from ydkgen.common import is_list_element
 
 class ClassConstructorPrinter(FunctionPrinter):
     def __init__(self, ctx, clazz, leafs, identity_subclasses):
-        if sys.version_info > (3,):
-            super().__init__(ctx, clazz, leafs)
-        else:
-            super(ClassConstructorPrinter, self).__init__(ctx, clazz, leafs)
+        super().__init__(ctx, clazz, leafs)
         self.identity_subclasses = identity_subclasses
 
     def print_function_header(self):
@@ -172,16 +173,14 @@ class ClassConstructorPrinter(FunctionPrinter):
             if id_subclasses is None:
                 meta_info_data.doc_link = prop.qualified_go_name()
             else:
-                meta_info_data.doc_link = self._get_many_docstring(
-                    id_subclasses, property_type)
+                meta_info_data.doc_link = self._get_many_docstring(id_subclasses, property_type)
                 meta_info_data.doc_link_description = 'one of the following: '
             if prop.is_many:
                 meta_info_data.doc_link = 'slice of %s' % meta_info_data.doc_link
         else:
             meta_info_data.doc_link = get_type_name(property_type)
             if prop.stmt.keyword == 'leaf-list':
-                meta_info_data.doc_link = 'slice of %s' % get_type_name(
-                    property_type)
+                meta_info_data.doc_link = 'slice of %s' % get_type_name(property_type)
             elif prop.stmt.keyword == 'anyxml':
                 return meta_info_data
 
@@ -190,8 +189,7 @@ class ClassConstructorPrinter(FunctionPrinter):
                 if prop.stmt.i_leafref_ptr is not None:
                     ref_class = prop.stmt.i_leafref_ptr[0].parent.i_class
                     ref_prop = prop.stmt.i_leafref_ptr[0].i_property
-                    ref_path = '%s.%s' % (
-                        ref_class.get_package().name, ref_prop.qualified_go_name())
+                    ref_path = '%s.%s' % (ref_class.get_package().name, ref_prop.qualified_go_name())
                     meta_info_data.target_of_leafref = ref_path
             elif isinstance(type_spec, UnionTypeSpec):
                 pairs = zip(meta_info_data.children, type_spec.types)
@@ -248,21 +246,16 @@ class ClassConstructorPrinter(FunctionPrinter):
             pass
             if type_depth == 1:
                 properties_description.append('one of the following types:')
-            temp = [' '.join(self._get_type_doc(c, type_depth + 1))
-                    for c in meta_info_data.children]
+            temp = [' '.join(self._get_type_doc(c, type_depth + 1)) for c in meta_info_data.children]
             temp = reduce(lambda a, b: '%s, or %s' % (a, b), temp)
             properties_description.append('%s.' % temp)
         else:
-            self._add_comment_on_restriction(
-                properties_description, meta_info_data, type_depth)
-            self._add_comment_on_leaf_ref_source(
-                properties_description, meta_info_data)
-            self._add_comment_on_mandatory(
-                properties_description, meta_info_data)
+            self._add_comment_on_restriction(properties_description, meta_info_data, type_depth)
+            self._add_comment_on_leaf_ref_source(properties_description, meta_info_data)
+            self._add_comment_on_mandatory(properties_description, meta_info_data)
             # # self._add_comment_on_presence(description, meta_info_data)
             self._add_comment_on_units(properties_description, meta_info_data)
-            self._add_comment_on_default_value(
-                properties_description, meta_info_data)
+            self._add_comment_on_default_value(properties_description, meta_info_data)
             self._add_comment_on_status(properties_description, meta_info_data)
 
         return properties_description
@@ -271,8 +264,7 @@ class ClassConstructorPrinter(FunctionPrinter):
         target = meta_info_data.doc_link
         if isinstance(meta_info_data.doc_link, list):
             doc_link = map(lambda l: '%s' % l, meta_info_data.doc_link)
-            target = '%s%s' % (
-                meta_info_data.doc_link_description, ''.join(doc_link))
+            target = '%s%s' % (meta_info_data.doc_link_description, ''.join(doc_link))
         target = target.lstrip()
 
         prop_restriction = self._get_property_restriction(meta_info_data)
@@ -287,8 +279,7 @@ class ClassConstructorPrinter(FunctionPrinter):
         prop_restriction = None
 
         if len(meta_info_data.pattern) > 0:
-            prop_restriction = 'with pattern: {0}'.format(
-                meta_info_data.pattern[0])
+            prop_restriction = 'with pattern: {0}'.format(meta_info_data.pattern[0])
         else:
             if len(meta_info_data.prange) > 0:
                 restriction = format_range_string(meta_info_data.prange)
@@ -301,8 +292,7 @@ class ClassConstructorPrinter(FunctionPrinter):
 
     def _add_comment_on_leaf_ref_source(self, description, meta_info_data):
         if len(meta_info_data.target_of_leafref) > 0:
-            description.append('Refers to %s' %
-                               (meta_info_data.target_of_leafref))
+            description.append('Refers to %s' % (meta_info_data.target_of_leafref))
 
     def _add_comment_on_mandatory(self, description, meta_info_data):
         if meta_info_data.mandatory:
@@ -318,8 +308,7 @@ class ClassConstructorPrinter(FunctionPrinter):
 
     def _add_comment_on_default_value(self, description, meta_info_data):
         if len(meta_info_data.default_value) > 0:
-            description.append('The default value is %s.' %
-                               meta_info_data.default_value)
+            description.append('The default value is %s.' % meta_info_data.default_value)
 
     # todo: untested
     def _add_comment_on_status(self, description, meta_info_data):

@@ -1,5 +1,5 @@
 #  ----------------------------------------------------------------
-# Copyright 2016 Cisco Systems
+# Copyright 2016-2019 Cisco Systems
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 
 """
  module_printer.py
 
  YANG model driven API, python emitter.
-
 """
-import sys
+
 from ydkgen.api_model import Class, Enum, Package
 from ydkgen.common import convert_to_reStructuredText
 
@@ -32,15 +36,10 @@ from ydkgen.printer.file_printer import FilePrinter
 class ModulePrinter(FilePrinter):
 
     def __init__(self, ctx, extra_args):
-        if sys.version_info > (3,):
-            super().__init__(ctx)
-        else:
-            super(ModulePrinter, self).__init__(ctx)
-        self.one_class_per_module = extra_args.get(
-            'one_class_per_module', False)
+        super().__init__(ctx)
+        self.one_class_per_module = extra_args.get('one_class_per_module', False)
         self.identity_subclasses = extra_args.get('identity_subclasses', {})
-        self.module_namespace_lookup = extra_args.get(
-            'module_namespace_lookup', {})
+        self.module_namespace_lookup = extra_args.get('module_namespace_lookup', {})
         self.generate_meta = extra_args.get('generate_meta', False)
 
     def print_header(self, package):
@@ -76,16 +75,15 @@ class ModulePrinter(FilePrinter):
         self.ctx.writeln('"""')
 
     def _print_static_imports(self):
-        self.ctx.writeln("import sys")
         self.ctx.writeln("from collections import OrderedDict")
         self.ctx.bline()
+        self.ctx.writeln("from ydk.types import Entity as _Entity_")
+        self.ctx.writeln("from ydk.types import EntityPath, Identity, Enum, YType, YLeaf, YLeafList, YList, LeafDataList, Bits, Empty, Decimal64")
         self.ctx.writeln(
             "from ydk.types import Entity, EntityPath, Identity, Enum, YType, YLeaf, YLeafList, YList, LeafDataList, Bits, Empty, Decimal64")
         self.ctx.writeln("from ydk.filters import YFilter")
         self.ctx.writeln("from ydk.errors import YError, YModelError")
-        self.ctx.writeln(
-            "from ydk.errors.error_handler import handle_type_error as _handle_type_error")
-        self.ctx.bline()
+        self.ctx.writeln("from ydk.errors.error_handler import handle_type_error as _handle_type_error")
 
     def _print_imports(self, package):
         self._print_static_imports()
@@ -96,13 +94,15 @@ class ModulePrinter(FilePrinter):
                     self.is_derived_identity(package, imported_type))):
                 if self.one_class_per_module:
                     imported_stmt = 'from %s.%s import %s' % (
-                        imported_type.get_py_mod_name(
-                        ), imported_type.get_py_mod_name().split('.')[-1],
+                        imported_type.get_py_mod_name(), imported_type.get_py_mod_name().split('.')[-1],
                         imported_type.qn().split('.')[0])
                 else:
                     imported_stmt = 'from %s import %s' % (
                         imported_type.get_py_mod_name(), imported_type.qn().split('.')[0])
                 imports_to_print.add(imported_stmt)
+
+        if imports_to_print:
+            self.ctx.bline()
 
         for imported_stmt in sorted(imports_to_print):
             self.ctx.writeln(imported_stmt)
@@ -126,7 +126,7 @@ class ModulePrinter(FilePrinter):
             ClassPrinter(self.ctx, self.module_namespace_lookup, self.one_class_per_module,
                          self.generate_meta,
                          self.identity_subclasses).print_output(
-                [clazz for clazz in package.owned_elements if isinstance(clazz, Class)])
+                        [clazz for clazz in package.owned_elements if isinstance(clazz, Class)])
 
     def _print_enum(self, enum_class):
         EnumPrinter(self.ctx).print_enum(enum_class, self.generate_meta)

@@ -1,5 +1,5 @@
 #  ----------------------------------------------------------------
-# Copyright 2016 Cisco Systems
+# Copyright 2016-2019 Cisco Systems
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,15 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 
-'''
+"""
    YDK PY converter
+"""
 
-'''
 from __future__ import print_function
 
 import os
-import sys
 
 from ydkgen.api_model import Class, Enum
 from ydkgen.builder import MultiFileBuilder, MultiFileHeader, MultiFileSource
@@ -37,11 +41,7 @@ from ..tests import TestPrinter
 class CppBindingsPrinter(LanguageBindingsPrinter):
 
     def __init__(self, ydk_root_dir, bundle, generate_tests, one_class_per_module):
-        if sys.version_info > (3,):
-            super().__init__(ydk_root_dir, bundle, generate_tests, one_class_per_module)
-        else:
-            super(CppBindingsPrinter, self).__init__(
-                ydk_root_dir, bundle, generate_tests, one_class_per_module)
+        super().__init__(ydk_root_dir, bundle, generate_tests, one_class_per_module)
         self.source_files = []
         self.header_files = []
 
@@ -53,21 +53,17 @@ class CppBindingsPrinter(LanguageBindingsPrinter):
             self._print_module(index, package, size)
 
         if self.generate_tests:
-            self._print_cmake_file(
-                self.packages, self.bundle_name, self.test_dir)
+            self._print_cmake_file(self.packages, self.bundle_name, self.test_dir)
         return (self.source_files, self.header_files)
 
     def _print_module(self, index, package, size):
-        print('Processing %d of %d %s' %
-              (index + 1, size, package.stmt.pos.ref))
+        print('Processing %d of %d %s' % (index + 1, size, package.stmt.pos.ref))
         # Skip generating module for empty modules
         if len(package.owned_elements) == 0:
             return
         builder = MultiFileBuilder(package, self.classes_per_source_file)
-        self._print_header_file(
-            package, builder.multi_file_data, self.models_dir)
-        self._print_source_file(
-            package, builder.multi_file_data, self.models_dir)
+        self._print_header_file(package, builder.multi_file_data, self.models_dir)
+        self._print_source_file(package, builder.multi_file_data, self.models_dir)
         if self.generate_tests:
             self._print_tests(package, self.test_dir)
 
@@ -76,22 +72,21 @@ class CppBindingsPrinter(LanguageBindingsPrinter):
                            self.identity_subclasses, self.bundle_name)
         for multi_file_header in [x for x in multi_file_data.multi_file_list if isinstance(x, MultiFileHeader)]:
             hp.print_output(
-                package,
-                multi_file_header,
-                path
-            )
+                            package,
+                            multi_file_header,
+                            path
+                            )
             if not multi_file_header.fragmented:
                 self.header_files.append(multi_file_header.file_name)
 
     def _print_source_file(self, package, multi_file_data, path):
-        sp = SourcePrinter(self.ypy_ctx, self.bundle_name,
-                           self.module_namespace_lookup)
+        sp = SourcePrinter(self.ypy_ctx, self.bundle_name, self.module_namespace_lookup)
         for multi_file_source in [x for x in multi_file_data.multi_file_list if isinstance(x, MultiFileSource)]:
             sp.print_output(
-                package,
-                multi_file_source,
-                path
-            )
+                            package,
+                            multi_file_source,
+                            path
+                            )
             file_name = multi_file_source.file_name
             if multi_file_source.fragmented:
                 file_name = os.path.join('fragmented', file_name)

@@ -57,11 +57,9 @@ class LanguageBindingsPrinter(object):
 
         self.packages = packages
         self.packages = sorted(self.packages, key=lambda package: package.name)
-        self.packages = [
-            p for p in self.packages if p.is_deviation is not True]
+        self.packages = [p for p in self.packages if p.is_deviation is not True]
         self.identity_subclasses = self._get_identity_subclasses_map()
-        self.module_namespace_lookup = self._get_module_namespace_lookup(
-            self.packages)
+        self.module_namespace_lookup  = self._get_module_namespace_lookup(self.packages)
         self.initialize_print_environment()
         return self.print_files()
 
@@ -96,8 +94,7 @@ class LanguageBindingsPrinter(object):
                 if emit_args.extra_args is None:
                     emit_func(emit_args.ctx, emit_args.package)
                 else:
-                    emit_func(emit_args.ctx, emit_args.package,
-                              emit_args.extra_args)
+                    emit_func(emit_args.ctx, emit_args.package, emit_args.extra_args)
 
     def initialize_output_directory(self, path, delete_if_exists=False):
         if delete_if_exists:
@@ -121,11 +118,9 @@ class LanguageBindingsPrinter(object):
         for (child_identity, base_identities) in identity_tuples:
             for base_identity in base_identities:
                 if id(base_identity) in identity_subclasses:
-                    existing_child_identities = identity_subclasses[id(
-                        base_identity)]
+                    existing_child_identities = identity_subclasses[id(base_identity)]
                     existing_child_identities.append(child_identity)
-                    identity_subclasses[id(base_identity)
-                                        ] = existing_child_identities
+                    identity_subclasses[id(base_identity)] = existing_child_identities
                 else:
                     identity_subclasses[id(base_identity)] = [child_identity]
         return identity_subclasses
@@ -133,8 +128,7 @@ class LanguageBindingsPrinter(object):
     def _get_identity_tuples(self):
         identity_subclasses = []
         for package in self.packages:
-            identity_subclasses.extend(
-                self._get_identity_subclasses_for_package(package))
+            identity_subclasses.extend(self._get_identity_subclasses_for_package(package))
         return identity_subclasses
 
     def _get_identity_subclasses_for_package(self, element):
@@ -142,11 +136,9 @@ class LanguageBindingsPrinter(object):
         for subelement in element.owned_elements:
             if isinstance(subelement, Class):
                 if subelement.is_identity():
-                    identity_subclasses.append(
-                        (subelement, subelement.extends))
+                    identity_subclasses.append((subelement, subelement.extends))
                 else:
-                    identity_subclasses.extend(
-                        self._get_identity_subclasses_for_package(subelement))
+                    identity_subclasses.extend(self._get_identity_subclasses_for_package(subelement))
         return identity_subclasses
 
     def _get_module_namespace_lookup(self, packages):

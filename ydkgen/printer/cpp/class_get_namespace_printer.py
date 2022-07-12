@@ -9,8 +9,7 @@ class GetNamespacePrinter(object):
 
     def print_output(self, clazz):
         namespace = get_class_namespace(clazz)
-        self.ctx.writeln('std::string %s::get_namespace() const' %
-                         clazz.qualified_cpp_name())
+        self.ctx.writeln('std::string %s::get_namespace() const' % clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
         if namespace is not None:

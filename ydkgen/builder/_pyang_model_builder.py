@@ -1,5 +1,6 @@
 #  ----------------------------------------------------------------
-# Copyright 2016 Cisco Systems
+# YDK - YANG Development Kit
+# Copyright 2016-2019 Cisco Systems
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 
 import logging
 import os
-import pyang
+from pyang import repository as _repository, context as _context
 import re
-import sys
 
 from pyang import error, statements
 from pyang.error import err_add
@@ -31,28 +36,19 @@ logger.addHandler(logging.NullHandler())
 
 class PyangModelBuilder(object):
     def __init__(self, resolved_model_dir):
-        self.repos = pyang.FileRepository(resolved_model_dir, False)
-        self.ctx = pyang.Context(self.repos)
+        self.repos = _repository.FileRepository(resolved_model_dir, False)
+        self.ctx = _context.Context(self.repos)
         self.resolved_model_dir = resolved_model_dir
         self.submodules = []
-        try:
-            reload(sys)
-            sys.setdefaultencoding('utf8')
-        except:
-            pass
 
     def parse_and_return_modules(self):
         """ Use pyang to parse the files, validate them and get a list of modules.
 
-            :param str resolved_model_dir The directory where all models to be compiled are found.
             :raise YdkGenException If there was a problem parsing the modules
         """
-        statements.add_validation_fun(
-            'reference_3', ['deviation'], self._add_i_deviation)
-        statements.add_validation_fun(
-            'reference_3', ['deviation'], self._add_d_info)
-        statements.add_validation_fun(
-            'reference_3', ['deviate'], self._remove_d_info)
+        statements.add_validation_fun('reference_3', ['deviation'], self._add_i_deviation)
+        statements.add_validation_fun('reference_3', ['deviation'], self._add_d_info)
+        statements.add_validation_fun('reference_3', ['deviate'], self._remove_d_info)
 
         # set marker for models being augmented
         statements.add_validation_fun('expand_2', ['augment'], self._set_i_aug)
@@ -139,7 +135,7 @@ class PyangModelBuilder(object):
 
         if stmt.arg == 'not-supported':
             if ((t.parent.keyword == 'list') and
-                    (t in t.parent.i_key)):
+                (t in t.parent.i_key)):
                 err_add(self.ctx.errors, stmt.pos, 'BAD_DEVIATE_KEY',
                         (t.i_module.arg, t.arg))
                 return
@@ -168,7 +164,7 @@ class PyangModelBuilder(object):
             for c in stmt.substmts:
                 if (c.keyword == 'config'
                     and stmt.arg == 'replace'
-                        and hasattr(t, 'i_config')):
+                    and hasattr(t, 'i_config')):
                     self._add_deviation_r(t, 'replace', stmt.i_module, c)
                 if c.keyword in statements._singleton_keywords:
                     old = t.search_one(c.keyword)
@@ -182,14 +178,12 @@ class PyangModelBuilder(object):
 
     def _set_i_aug(self, ctx, stmt):
         """ inject bool 'i_augment' to top statement for model being augmented"""
-        i_target_node = None
         if hasattr(stmt, 'i_target_node'):
             i_target_node = stmt.i_target_node
         else:
-            i_target_node = statements.find_target_node(
-                ctx, stmt, is_augment=True)
+            i_target_node = statements.find_target_node(ctx, stmt, is_augment=True)
         if i_target_node is not None:
-            if hasattr(stmt.top, 'i_aug_targets'):
+            if hasattr(stmt.top , 'i_aug_targets'):
                 stmt.top.i_aug_targets.add(i_target_node.top)
             else:
                 stmt.top.i_aug_targets = set([i_target_node.top])
@@ -206,8 +200,7 @@ class PyangModelBuilder(object):
 
     def _get_pyang_modules(self, filenames):
         modules = []
-        regex_expression = re.compile(
-            r"^(.*?)(\@(\d{4}-\d{2}-\d{2}))?\.(yang|yin)$")
+        regex_expression = re.compile(r"^(.*?)(\@(\d{4}-\d{2}-\d{2}))?\.(yang|yin)$")
         for filename in filenames:
             base_file_name = filename
             if filename.startswith('file://'):
@@ -231,8 +224,7 @@ class PyangModelBuilder(object):
             else:
                 module = self.ctx.add_module(filename, text)
             if module is None:
-                raise YdkGenException(
-                    '\nCould not add module "%s", (%s). \nPlease remove any duplicate files and verify that all the models pass pyang. Run "pyang *" on all the models.' % (name, filename))
+                raise YdkGenException('\nCould not add module "%s", (%s). \nPlease remove any duplicate files and verify that all the models pass pyang. Run "pyang *" on all the models.'%(name, filename))
             else:
                 modules.append(module)
         return modules
@@ -260,11 +252,10 @@ class PyangModelBuilder(object):
                 logger.warning('%s: %s\n' %
                                (str(epos), error.err_to_str(etag, eargs)))
             else:
-                err_msg = '%s: %s\n' % (
-                    str(epos), error.err_to_str(etag, eargs))
+                err_msg = '%s: %s\n' % (str(epos), error.err_to_str(etag, eargs))
                 logger.error(err_msg)
                 error_messages.append(err_msg)
 
         if len(error_messages) > 0:
             err_msg = '\n'.join(error_messages)
-            raise YdkGenException('''\nError occured: "%s". \nThe models supplied to the YDK generator are invalid. Please make sure the models are valid by compiling the models together using pyang. Please run "pyang *" in the models directory, make sure there are no errors and then try running the generator again. If there are model errors, please fix the errors by editing the model, contacting the model owner or deleting the model from the list of models to generate the YDK bindings for.''' % err_msg)
+            raise YdkGenException('''\nError occured: "%s". \nThe models supplied to the YDK generator are invalid. Please make sure the models are valid by compiling the models together using pyang. Please run "pyang *.yang" in the models directory, make sure there are no errors and then try running the generator again. If there are model errors, please fix the errors by editing the model, contacting the model owner or deleting the model from the list of models to generate the YDK bindings for.''' % err_msg)

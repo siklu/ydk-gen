@@ -1,6 +1,6 @@
 #!/bin/bash
 #  ----------------------------------------------------------------
-# Copyright 2018 Cisco Systems
+# Copyright 2018-2019 Cisco Systems
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,22 +14,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 #
 # dependencies_linux_gnmi.sh
 # Script to install protobuf, protoc and grpc on Ubuntu and CentOS
 # for running YDK gNMI tests on docker
-#
+# and installing YDK from install_ydk.sh script
 # ------------------------------------------------------------------
 
 function print_msg {
-    echo -e "${MSG_COLOR}*** $(date) *** dependencies_linux_gnmi.sh | $@ ${NOCOLOR}"
+    echo -e "${MSG_COLOR}*** $(date) *** dependencies_linux_gnmi.sh | $* ${NOCOLOR}"
 }
 
 function install_protobuf {
+  if [[ ! -d $HOME/protobuf-3.5.0 ]]; then
+    cd $HOME
     print_msg "Downloading protobuf and protoc"
     wget https://github.com/google/protobuf/releases/download/v3.5.0/protobuf-cpp-3.5.0.zip > /dev/null
     unzip protobuf-cpp-3.5.0.zip > /dev/null
-    cd protobuf-3.5.0
+    rm -f protobuf-cpp-3.5.0.zip
+    cd -
+  fi
+  if [[ ! -x /usr/local/lib/libprotoc.so.15.0.0 ]]; then
+    cd $HOME/protobuf-3.5.0
     print_msg "Configuring protobuf and protoc"
     ./configure > /dev/null
     print_msg "Compiling protobuf and protoc"
@@ -38,18 +49,34 @@ function install_protobuf {
     sudo make install
     sudo ldconfig
     cd -
+  fi
 }
 
 function install_grpc {
-    print_msg "Installing grpc"
-
+  if [[ ! -d $HOME/grpc ]]; then
+    cd $HOME
+    print_msg "Downloading grpc"
     git clone -b v1.9.1 https://github.com/grpc/grpc
     cd grpc
     git submodule update --init
+    # Correcting source code, which fails in focal with gcc-7.5.0
+    cp $curr_dir/3d_party/grpc/log_linux.cc src/core/lib/gpr/
+    cp $curr_dir/3d_party/grpc/Makefile .
+    cd $curr_dir
+  fi
+  if [[ ! -x /usr/local/lib/libgrpc.a ]]; then
+    print_msg "Compiling grpc"
+    cd $HOME/grpc
     make > /dev/null
+    local status=$?
+    if [ $status -ne 0 ]; then
+       print_msg "Failed to compile grpc code; exiting"
+       exit $status
+    fi
     sudo make install
     sudo ldconfig
     cd -
+  fi
 }
 
 ########################## EXECUTION STARTS HERE #############################
@@ -58,6 +85,17 @@ function install_grpc {
 NOCOLOR="\033[0m"
 YELLOW='\033[1;33m'
 MSG_COLOR=$YELLOW
+
+curr_dir=$(pwd)
+os_info=$(cat /etc/*-release)
+codename=$(lsb_release -c | awk '{ print $2 }')
+
+if [[ -z ${C_INCLUDE_PATH} ]]; then
+    export C_INCLUDE_PATH=/usr/local/include
+fi
+if [[ -z ${CPLUS_INCLUDE_PATH} ]]; then
+    export CPLUS_INCLUDE_PATH=/usr/local/include
+fi
 
 install_protobuf
 install_grpc

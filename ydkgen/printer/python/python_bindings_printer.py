@@ -1,5 +1,5 @@
 #  ----------------------------------------------------------------
-# Copyright 2016 Cisco Systems
+# Copyright 2016-2019 Cisco Systems
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,15 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 
 """
-   YDK PY converter
+ YDK PY converter
 """
-from __future__ import print_function
-
 
 import os
-import sys
 import shutil
 from distutils import dir_util
 
@@ -37,15 +39,15 @@ from ..doc import DocPrinter
 from ..tests import TestPrinter
 from ydkgen.printer.language_bindings_printer import LanguageBindingsPrinter, _EmitArgs
 
+import logging
+
+logger = logging.getLogger('ydkgen')
+
 
 class PythonBindingsPrinter(LanguageBindingsPrinter):
 
     def __init__(self, ydk_root_dir, bundle, generate_tests, one_class_per_module):
-        if sys.version_info > (3,):
-            super().__init__(ydk_root_dir, bundle, generate_tests, one_class_per_module)
-        else:
-            super(PythonBindingsPrinter, self).__init__(
-                ydk_root_dir, bundle, generate_tests, one_class_per_module)
+        super().__init__(ydk_root_dir, bundle, generate_tests, one_class_per_module)
         self.bundle = bundle
         self.bundle_name = bundle.name
         self.bundle_version = bundle.str_version
@@ -77,11 +79,11 @@ class PythonBindingsPrinter(LanguageBindingsPrinter):
             self._print_module(index, package, size)
 
     def _print_module(self, index, package, size):
-        print('Processing %d of %d %s' %
-              (index + 1, size, package.stmt.pos.ref))
+        print('Processing %d of %d %s' % (index + 1, size, package.stmt.pos.ref))
 
         # Skip generating module for empty modules
         if len(package.owned_elements) == 0:
+            logger.debug("    Skipping module, because it does not contain top level containers")
             return
 
         sub = package.sub_name
@@ -103,12 +105,10 @@ class PythonBindingsPrinter(LanguageBindingsPrinter):
             self._print_python_modules(package, index, path, size, sub)
         else:
             # RST Documentation
-            self._print_python_module(
-                package, index, self.models_dir, size, sub)
+            self._print_python_module(package, index, self.models_dir, size, sub)
 
         if self.generate_meta:
-            meta_dir = self.initialize_output_directory(
-                self.models_dir + '/_meta')
+            meta_dir = self.initialize_output_directory(self.models_dir + '/_meta')
             self._print_meta_module(package, meta_dir)
         if self.generate_tests:
             self._print_tests(package, test_output_dir)
@@ -145,8 +145,7 @@ class PythonBindingsPrinter(LanguageBindingsPrinter):
     def _print_python_modules(self, element, index, path, size, sub):
         for c in [clazz for clazz in element.owned_elements if isinstance(clazz, Class)]:
             if not c.is_identity():
-                self._print_python_module(c, index, os.path.join(
-                    path, get_property_name(c, c.iskeyword)), size, sub)
+                self._print_python_module(c, index, os.path.join(path, get_property_name(c, c.iskeyword)), size, sub)
 
     def _print_python_module(self, package, index, path, size, sub):
         if self.one_class_per_module:
@@ -159,8 +158,10 @@ class PythonBindingsPrinter(LanguageBindingsPrinter):
         extra_args = {'one_class_per_module': self.one_class_per_module,
                       'generate_meta': self.generate_meta,
                       'identity_subclasses': self.identity_subclasses,
-                      'module_namespace_lookup': self.module_namespace_lookup}
-        self.print_file(get_python_module_file_name(path, package),
+                      'module_namespace_lookup' : self.module_namespace_lookup}
+        python_module_file_name = get_python_module_file_name(path, package)
+        logger.debug("    Printing python module %s" % python_module_file_name)
+        self.print_file(python_module_file_name,
                         emit_module,
                         _EmitArgs(self.ypy_ctx, package, extra_args))
 
@@ -219,8 +220,7 @@ class PythonBindingsPrinter(LanguageBindingsPrinter):
 
 
 def _copy_yang_files_from_subdirectories(yang_files_dir):
-    subdirs = [os.path.join(yang_files_dir, o) for o in os.listdir(
-        yang_files_dir) if os.path.isdir(os.path.join(yang_files_dir, o))]
+    subdirs = [os.path.join(yang_files_dir, o) for o in os.listdir(yang_files_dir) if os.path.isdir(os.path.join(yang_files_dir, o))]
     for subdir in subdirs:
         files = os.listdir(subdir)
         for file in files:
@@ -267,8 +267,7 @@ def get_test_module_file_name(path, package):
 def emit_yang_ns(ctx, packages, extra_args):
     bundle_name = extra_args[0]
     one_class_per_module = extra_args[1]
-    NamespacePrinter(ctx, one_class_per_module).print_output(
-        packages, bundle_name)
+    NamespacePrinter(ctx, one_class_per_module).print_output(packages, bundle_name)
 
 
 def emit_importests(ctx, packages):
@@ -276,14 +275,12 @@ def emit_importests(ctx, packages):
 
 
 def emit_module_documentation(ctx, named_element, identity_subclasses):
-    DocPrinter(ctx, 'py').print_module_documentation(
-        named_element, identity_subclasses)
+    DocPrinter(ctx, 'py').print_module_documentation(named_element, identity_subclasses)
 
 
 def emit_table_of_contents(ctx, packages, extra_args):
     bundle_name, bundle_version = extra_args
-    DocPrinter(ctx, 'py', bundle_name,
-               bundle_version).print_table_of_contents(packages)
+    DocPrinter(ctx, 'py', bundle_name, bundle_version).print_table_of_contents(packages)
 
 
 def emit_module(ctx, package, extra_args):

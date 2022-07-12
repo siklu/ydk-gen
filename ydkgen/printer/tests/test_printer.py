@@ -19,15 +19,15 @@ test_printer.py
 
 Test printer.
 """
-import sys
+
 from ydkgen.common import iscppkeyword
 
 from ydkgen.builder import TestBuilder
 from ydkgen.builder import FixtureBuilder
 from .test_fixture_printer import FixturePrinter
 from ydkgen.common import get_top_class, get_element_path, get_path_sep, get_obj_name, \
-    get_qn, is_reference_prop, is_terminal_prop, is_empty_prop, \
-    is_identity_prop, is_decimal64_prop
+                    get_qn, is_reference_prop, is_terminal_prop, is_empty_prop, \
+                    is_identity_prop, is_decimal64_prop
 
 _IGNORE_TESTS = set({'ietf_netconf_acm'})
 
@@ -36,10 +36,7 @@ class TestPrinter(FixturePrinter):
     """Test printer."""
 
     def __init__(self, ctx, lang):
-        if sys.version_info > (3,):
-            super().__init__(ctx, lang)
-        else:
-            super(TestPrinter, self).__init__(ctx, lang)
+        super().__init__(ctx, lang)
 
     def print_tests(self, package, identity_subclasses):
         """Print all test case."""
@@ -206,8 +203,7 @@ class TestPrinter(FixturePrinter):
         if self.lang == 'py':
             self._writeln('def test_{}s(self):'.format(test_name))
         elif self.lang == 'cpp':
-            self._writeln('TEST_CASE_METHOD( ConnectionFixture, "{}_{}_test" )'.format(
-                self.package.name, test_name))
+            self._writeln('TEST_CASE_METHOD( ConnectionFixture, "{}_{}_test" )'.format(self.package.name, test_name))
             self._writeln('{')
             self._lvl_inc()
         self._lvl_inc()

@@ -202,8 +202,7 @@ static void check_and_set_leaf(Entity &entity, Entity *parent,
 
 static string resolve_leaf_value_namespace(const string &content,
                                            const string &name_space,
-                                           const string &name_space_prefix,
-                                           Entity *entity) {
+                                           const string &name_space_prefix) {
   string c{content};
   if (name_space.size() > 0 && name_space_prefix.size() > 0) {
     if (content.find(name_space_prefix) != string::npos &&
@@ -231,7 +230,7 @@ static void check_and_set_content(Entity &entity, const string &leaf_name,
       xmlFree(nsList);
     }
     string c = resolve_leaf_value_namespace(to_string(content), name_space,
-                                            name_space_prefix, &entity);
+                                            name_space_prefix);
 
     YLOG_DEBUG("XMLCodec: Creating leaf '{}' with value '{}'", leaf_name, c);
     entity.set_value(leaf_name, c, name_space, name_space_prefix);

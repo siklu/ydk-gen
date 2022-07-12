@@ -1,5 +1,5 @@
 #  ----------------------------------------------------------------
-# Copyright 2016 Cisco Systems
+# Copyright 2016-2019 Cisco Systems
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,29 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 
 """
  import_test_printer.py
 
  YANG model driven API, python emitter.
-
 """
+
 import abc
 import os
-import sys
+import logging
+
 from ydkgen.printer import FilePrinter
 from ydkgen.builder import MultiFile
-import logging
 
 logger = logging.getLogger('ydkgen')
 
 
 class MultiFilePrinter(FilePrinter):
     def __init__(self, ctx):
-        if sys.version_info > (3,):
-            super().__init__(ctx)
-        else:
-            super(MultiFilePrinter, self).__init__(ctx)
+        super().__init__(ctx)
 
     def print_output(self, package, multi_file, path_prefix):
         assert isinstance(multi_file, MultiFile)
@@ -46,8 +48,7 @@ class MultiFilePrinter(FilePrinter):
                 os.mkdir(path)
         path = os.path.join(path, multi_file.file_name)
         if multi_file.fragmented:
-            logger.debug('Printing fragmented file {0}'.format(
-                multi_file.file_name))
+            logger.debug('Printing fragmented file {0}'.format(multi_file.file_name))
         with open(path, 'w+') as file_descriptor:
             self.ctx.fd = file_descriptor
             self._start_tab_leak_check()

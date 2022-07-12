@@ -24,7 +24,6 @@ from ydkgen.printer.cpp.cpp_bindings_printer import CppBindingsPrinter
 from ydkgen.printer.python.python_bindings_printer import PythonBindingsPrinter
 from ydkgen.printer.go.go_bindings_printer import GoBindingsPrinter
 
-
 class PrinterFactory(object):
 
     def get_printer(self, language):

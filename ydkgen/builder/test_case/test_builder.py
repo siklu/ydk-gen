@@ -22,7 +22,7 @@ Build information needed for a test program.
 
 from .test_cases_builder import TestCasesBuilder
 from ydkgen.common import is_nonid_class_element, has_terminal_nodes, \
-    is_config_prop, is_class_prop
+                         is_config_prop, is_class_prop
 
 
 class TestBuilder(object):

@@ -14,6 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 
 """
 Translate profile file to profile file to bundle file.
@@ -21,7 +26,7 @@ Translate profile file to profile file to bundle file.
 Regular expression taken from:
 https://github.com/xym-tool/symd/blob/master/symd.py.
 """
-from __future__ import print_function
+
 import os
 import re
 import json
@@ -37,18 +42,14 @@ from ..common import YdkGenException
 
 logger = logging.getLogger('ydkgen')
 
-MODULE_STATEMENT = re.compile(
-    r'''^[ \t]*(sub)?module +(["'])?([-A-Za-z0-9]*(@[0-9-]*)?)(["'])? *\{.*$''')
-REVISION_STATEMENT = re.compile(
-    r'''^[ \t]*revision[\s]*(['"])?([-0-9]+)?(['"])?[\s]*\{.*$''')
+MODULE_STATEMENT = re.compile(r'''^[ \t]*(sub)?module +(["'])?([-A-Za-z0-9]*(@[0-9-]*)?)(["'])? *\{.*$''')
+REVISION_STATEMENT = re.compile(r'''^[ \t]*revision[\s]*(['"])?([-0-9]+)?(['"])?[\s]*\{.*$''')
 Local_URI = namedtuple('Local_URI', ['url'])
 Remote = namedtuple('Remote', ['url', 'commitid'])
 Remote_URI = namedtuple('RemoteURI', ['url', 'commitid', 'path'])
 
-Bundle = namedtuple(
-    'Bundle', ['name', 'version', 'core_version', 'description', 'long_description'])
-BundleDependency = namedtuple(
-    'BundleDependency', ['name', 'version', 'core_version', 'uri'])
+Bundle = namedtuple('Bundle', ['name', 'version', 'core_version', 'description', 'long_description'])
+BundleDependency = namedtuple('BundleDependency', ['name', 'version', 'core_version', 'uri'])
 
 TEMPLATE = """{% set comma = joiner(",") %}
 {
@@ -134,13 +135,17 @@ def get_file_attrs(files, root, remote=None):
     for f in files:
         if f.endswith('.yang'):
             # logger.debug('Getting attrs from file: %s' % f)
-            yield get_module_attrs(os.path.join(root, f), root, remote)
+            file_path = os.path.join(root, f)
+            if os.path.exists(file_path):
+                yield get_module_attrs(file_path, root, remote)
+            else:
+                logger.warning('File %s is not present in the directory %s; skipping' % (f, root))
 
 
 def get_dir_attrs(dirs, root, remote=None):
     for d in dirs:
-        for (d, _, files) in walk(os.path.join(root, d.lstrip('/'))):
-            for res in get_file_attrs((os.path.join(d, f) for f in files),
+        for (dd, _, files) in walk(os.path.join(root, d.lstrip('/'))):
+            for res in get_file_attrs((os.path.join(dd, f) for f in files),
                                       root,
                                       remote):
                 yield res
@@ -199,20 +204,18 @@ def translate(in_file, out_file, root_dir):
     for source in accepted_resources:
         if source in data['models']:
             get_fun = 'get_%s_attrs' % source
-            modules.extend(globals()[get_fun](
-                data['models'][source], ydk_root))
+            modules.extend(globals()[get_fun](data['models'][source], ydk_root))
 
     try:
+        name = data['name']
         version = data['version']
+        core_version = data['core_version']
         description = data['description']
     except KeyError:
-        raise YdkGenException('Bundle file requires version and description.')
+        raise YdkGenException('Bundle profile requires to specify name, version, core_version and description.')
 
-    core_version = data['core_version'] if 'core_version' in data else version
-    long_description = data['long_description'] if 'long_description' in data else str(
-    )
-    definition = Bundle(load_profile_attr(in_file, 'name'),
-                        version, core_version, description, long_description)
+    long_description = data['long_description'] if 'long_description' in data else str()
+    definition = Bundle(name, version, core_version, description, long_description)
     dependency = load_profile_attr(in_file, 'dependency')
 
     output = Environment().from_string(TEMPLATE).render(

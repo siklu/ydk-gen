@@ -34,7 +34,7 @@ class GeneratedPackageMethodsPrinter(object):
         self.bundle_name = bundle_name
         self.packages = packages
 
-        self.packages.sort(key=lambda x: x.stmt.arg)
+        self.packages.sort(key = lambda x:x.stmt.arg)
 
     def print_output(self):
         self.print_header()
@@ -63,8 +63,7 @@ class GeneratedPackageMethodsPrinter(object):
         self.ctx.lvl_inc()
         self.ctx.writeln('caps := make(map[string]string)')
         for package in self.packages:
-            self.ctx.writeln('caps["%s"] = "%s"' %
-                             (package.stmt.arg, package.revision))
+            self.ctx.writeln('caps["%s"] = "%s"' % (package.stmt.arg, package.revision))
         self.ctx.writeln('return caps')
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
@@ -78,8 +77,7 @@ class GeneratedPackageMethodsPrinter(object):
             namespace = package.stmt.search_one('namespace')
             if namespace is None:
                 continue
-            self.ctx.writeln('namespaces["%s"] = "%s"' % (
-                package.stmt.arg, namespace.arg))
+            self.ctx.writeln('namespaces["%s"] = "%s"' % (package.stmt.arg, namespace.arg))
         self.ctx.writeln('return namespaces')
         self.ctx.lvl_dec()
         self.ctx.writeln('}')

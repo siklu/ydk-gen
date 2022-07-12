@@ -1,5 +1,5 @@
 #  ----------------------------------------------------------------
-# Copyright 2016 Cisco Systems
+# Copyright 2016-2019 Cisco Systems
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,16 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 
-'''
+"""
    YDK GO converter
-
-'''
+"""
 
 from __future__ import print_function
 
 import os
-import sys
+
 from distutils.file_util import copy_file
 from distutils.dir_util import mkpath
 
@@ -38,11 +42,7 @@ from ..doc import DocPrinter
 class GoBindingsPrinter(LanguageBindingsPrinter):
 
     def __init__(self, ydk_root_dir, bundle, generate_tests, one_class_per_module):
-        if sys.version_info > (3,):
-            super().__init__(ydk_root_dir, bundle, generate_tests, one_class_per_module)
-        else:
-            super(GoBindingsPrinter, self).__init__(ydk_root_dir,
-                                                    bundle, generate_tests, one_class_per_module)
+        super().__init__(ydk_root_dir, bundle, generate_tests, one_class_per_module)
 
     def print_files(self):
         only_modules = [package.stmt for package in self.packages]
@@ -56,8 +56,7 @@ class GoBindingsPrinter(LanguageBindingsPrinter):
         generated_entity_lookup_file_name = '%s/generated_package_methods.go' % path
         with open(generated_entity_lookup_file_name, 'w+') as file_descriptor:
             self.ypy_ctx.fd = file_descriptor
-            gelp = GeneratedPackageMethodsPrinter(
-                self.ypy_ctx, self.bundle_name, self.packages)
+            gelp = GeneratedPackageMethodsPrinter(self.ypy_ctx, self.bundle_name, self.packages)
             gelp.print_output()
 
         # RST documentation
@@ -68,8 +67,7 @@ class GoBindingsPrinter(LanguageBindingsPrinter):
         # return self.source_files
 
     def _print_module(self, index, package, size):
-        print('Processing %d of %d %s' %
-              (index + 1, size, package.stmt.pos.ref))
+        print('Processing %d of %d %s' % (index + 1, size, package.stmt.pos.ref))
         # Skip generating module for empty modules
         if len(package.owned_elements) == 0:
             return
@@ -96,8 +94,7 @@ class GoBindingsPrinter(LanguageBindingsPrinter):
         go_module_file_name = '%s/%s.go' % (path, package.name)
         with open(go_module_file_name, 'w+') as file_descriptor:
             self.ypy_ctx.fd = file_descriptor
-            mp = ModulePrinter(self.ypy_ctx, self.bundle_name,
-                               self.identity_subclasses)
+            mp = ModulePrinter(self.ypy_ctx, self.bundle_name, self.identity_subclasses)
             mp.print_output(package)
 
     def _print_go_rst_toc(self):
@@ -140,14 +137,12 @@ def get_go_doc_file_name(path, named_element):
 
 def emit_table_of_contents(ctx, packages, extra_args):
     bundle_name, bundle_version = extra_args
-    DocPrinter(ctx, 'go', bundle_name,
-               bundle_version).print_table_of_contents(packages)
+    DocPrinter(ctx, 'go', bundle_name, bundle_version).print_table_of_contents(packages)
 
 
 def emit_go_doc(ctx, named_element, extra_args):
     identity_subclasses, bundle_name = extra_args
-    DocPrinter(ctx, 'go', bundle_name).print_module_documentation(
-        named_element, identity_subclasses)
+    DocPrinter(ctx, 'go', bundle_name).print_module_documentation(named_element, identity_subclasses)
 
 
 def copy_tree(src, dst):

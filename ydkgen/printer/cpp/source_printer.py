@@ -1,5 +1,5 @@
 #  ----------------------------------------------------------------
-# Copyright 2016 Cisco Systems
+# Copyright 2016-2019 Cisco Systems
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 
 """
-source_printer.py
+ source_printer.py
 
- prints C++ classes
-
+ Prints C++ classes
 """
-import sys
+
 from ydkgen.builder import MultiFileSource
 from ydkgen.printer import MultiFilePrinter
 
@@ -30,10 +34,7 @@ from .class_enum_printer import EnumPrinter
 
 class SourcePrinter(MultiFilePrinter):
     def __init__(self, ctx, bundle_name, module_namespace_lookup):
-        if sys.version_info > (3,):
-            super().__init__(ctx)
-        else:
-            super(SourcePrinter, self).__init__(ctx)
+        super().__init__(ctx)
         self.enum_printer = EnumPrinter(self.ctx)
         self.bundle_name = bundle_name
         self.module_namespace_lookup = module_namespace_lookup
@@ -54,8 +55,7 @@ class SourcePrinter(MultiFilePrinter):
         self.ctx.writeln('#include <iostream>')
         self.ctx.writeln('#include <ydk/entity_util.hpp>')
         self.ctx.writeln('#include "bundle_info.hpp"')
-        self.ctx.writeln('#include "{0}"'.format(
-            multi_file.file_name.replace('.cpp', '.hpp')))
+        self.ctx.writeln('#include "{0}"'.format(multi_file.file_name.replace('.cpp', '.hpp')))
         for header_import in multi_file.imports:
             self.ctx.writeln(header_import)
         self.ctx.bline()
@@ -73,8 +73,7 @@ class SourcePrinter(MultiFilePrinter):
         self.ctx.bline()
 
     def _print_class(self, clazz):
-        ClassSourcePrinter(self.ctx, self.bundle_name,
-                           self.module_namespace_lookup).print_output(clazz)
+        ClassSourcePrinter(self.ctx, self.bundle_name, self.module_namespace_lookup).print_output(clazz)
 
     def _print_enums(self, package, classes):
         self.enum_printer.print_enum_to_string_funcs(package, classes)

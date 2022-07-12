@@ -1,5 +1,5 @@
 #  ----------------------------------------------------------------
-# Copyright 2016 Cisco Systems
+# Copyright 2016-2019 Cisco Systems
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------
+# This file has been modified by Yan Gorelik, YDK Solutions.
+# All modifications in original under CiscoDevNet domain
+# introduced since October 2019 are copyrighted.
+# All rights reserved under Apache License, Version 2.0.
+# ------------------------------------------------------------------
 
 """
-header_printer.py
+ header_printer.py
 
- prints C++ classes
-
+ Prints C++ classes
 """
-import sys
+
 from ydkgen.api_model import Class
 from ydkgen.builder import MultiFileHeader
 from ydkgen.printer import MultiFilePrinter
@@ -31,10 +35,7 @@ from .class_enum_printer import EnumPrinter
 
 class HeaderPrinter(MultiFilePrinter):
     def __init__(self, ctx, identity_subclasses, bundle_name):
-        if sys.version_info > (3,):
-            super().__init__(ctx)
-        else:
-            super(HeaderPrinter, self).__init__(ctx)
+        super().__init__(ctx)
         self.enum_printer = EnumPrinter(self.ctx)
         self.identity_subclasses = identity_subclasses
         self.bundle_name = bundle_name
@@ -46,11 +47,11 @@ class HeaderPrinter(MultiFilePrinter):
 
     def print_extra(self, package, multi_file):
         assert isinstance(multi_file, MultiFileHeader)
-        self._print_enums(package, multi_file.class_list,
-                          multi_file.file_name, (not multi_file.fragmented))
+        self._print_enums(package, multi_file.class_list, multi_file.file_name, (not multi_file.fragmented))
 
     def print_header(self, package, multi_file):
-        assert isinstance(multi_file, MultiFileHeader)
+        if not isinstance(multi_file, MultiFileHeader):
+            raise AssertionError()
         self.p = package
         self._print_include_guard_header(multi_file.include_guard)
         self._print_imports(package, multi_file.imports)
@@ -59,7 +60,8 @@ class HeaderPrinter(MultiFilePrinter):
         self.ctx.bline()
 
     def print_trailer(self, package, multi_file):
-        assert isinstance(multi_file, MultiFileHeader)
+        if not isinstance(multi_file, MultiFileHeader):
+            raise AssertionError()
         self.ctx.bline()
         self.ctx.writeln('}')
         self.ctx.writeln('}')
@@ -83,8 +85,7 @@ class HeaderPrinter(MultiFilePrinter):
         for imported_type in package.imported_types():
             if all((id(imported_type) in self.identity_subclasses,
                     self.is_derived_identity(package, imported_type))):
-                import_stmt = '#include "{0}"'.format(
-                    imported_type.get_cpp_header_name())
+                import_stmt = '#include "{0}"'.format(imported_type.get_cpp_header_name())
                 imports_to_print.add(import_stmt)
         imports_to_print = sorted(imports_to_print)
         for import_to_print in imports_to_print:
@@ -97,19 +98,16 @@ class HeaderPrinter(MultiFilePrinter):
         self._print_class_trailer(clazz)
 
     def _print_class_header(self, clazz):
-        parents = 'Entity'
         if isinstance(clazz.owner, Class):
             self.ctx.bline()
         class_name = clazz.qualified_cpp_name()
         if len(clazz.extends) > 0:
-            parents = ', '.join([sup.fully_qualified_cpp_name()
-                                 for sup in clazz.extends])
+            parents = ', '.join([sup.fully_qualified_cpp_name() for sup in clazz.extends])
             if clazz.is_identity():
                 parents += ', virtual ydk::Identity'
             self.ctx.writeln('class ' + class_name + ' : public ' + parents)
         elif clazz.is_identity():
-            self.ctx.writeln('class ' + class_name +
-                             ' : public virtual ydk::Identity')
+            self.ctx.writeln('class ' + class_name + ' : public virtual ydk::Identity')
         else:
             self.ctx.writeln('class ' + class_name + ' : public ydk::Entity')
         self.ctx.writeln('{')
@@ -128,8 +126,7 @@ class HeaderPrinter(MultiFilePrinter):
         self.ctx.bline()
 
     def _print_forward_declarations(self, clazz):
-        child_classes = [nested_class for nested_class in clazz.owned_elements if isinstance(
-            nested_class, Class)]
+        child_classes = [nested_class for nested_class in clazz.owned_elements if isinstance(nested_class, Class)]
         if len(child_classes) == 0:
             return
         self.ctx.lvl_inc()
@@ -139,9 +136,7 @@ class HeaderPrinter(MultiFilePrinter):
         self.ctx.lvl_dec()
 
     def _print_forward_declaration(self, clazz):
-        self.ctx.writeln('class ' + clazz.name +
-                         '; //type: ' + clazz.qualified_cpp_name())
+        self.ctx.writeln('class ' + clazz.name + '; //type: ' + clazz.qualified_cpp_name())
 
     def _print_enums(self, package, classes, file_name, reset_enum_lookup):
-        self.enum_printer.print_enum_declarations(
-            package, classes, file_name, reset_enum_lookup)
+        self.enum_printer.print_enum_declarations(package, classes, file_name, reset_enum_lookup)
