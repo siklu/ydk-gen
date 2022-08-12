@@ -22,6 +22,7 @@ class_path_printer.py
 """
 from ydkgen.api_model import Package
 from ydkgen.common import has_list_ancestor, is_top_level_class
+from ydkgen.common import get_qualified_yang_name
 
 class GetSegmentPathPrinter(object):
 
@@ -46,40 +47,38 @@ class GetSegmentPathPrinter(object):
 
     def _print_get_ydk_segment_path_body(self, clazz):
         path='"'
-        if clazz.owner is not None:
-            if isinstance(clazz.owner, Package):
-                path+= clazz.owner.stmt.arg + ':'
-            elif clazz.owner.stmt.i_module.arg != clazz.stmt.i_module.arg:
-                path+=clazz.stmt.i_module.arg + ':'
-
-        path+= clazz.stmt.arg
+        if clazz.owner is not None and isinstance(clazz.owner, Package):
+            path += clazz.owner.stmt.arg + ':' + clazz.stmt.arg
+        else:
+            path += get_qualified_yang_name(clazz)
         path+='"'
+
         predicates = ''
         insert_token = ' + '
 
         key_props = clazz.get_key_props()
         for key_prop in key_props:
             predicates += insert_token
-            
+
             predicates += '"['
             if key_prop.stmt.i_module.arg != clazz.stmt.i_module.arg:
                 predicates += key_prop.stmt.i_module.arg
                 predicates += ':'
-            
+
             predicates += key_prop.stmt.arg + '='
-            
+
             predicates += "'"
-                
+
             predicates +='"'
 
             predicates += insert_token
-            
+
             predicates += ('str(self.%s)') % key_prop.name + insert_token
 
             predicates += '"'
-                
+
             predicates += "'"
-                
+
             predicates += ']"'
 
         path = '%s%s' % (path, predicates)
@@ -129,10 +128,8 @@ class GetAbsolutePathPrinter(object):
                 path += p.stmt.arg
             else:
                 path += '/'
-                if p.stmt.i_module.arg != p.owner.stmt.i_module.arg:
-                    path += p.stmt.i_module.arg
-                    path += ':'
-                path += p.stmt.arg
+                path += get_qualified_yang_name(p)
+
         slash = ""
         if len(path) > 0:
             slash = "/"

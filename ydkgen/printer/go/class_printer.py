@@ -86,12 +86,11 @@ class ClassPrinter(object):
     def _print_segment_path(fp, data_alias):
         path = ['"']
         prefix = ''
-        if fp.clazz.owner is not None:
-            if isinstance(fp.clazz.owner, Package):
-                prefix = '%s:' % fp.clazz.owner.stmt.arg
-            elif fp.clazz.owner.stmt.i_module.arg != fp.clazz.stmt.i_module.arg:
-                prefix = '%s:' % fp.clazz.stmt.i_module.arg
-        path.append('%s%s"' % (prefix, fp.clazz.stmt.arg))
+        if fp.clazz.owner is not None and isinstance(fp.clazz.owner, Package):
+            prefix = fp.clazz.owner.stmt.arg + ':' + fp.clazz.stmt.arg
+        else:
+            prefix = get_qualified_yang_name(fp)
+        path.append('%s"' % prefix)
 
         key_props = fp.clazz.get_key_props()
         if len(key_props) > 0:
@@ -128,10 +127,7 @@ class ClassPrinter(object):
                 path += p.stmt.arg
             else:
                 path += '/'
-                if p.stmt.i_module.arg != p.owner.stmt.i_module.arg:
-                    path += p.stmt.i_module.arg
-                    path += ':'
-                path += p.stmt.arg
+                path += get_qualified_yang_name(p)
 
         if len(path) == 0:
             fp.ctx.writeln('%s.AbsolutePath = %s.SegmentPath' % (data_alias, data_alias))
