@@ -397,7 +397,7 @@ class YList : public NonTypedYList {
   }
 
   void review(std::shared_ptr<Entity> ep) override {
-    auto key = build_key(ep);
+    auto key = this->build_key(ep);
     if (!key || key == ep->ylist_key) return;
 
     // Reinsert the entity with the right key now.
