@@ -51,12 +51,6 @@ class ClassSourcePrinter(object):
         self._print_class_destructor(clazz)
         self._print_class_method_definitions(clazz, leafs, children)
 
-    def _print_template_instantiations(self, clazz):
-        for prop in clazz.properties():
-            if prop.is_many and isinstance(prop.property_type, Class) and not prop.property_type.is_identity():
-                self.ctx.writeln("template ydk::YListWrapper<%s>;" % (
-                    prop.property_type.fully_qualified_cpp_name()))
-
     def _print_class_constructor(self, clazz, leafs, children):
         ClassConstructorPrinter(self.ctx, self.module_namespace_lookup).print_constructor(
             clazz, leafs, children)

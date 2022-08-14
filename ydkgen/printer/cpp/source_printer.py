@@ -27,6 +27,7 @@
 
 from ydkgen.builder import MultiFileSource
 from ydkgen.printer import MultiFilePrinter
+from ydkgen.api_model import Class
 
 from .class_source_printer import ClassSourcePrinter
 from .class_enum_printer import EnumPrinter
@@ -55,7 +56,8 @@ class SourcePrinter(MultiFilePrinter):
         self.ctx.writeln('#include <iostream>')
         self.ctx.writeln('#include <ydk/entity_util.hpp>')
         self.ctx.writeln('#include "bundle_info.hpp"')
-        self.ctx.writeln('#include "{0}"'.format(multi_file.file_name.replace('.cpp', '.hpp')))
+        self.ctx.writeln('#include "{0}"'.format(
+            multi_file.file_name.replace('.cpp', '.hpp')))
         for header_import in multi_file.imports:
             self.ctx.writeln(header_import)
         self.ctx.bline()
@@ -72,8 +74,18 @@ class SourcePrinter(MultiFilePrinter):
         self.ctx.writeln('}')
         self.ctx.bline()
 
+        self.ctx.writeln('namespace ydk {')
+        for clazz in multi_file.class_list:
+            for prop in clazz.properties():
+                if prop.is_many and isinstance(prop.property_type, Class) and not prop.property_type.is_identity():
+                    self.ctx.writeln("template class ydk::YListWrapper<%s>;" % (
+                        prop.property_type.fully_qualified_cpp_name()))
+        self.ctx.writeln('}')
+        self.ctx.bline()
+
     def _print_class(self, clazz):
-        ClassSourcePrinter(self.ctx, self.bundle_name, self.module_namespace_lookup).print_output(clazz)
+        ClassSourcePrinter(self.ctx, self.bundle_name,
+                           self.module_namespace_lookup).print_output(clazz)
 
     def _print_enums(self, package, classes):
         self.enum_printer.print_enum_to_string_funcs(package, classes)

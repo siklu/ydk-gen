@@ -44,11 +44,6 @@ class HeaderPrinter(MultiFilePrinter):
         assert isinstance(multi_file, MultiFileHeader)
         for clazz in multi_file.class_list:
             self._print_class(clazz)
-        for clazz in multi_file.class_list:
-            for prop in clazz.properties():
-                if prop.is_many and isinstance(prop.property_type, Class) and not prop.property_type.is_identity():
-                    self.ctx.writeln("extern template ydk::YListWrapper<%s>;" % (
-                        prop.property_type.fully_qualified_cpp_name()))
 
     def print_extra(self, package, multi_file):
         assert isinstance(multi_file, MultiFileHeader)
@@ -71,6 +66,15 @@ class HeaderPrinter(MultiFilePrinter):
         self.ctx.bline()
         self.ctx.writeln('}')
         self.ctx.writeln('}')
+
+        self.ctx.writeln('namespace ydk {')
+        for clazz in multi_file.class_list:
+            for prop in clazz.properties():
+                if prop.is_many and isinstance(prop.property_type, Class) and not prop.property_type.is_identity():
+                    self.ctx.writeln("extern template class ydk::YListWrapper<%s>;" % (
+                        prop.property_type.fully_qualified_cpp_name()))
+        self.ctx.writeln('}')
+
         self._print_include_guard_trailer(multi_file.include_guard)
         self.ctx.bline()
 
