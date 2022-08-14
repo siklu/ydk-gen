@@ -351,6 +351,8 @@ class YLeafList {
 
 template <class T>
 class YList : public NonTypedYList {
+  typedef std::map<std::string, std::shared_ptr<T>> MapType;
+
  public:
   YList(Entity* parent_entity, std::initializer_list<std::string> key_names)
       : NonTypedYList{std::move(key_names)}, parent(parent_entity) {}
@@ -374,6 +376,20 @@ class YList : public NonTypedYList {
   std::vector<std::string> keys() const { return key_vector; }
   bool has_key(const std::string& key) const { return entity_map.count(key); }
   std::size_t len() const { return key_vector.size(); }
+
+  bool has_data() {
+    for (const auto& [key, entity] : entity_map) {
+      if (entity->has_data()) return true;
+    }
+
+    return false;
+  }
+
+  typename MapType::iterator begin() { return entity_map.begin(); }
+  typename MapType::iterator end() { return entity_map.end(); }
+
+  typename MapType::iterator begin() const { return entity_map.begin(); }
+  typename MapType::iterator end() const { return entity_map.end(); }
 
   void append(std::shared_ptr<T> ep) {
     ep->parent = parent;
@@ -445,8 +461,6 @@ class YList : public NonTypedYList {
   }
 
  private:
-  typedef std::map<std::string, std::shared_ptr<T>> MapType;
-
   MapType entity_map;
   std::vector<std::string> key_vector;
   Entity* parent;
