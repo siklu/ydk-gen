@@ -367,7 +367,7 @@ class YList : public NonTypedYList {
     std::vector<std::shared_ptr<T>> ev{};
     for (const auto& key : key_vector) {
       auto it = entity_map.find(key);
-      if (it != entity_map.end()) ev.emplace_back(*it);
+      if (it != entity_map.end()) ev.emplace_back(it->second);
     }
     return ev;
   }
@@ -445,7 +445,7 @@ class YList : public NonTypedYList {
   }
 
  private:
-  typedef std::map<std::string, std::shared_ptr<Entity>> MapType;
+  typedef std::map<std::string, std::shared_ptr<T>> MapType;
 
   MapType entity_map;
   std::vector<std::string> key_vector;
