@@ -381,7 +381,7 @@ class YList : public NonTypedYList {
       maybe_key = build_temp_key();
     }
 
-    auto was_inserted = entity_map.insert_or_assign(*maybe_key, ep);
+    auto [iter, was_inserted] = entity_map.insert_or_assign(*maybe_key, ep);
 
     if (was_inserted) {
       key_vector.push_back(*maybe_key);
@@ -430,7 +430,7 @@ class YList : public NonTypedYList {
     auto maybe_entity = entity_map.find(key_vector[item]);
     if (maybe_entity == entity_map.end()) return std::nullopt;
 
-    auto entity = *maybe_entity;
+    auto& [key, entity] = *maybe_entity;
 
     entity_map.erase(maybe_entity);
     key_vector.erase(key_vector.begin() + item);
@@ -462,5 +462,7 @@ std::string to_string(YFilter yfilter);
 enum class Protocol { restconf, netconf };
 
 enum class DataStore { candidate, running, startup, url, na };
+
+template class YList<Entity>;
 
 }  // namespace ydk
