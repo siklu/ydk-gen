@@ -377,7 +377,7 @@ class YList : public NonTypedYList {
   bool has_key(const std::string& key) const { return entity_map.count(key); }
   std::size_t len() const { return key_vector.size(); }
 
-  bool has_data() {
+  bool has_data() const {
     for (const auto& [key, entity] : entity_map) {
       if (entity->has_data()) return true;
     }
@@ -385,7 +385,7 @@ class YList : public NonTypedYList {
     return false;
   }
 
-  bool has_operation() {
+  bool has_operation() const {
     for (const auto& [key, entity] : entity_map) {
       if (entity->has_operation()) return true;
     }
