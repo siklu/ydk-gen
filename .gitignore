@@ -39,3 +39,6 @@ sdk/python/gnmi/ydk_service_gnmi.egg-info
 venv
 .history
 temp
+.clangd
+build
+compile_commands.json
