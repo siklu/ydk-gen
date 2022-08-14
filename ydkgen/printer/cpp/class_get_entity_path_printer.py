@@ -22,6 +22,7 @@ class_path_printer.py
 """
 from ydkgen.api_model import Package
 from ydkgen.common import has_list_ancestor, is_top_level_class, is_list_element
+from ydkgen.common import get_qualified_yang_name
 
 
 def get_leafs_children(clazz, leafs, children):
@@ -88,10 +89,7 @@ class GetAbsolutePathPrinter(object):
                 path += p.stmt.arg
             else:
                 path += '/'
-                if p.stmt.i_module.arg != p.owner.stmt.i_module.arg:
-                    path += p.stmt.i_module.arg
-                    path += ':'
-                path += p.stmt.arg
+                path += get_qualified_yang_name(p)
         slash = ""
         if len(path) > 0:
             slash = "/"
@@ -201,14 +199,14 @@ class GetSegmentPathPrinter(object):
 
     def _print_get_ydk_segment_path_body(self, clazz):
         self.ctx.writeln('std::ostringstream path_buffer;')
-        path='"'
-        if clazz.owner is not None:
-            if isinstance(clazz.owner, Package):
-                path+= clazz.owner.stmt.arg + ':'
-            elif clazz.owner.stmt.i_module.arg != clazz.stmt.i_module.arg:
-                path+=clazz.stmt.i_module.arg + ':'
 
-        path+= clazz.stmt.arg + '";'
+        path='"'
+        if clazz.owner is not None and isinstance(clazz.owner, Package):
+            path += clazz.owner.stmt.arg + ':' + clazz.stmt.arg
+        else:
+            path += get_qualified_yang_name(clazz)
+        path += '";'
+
         self.ctx.writeln('path_buffer << %s' % (path))
 
         key_props = clazz.get_key_props()

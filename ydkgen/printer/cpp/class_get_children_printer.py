@@ -21,6 +21,8 @@ source_printer.py
 
 """
 
+from ydkgen.common import get_qualified_yang_name
+
 class ClassGetChildrenPrinter(object):
     def __init__(self, ctx):
         self.ctx = ctx
@@ -65,11 +67,6 @@ class ClassGetChildrenPrinter(object):
         self.ctx.writeln('if(%s != nullptr)' % child.name)
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
-        path = ''
-        if child.stmt.i_module.arg != child.owner.stmt.i_module.arg:
-            path += child.stmt.i_module.arg
-            path += ':'
-        path += child.stmt.arg
-        self.ctx.writeln('_children["%s"] = %s;' % (path, child.name))
+        self.ctx.writeln('_children["%s"] = %s;' % (get_qualified_yang_name(child), child.name))
         self.ctx.lvl_dec()
         self.ctx.writeln('}')

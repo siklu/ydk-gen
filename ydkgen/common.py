@@ -484,13 +484,18 @@ def get_class_namespace(clazz):
     else:
         return None
 
+def get_class_module(clazz):
+    if hasattr(clazz.stmt, 'i_augment'):
+        return clazz.stmt.i_augment.i_target_node.i_module
+    else:
+        return clazz.stmt.i_module
 
 def get_qualified_yang_name(clazz):
-    yang_name = clazz.stmt.arg
-    if clazz.owner.stmt.i_module.arg != clazz.stmt.i_module.arg:
-        yang_name = clazz.stmt.i_module.arg + ':' + yang_name
-    return yang_name
-
+    module = get_class_module(clazz)
+    if clazz.owner.stmt.i_module.arg != module.arg:
+        return module.arg + ':' + clazz.stmt.arg
+    else:
+        return clazz.stmt.arg
 
 def get_unclashed_name(element, iskeyword):
     name = snake_case(element.stmt.unclashed_arg if hasattr(element.stmt, 'unclashed_arg') else element.stmt.arg)
