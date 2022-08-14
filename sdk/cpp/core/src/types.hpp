@@ -20,28 +20,19 @@
  All rights reserved under Apache License, Version 2.0.
  ------------------------------------------------------------------*/
 
-#ifndef _TYPES_HPP_
-#define _TYPES_HPP_
+#pragma once
 
-#include <boost/iterator/transform_iterator.hpp>
 #include <initializer_list>
 #include <iostream>
 #include <map>
 #include <memory>
+#include <optional>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "filters.hpp"
-
-#if (__cplusplus < 201402L)
-namespace std {
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-}  // namespace std
-#endif
 
 namespace ydk {
 
@@ -62,7 +53,6 @@ typedef struct Empty {
 class Entity;
 class YLeaf;
 class YLeafList;
-class YList;
 
 class LeafData {
  public:
@@ -98,7 +88,19 @@ struct EntityPath {
   bool operator!=(const EntityPath& other) const;
 };
 
-class YList;
+class NonTypedYList {
+ public:
+  explicit NonTypedYList(std::vector<std::string>&& ylist_key_names);
+  virtual void review(std::shared_ptr<Entity> ep) = 0;
+
+ protected:
+  std::optional<std::string> build_key(std::shared_ptr<Entity> ep);
+  std::string build_temp_key() { return std::to_string(counter++); }
+
+ private:
+  std::vector<std::string> ylist_key_names;
+  int counter = 1000000;
+};
 
 class Entity {
  public:
@@ -158,7 +160,7 @@ class Entity {
   bool ignore_validation;
   std::vector<std::string> ylist_key_names;
   std::string ylist_key;
-  YList* ylist = nullptr;
+  NonTypedYList* ylist = nullptr;
 
   std::string get_ylist_key() const;
 };
@@ -346,74 +348,110 @@ class YLeafList {
   std::string name;
 };
 
-class YList {
+template <class T>
+class YList : public NonTypedYList {
  public:
-  YList(Entity* parent_entity, std::initializer_list<std::string> key_names);
-  virtual ~YList();
+  YList(Entity* parent_entity, std::initializer_list<std::string> key_names)
+      : NonTypedYList{std::move(key_names)}, parent(parent_entity) {}
 
-  std::shared_ptr<Entity> operator[](const std::string& key) const;
-  std::shared_ptr<Entity> operator[](const std::size_t item) const;
-  std::vector<std::shared_ptr<Entity>> entities() const;
-  std::vector<std::string> keys() const;
-  bool has_key(const std::string& key) const;
-  std::size_t len() const;
+  std::shared_ptr<T> operator[](const std::string& key) const {
+    auto it = entity_map.find(key);
+    if (it != entity_map.end())
+      return it->second;
+    else {
+      return nullptr;
+    }
+  }
+  std::vector<std::shared_ptr<T>> entities() const {
+    std::vector<std::shared_ptr<Entity>> ev{};
+    for (auto key : key_vector) {
+      ev.push_back(entity_map.at(key));
+    }
+    return ev;
+  }
+  std::vector<std::string> keys() const { return key_vector; }
+  bool has_key(const std::string& key) const { return entity_map.count(key); }
+  std::size_t len() const { return key_vector.size(); }
 
-  void append(std::shared_ptr<Entity> ep);
-  void extend(std::initializer_list<std::shared_ptr<Entity>> ep_list);
-  void review(std::shared_ptr<Entity> ep);
-  std::string build_key(std::shared_ptr<Entity> ep);
+  void append(std::shared_ptr<T> ep) {
+    ep->parent = parent;
 
-  std::shared_ptr<Entity> pop(const std::string& key);
-  std::shared_ptr<Entity> pop(const std::size_t item);
+    auto maybe_key = build_key(ep);
+    if (!maybe_key) {
+      maybe_key = build_temp_key();
+    }
 
-  std::vector<std::string> ylist_key_names;
+    auto was_inserted = entity_map.insert_or_assign(*maybe_key, ep);
 
- protected:
+    if (was_inserted) {
+      key_vector.push_back(*maybe_key);
+    }
+    entity_map[*maybe_key] = ep;
+    ep->ylist_key = std::move(*maybe_key);
+    ep->ylist = this;
+  }
+  void extend(std::initializer_list<std::shared_ptr<T>> ep_list) {
+    for (auto ep : ep_list) {
+      append(ep);
+    }
+  }
+
+  void review(std::shared_ptr<Entity> ep) override {
+    auto key = build_key(ep);
+    if (!key || key == ep->ylist_key) return;
+
+    // Reinsert the entity with the right key now.
+    pop(ep->ylist_key);
+    append(std::static_pointer_cast<T>(ep));
+  }
+
+  void clear() {
+    key_vector.clear();
+    entity_map.clear();
+  }
+
+  std::shared_ptr<T> pop(const std::string& key) {
+    for (std::vector<std::string>::iterator it = key_vector.begin();
+         it != key_vector.end(); ++it) {
+      if (*it == key) {
+        std::shared_ptr<Entity> found = entity_map[key];
+        entity_map.erase(key);
+        key_vector.erase(it);
+        return found;
+      }
+    }
+    return nullptr;
+  }
+  std::optional<std::shared_ptr<T>> pop(const std::size_t item) {
+    if (item >= key_vector.size()) {
+      return std::nullopt;
+    }
+
+    auto maybe_entity = entity_map.find(key_vector[item]);
+    if (maybe_entity == entity_map.end()) return std::nullopt;
+
+    auto entity = *maybe_entity;
+
+    entity_map.erase(maybe_entity);
+    key_vector.erase(key_vector.begin() + item);
+    return entity;
+  }
+
+ private:
   typedef std::map<std::string, std::shared_ptr<Entity>> MapType;
 
   MapType entity_map;
   std::vector<std::string> key_vector;
   Entity* parent;
-  int counter;
 };
+
+template <class T>
+using YListWrapper = YList<T>;
 
 std::ostream& operator<<(std::ostream& stream, const YLeaf& value);
 std::ostream& operator<<(std::ostream& stream, const EntityPath& value);
 std::ostream& operator<<(std::ostream& stream, Entity& value);
 std::ostream& operator<<(std::ostream& stream, const LeafData& value);
-
-template <class EntityType>
-class YListWrapper : public YList {
- public:
-  using ydk::YList::operator=;
-  using ydk::YList::operator[];
-  using ydk::YList::YList;
-
-  struct Func {
-    std::pair<const std::string&, std::shared_ptr<EntityType>> operator()(
-        const MapType::const_iterator::value_type& value) const {
-      return {value.first, std::static_pointer_cast<EntityType>(value.second)};
-    }
-  };
-
-  typedef typename boost::result_of<Func(
-      const MapType::const_iterator::value_type& value)>::type t;
-
-  std::shared_ptr<EntityType> operator[](const std::string& key) const {
-    return std::static_pointer_cast<EntityType>(ydk::YList::operator[](key));
-  }
-
-  typedef boost::transform_iterator<Func, MapType::const_iterator>
-      MapWrapperIterator;
-
-  MapWrapperIterator begin() const {
-    return boost::make_transform_iterator(entity_map.cbegin(), Func());
-  }
-
-  MapWrapperIterator end() const {
-    return boost::make_transform_iterator(entity_map.cend(), Func());
-  }
-};
 
 std::string get_bool_string(const std::string& value);
 
@@ -426,5 +464,3 @@ enum class Protocol { restconf, netconf };
 enum class DataStore { candidate, running, startup, url, na };
 
 }  // namespace ydk
-
-#endif /* _TYPES_HPP_ */

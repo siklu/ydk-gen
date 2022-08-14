@@ -21,13 +21,12 @@
  ------------------------------------------------------------------*/
 
 #include <iostream>
+#include <optional>
 #include <sstream>
 
 #include "types.hpp"
 
 namespace ydk {
-
-
 
 std::string to_str(YType t) {
 #define TOSTRING(t) \
@@ -273,6 +272,34 @@ std::string get_bool_string(const std::string& value) {
   } else {
     return value;
   }
+}
+
+NonTypedYList::NonTypedYList(std::vector<std::string>&& ylist_key_names)
+    : ylist_key_names{std::move(ylist_key_names)} {}
+
+std::optional<std::string> NonTypedYList::build_key(
+    std::shared_ptr<Entity> ep) {
+  std::ostringstream value_buffer;
+  std::string key;
+  auto name_leaf_data_vector = ep->get_name_leaf_data();
+  for (const auto& ylist_key : ylist_key_names) {
+    for (const auto& name_leaf_data : name_leaf_data_vector) {
+      if (ylist_key == name_leaf_data.first &&
+          !name_leaf_data.second.value.empty()) {
+        key = value_buffer.str();
+        if (key.length() > 0) {
+          value_buffer << ",";
+        }
+        value_buffer << name_leaf_data.second.value;
+        break;
+      }
+    }
+  }
+
+  if (key.empty())
+    return std::nullopt;
+  else
+    return key;
 }
 
 }  // namespace ydk
