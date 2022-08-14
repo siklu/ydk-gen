@@ -393,11 +393,11 @@ class YList : public NonTypedYList {
     return false;
   }
 
-  typename MapType::iterator begin() { return entity_map.begin(); }
-  typename MapType::iterator end() { return entity_map.end(); }
+  auto begin() { return entity_map.begin(); }
+  auto end() { return entity_map.end(); }
 
-  typename MapType::iterator begin() const { return entity_map.begin(); }
-  typename MapType::iterator end() const { return entity_map.end(); }
+  auto begin() const { return entity_map.begin(); }
+  auto end() const { return entity_map.end(); }
 
   void append(std::shared_ptr<T> ep) {
     ep->parent = parent;
