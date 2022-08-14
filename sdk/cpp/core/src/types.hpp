@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <initializer_list>
 #include <iostream>
 #include <map>
@@ -363,9 +364,10 @@ class YList : public NonTypedYList {
     }
   }
   std::vector<std::shared_ptr<T>> entities() const {
-    std::vector<std::shared_ptr<Entity>> ev{};
-    for (auto key : key_vector) {
-      ev.push_back(entity_map.at(key));
+    std::vector<std::shared_ptr<T>> ev{};
+    for (const auto& key : key_vector) {
+      auto it = entity_map.find(key);
+      if (it != entity_map.end()) ev.emplace_back(*it);
     }
     return ev;
   }
@@ -376,7 +378,7 @@ class YList : public NonTypedYList {
   void append(std::shared_ptr<T> ep) {
     ep->parent = parent;
 
-    auto maybe_key = build_key(ep);
+    auto maybe_key = NonTypedYList::build_key(ep);
     if (!maybe_key) {
       maybe_key = build_temp_key();
     }
@@ -397,7 +399,7 @@ class YList : public NonTypedYList {
   }
 
   void review(std::shared_ptr<Entity> ep) override {
-    auto key = this->build_key(ep);
+    auto key = NonTypedYList::build_key(ep);
     if (!key || key == ep->ylist_key) return;
 
     // Reinsert the entity with the right key now.
@@ -411,16 +413,21 @@ class YList : public NonTypedYList {
   }
 
   std::shared_ptr<T> pop(const std::string& key) {
-    for (std::vector<std::string>::iterator it = key_vector.begin();
-         it != key_vector.end(); ++it) {
-      if (*it == key) {
-        std::shared_ptr<Entity> found = entity_map[key];
-        entity_map.erase(key);
-        key_vector.erase(it);
-        return found;
-      }
+    auto maybe_key_iterator =
+        std::find(key_vector.begin(), key_vector.end(), key);
+    if (maybe_key_iterator == key_vector.end()) {
+      return nullptr;
     }
-    return nullptr;
+
+    auto entity_iterator = entity_map.find(key);
+    if (entity_iterator == entity_map.end()) return nullptr;
+
+    auto entity = entity_iterator->second;
+
+    entity_map.erase(entity_iterator);
+    key_vector.erase(maybe_key_iterator);
+
+    return entity;
   }
   std::optional<std::shared_ptr<T>> pop(const std::size_t item) {
     if (item >= key_vector.size()) {
@@ -462,7 +469,5 @@ std::string to_string(YFilter yfilter);
 enum class Protocol { restconf, netconf };
 
 enum class DataStore { candidate, running, startup, url, na };
-
-template class YList<Entity>;
 
 }  // namespace ydk
