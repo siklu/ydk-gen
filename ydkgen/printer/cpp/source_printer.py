@@ -78,7 +78,7 @@ class SourcePrinter(MultiFilePrinter):
         for clazz in multi_file.class_list:
             for prop in clazz.properties():
                 if prop.is_many and isinstance(prop.property_type, Class) and not prop.property_type.is_identity():
-                    self.ctx.writeln("template class ydk::YListWrapper<%s>;" % (
+                    self.ctx.writeln("template class ydk::YList<%s>;" % (
                         prop.property_type.fully_qualified_cpp_name()))
         self.ctx.writeln('}')
         self.ctx.bline()

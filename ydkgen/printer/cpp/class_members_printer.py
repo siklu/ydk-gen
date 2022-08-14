@@ -61,25 +61,33 @@ class ClassMembersPrinter(object):
 
     def _print_common_method_declarations(self, clazz):
         self.ctx.writeln('std::string get_bundle_name() const override;')
-        self.ctx.writeln('std::string get_bundle_yang_models_location() const override;')
+        self.ctx.writeln(
+            'std::string get_bundle_yang_models_location() const override;')
         self.ctx.writeln('bool has_data() const override;')
         self.ctx.writeln('bool has_operation() const override;')
-        self.ctx.writeln('std::vector<std::pair<std::string, ydk::LeafData> > get_name_leaf_data() const override;')
+        self.ctx.writeln(
+            'std::vector<std::pair<std::string, ydk::LeafData> > get_name_leaf_data() const override;')
         self.ctx.writeln('std::string get_segment_path() const override;')
-        self.ctx.writeln('std::shared_ptr<ydk::Entity> get_child_by_name(const std::string & yang_name, const std::string & segment_path) override;')
-        self.ctx.writeln('void set_child_by_name(const std::string & yang_name, std::shared_ptr<Entity> _ent) override;')
-        self.ctx.writeln('void set_value(const std::string & value_path, const std::string & value, const std::string & name_space, const std::string & name_space_prefix) override;')
-        self.ctx.writeln('void set_filter(const std::string & value_path, ydk::YFilter yfliter) override;')
-        self.ctx.writeln('std::map<std::string, std::shared_ptr<ydk::Entity>> get_children() const override;')
-        self.ctx.writeln('bool has_leaf_or_child_of_name(const std::string & name) const override;')
+        self.ctx.writeln(
+            'std::shared_ptr<ydk::Entity> get_child_by_name(const std::string & yang_name, const std::string & segment_path) override;')
+        self.ctx.writeln(
+            'void set_child_by_name(const std::string & yang_name, std::shared_ptr<Entity> _ent) override;')
+        self.ctx.writeln(
+            'void set_value(const std::string & value_path, const std::string & value, const std::string & name_space, const std::string & name_space_prefix) override;')
+        self.ctx.writeln(
+            'void set_filter(const std::string & value_path, ydk::YFilter yfliter) override;')
+        self.ctx.writeln(
+            'std::map<std::string, std::shared_ptr<ydk::Entity>> get_children() const override;')
+        self.ctx.writeln(
+            'bool has_leaf_or_child_of_name(const std::string & name) const override;')
         self.ctx.writeln('std::string get_namespace() const override;')
         if not is_top_level_class(clazz) and not has_list_ancestor(clazz):
             self.ctx.writeln('std::string get_absolute_path() const override;')
 
     def _print_top_level_entity_functions(self, clazz):
         if clazz.owner is not None and isinstance(clazz.owner, Package):
-            self.ctx.writeln('std::shared_ptr<ydk::Entity> clone_ptr() const override;')
-
+            self.ctx.writeln(
+                'std::shared_ptr<ydk::Entity> clone_ptr() const override;')
 
     def _print_class_value_members(self, clazz):
         if clazz.is_identity():
@@ -99,13 +107,16 @@ class ClassMembersPrinter(object):
         if isinstance(leaf.property_type, UnionTypeSpec):
             union_types = self._get_union_types(leaf)
             if len(union_types) == 1:
-                self.ctx.writeln('%s %s; //type:%s %s' % (leaf_type, leaf.name, description, list(union_types)[0]))
+                self.ctx.writeln('%s %s; //type:%s %s' % (leaf_type,
+                                 leaf.name, description, list(union_types)[0]))
             else:
-                self.ctx.writeln('%s %s; //type:%s one of %s' % (leaf_type, leaf.name, description, ', '.join(union_types)))
+                self.ctx.writeln('%s %s; //type:%s one of %s' %
+                                 (leaf_type, leaf.name, description, ', '.join(union_types)))
         elif isinstance(leaf.property_type, PathTypeSpec):
             self._print_leafref(leaf, leaf_type, description)
         else:
-            self.ctx.writeln('%s %s; //type:%s %s' % (leaf_type, leaf.name, description, leaf.property_type.name))
+            self.ctx.writeln('%s %s; //type:%s %s' % (leaf_type,
+                             leaf.name, description, leaf.property_type.name))
 
     def _get_union_types(self, union_leaf):
         union_type = union_leaf.property_type
@@ -113,7 +124,8 @@ class ClassMembersPrinter(object):
         for contained_type_stmt in union_type.types:
             contained_property_type = TypesExtractor().get_property_type(contained_type_stmt)
             if isinstance(contained_property_type, UnionTypeSpec):
-                contained_types.update(self._get_union_types(contained_property_type))
+                contained_types.update(
+                    self._get_union_types(contained_property_type))
             elif isinstance(contained_property_type, PathTypeSpec):
                 contained_types.add('%s' % _get_leafref_comment(union_leaf))
             else:
@@ -121,7 +133,8 @@ class ClassMembersPrinter(object):
         return contained_types
 
     def _print_leafref(self, leaf, leaf_type, description):
-        self.ctx.writeln('//type:%s %s' % (description, _get_leafref_comment(leaf)))
+        self.ctx.writeln('//type:%s %s' %
+                         (description, _get_leafref_comment(leaf)))
         self.ctx.writeln('%s %s;' % (leaf_type, leaf.name))
 
     def _print_class_child_members(self, clazz):
@@ -162,9 +175,9 @@ def _get_leafref_comment(leaf):
         reference_class = leaf.stmt.i_leafref_ptr[0].parent.i_class
         reference_prop = leaf.stmt.i_leafref_ptr[0].i_property
         return ('%s (refers to %s::%s)' %
-                         (reference_prop.property_type.name,
-                          reference_class.fully_qualified_cpp_name(),
-                          reference_prop.name))
+                (reference_prop.property_type.name,
+                 reference_class.fully_qualified_cpp_name(),
+                 reference_prop.name))
 
 
 def _get_class_inits_unique(prop):
@@ -177,7 +190,7 @@ def _get_class_inits_unique(prop):
 
 def _get_class_inits_many(prop):
     if prop.is_many and isinstance(prop.property_type, Class) and not prop.property_type.is_identity():
-        return 'ydk::YListWrapper<%s> %s;' % (prop.property_type.fully_qualified_cpp_name(), prop.name)
+        return 'ydk::YList<%s> %s;' % (prop.property_type.fully_qualified_cpp_name(), prop.name)
 
 
 def _get_children(clazz):
