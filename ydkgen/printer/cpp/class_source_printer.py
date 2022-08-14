@@ -36,6 +36,7 @@ from .class_get_entity_path_printer import GetEntityPathPrinter, GetSegmentPathP
 from .class_set_child_printer import ClassSetChildPrinter
 from .class_get_namespace_printer import GetNamespacePrinter
 
+
 class ClassSourcePrinter(object):
     def __init__(self, ctx, bundle_name, module_namespace_lookup):
         self.ctx = ctx
@@ -50,11 +51,19 @@ class ClassSourcePrinter(object):
         self._print_class_destructor(clazz)
         self._print_class_method_definitions(clazz, leafs, children)
 
+    def _print_template_instantiations(self, clazz):
+        for prop in clazz.properties():
+            if prop.is_many and isinstance(prop.property_type, Class) and not prop.property_type.is_identity():
+                self.ctx.writeln("template ydk::YListWrapper<%s>;" % (
+                    prop.property_type.fully_qualified_cpp_name()))
+
     def _print_class_constructor(self, clazz, leafs, children):
-        ClassConstructorPrinter(self.ctx, self.module_namespace_lookup).print_constructor(clazz, leafs, children)
+        ClassConstructorPrinter(self.ctx, self.module_namespace_lookup).print_constructor(
+            clazz, leafs, children)
 
     def _print_class_destructor(self, clazz):
-        self.ctx.writeln(clazz.qualified_cpp_name() + '::~' + clazz.name + '()')
+        self.ctx.writeln(clazz.qualified_cpp_name() +
+                         '::~' + clazz.name + '()')
         self.ctx.writeln('{')
         self.ctx.writeln('}')
         self.ctx.bline()
@@ -82,39 +91,47 @@ class ClassSourcePrinter(object):
             self._print_clone_ptr_function(clazz)
 
     def _print_clone_ptr_function(self, clazz):
-        self.ctx.writeln('std::shared_ptr<ydk::Entity> %s::clone_ptr() const' % clazz.qualified_cpp_name())
+        self.ctx.writeln(
+            'std::shared_ptr<ydk::Entity> %s::clone_ptr() const' % clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
-        self.ctx.writeln('return std::make_shared<%s>();' % clazz.qualified_cpp_name())
+        self.ctx.writeln('return std::make_shared<%s>();' %
+                         clazz.qualified_cpp_name())
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
         self.ctx.bline()
 
     def _print_yang_models_function(self, clazz):
-        self.ctx.writeln('std::string %s::get_bundle_yang_models_location() const' % clazz.qualified_cpp_name())
+        self.ctx.writeln(
+            'std::string %s::get_bundle_yang_models_location() const' % clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
-        self.ctx.writeln('return ydk_%s_models_path;' % snake_case(self.bundle_name))
+        self.ctx.writeln('return ydk_%s_models_path;' %
+                         snake_case(self.bundle_name))
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
         self.ctx.bline()
 
     def _print_bundle_name_function(self, clazz):
-        self.ctx.writeln('std::string %s::get_bundle_name() const' % clazz.qualified_cpp_name())
+        self.ctx.writeln('std::string %s::get_bundle_name() const' %
+                         clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
-        self.ctx.writeln('return ydk_%s_bundle_name;' % snake_case(self.bundle_name))
+        self.ctx.writeln('return ydk_%s_bundle_name;' %
+                         snake_case(self.bundle_name))
         self.ctx.lvl_dec()
         self.ctx.writeln('}')
         self.ctx.bline()
 
     def _print_has_leaf_or_child_of_name(self, clazz, children, leafs):
-        self.ctx.writeln('bool %s::has_leaf_or_child_of_name(const std::string & _name) const' % clazz.qualified_cpp_name())
+        self.ctx.writeln(
+            'bool %s::has_leaf_or_child_of_name(const std::string & _name) const' % clazz.qualified_cpp_name())
         self.ctx.writeln('{')
         self.ctx.lvl_inc()
         if(len(children) > 0 or len(leafs) > 0):
             props = children+leafs
-            if_condition = ' || '.join('_name == "%s"'% x.stmt.arg for x in props)
+            if_condition = ' || '.join(
+                '_name == "%s"' % x.stmt.arg for x in props)
             self.ctx.writeln('if(%s)' % if_condition)
             self.ctx.lvl_inc()
             self.ctx.writeln('return true;')
@@ -133,13 +150,16 @@ class ClassSourcePrinter(object):
                 leafs.append(prop)
 
     def _print_class_get_children(self, clazz, children):
-        ClassGetChildrenPrinter(self.ctx).print_class_get_children(clazz, children)
+        ClassGetChildrenPrinter(
+            self.ctx).print_class_get_children(clazz, children)
 
     def _print_class_has_data(self, clazz, leafs, children):
-        ClassHasDataPrinter(self.ctx).print_class_has_data(clazz, leafs, children)
+        ClassHasDataPrinter(self.ctx).print_class_has_data(
+            clazz, leafs, children)
 
     def _print_class_has_operation(self, clazz, leafs, children):
-        ClassHasDataPrinter(self.ctx).print_class_has_operation(clazz, leafs, children)
+        ClassHasDataPrinter(self.ctx).print_class_has_operation(
+            clazz, leafs, children)
 
     def _print_class_get_absolute_path(self, clazz):
         GetAbsolutePathPrinter(self.ctx).print_output(clazz)
