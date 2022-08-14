@@ -95,6 +95,11 @@ class HeaderPrinter(MultiFilePrinter):
         self.ctx.bline()
 
     def _print_class(self, clazz):
+        for prop in clazz.properties():
+            if prop.is_many and isinstance(prop.property_type, Class) and not prop.property_type.is_identity():
+                self.ctx.writeln("extern template ydk::YListWrapper<%s>;" % (
+                    prop.property_type.fully_qualified_cpp_name()))
+
         self._print_class_header(clazz)
         self._print_class_body(clazz)
         self._print_class_trailer(clazz)
@@ -137,10 +142,6 @@ class HeaderPrinter(MultiFilePrinter):
         self.ctx.lvl_inc()
         for child in child_classes:
             self._print_forward_declaration(child)
-        for prop in clazz.properties():
-            if prop.is_many and isinstance(prop.property_type, Class) and not prop.property_type.is_identity():
-                self.ctx.writeln("extern template ydk::YListWrapper<%s>;" % (
-                    prop.property_type.fully_qualified_cpp_name()))
 
         self.ctx.bline()
         self.ctx.lvl_dec()
