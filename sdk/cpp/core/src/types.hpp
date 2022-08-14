@@ -385,6 +385,14 @@ class YList : public NonTypedYList {
     return false;
   }
 
+  bool has_operation() {
+    for (const auto& [key, entity] : entity_map) {
+      if (entity->has_operation()) return true;
+    }
+
+    return false;
+  }
+
   typename MapType::iterator begin() { return entity_map.begin(); }
   typename MapType::iterator end() { return entity_map.end(); }
 
