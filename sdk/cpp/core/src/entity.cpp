@@ -53,9 +53,9 @@ shared_ptr<Entity> Entity::clone_ptr() const { return nullptr; }
 
 static void copy_leaves(const Entity *original_entity,
                         shared_ptr<Entity> cloned_entity) {
-  for (const pair<string, LeafData> &name_value :
+  for (const auto &name_value :
        original_entity->get_name_leaf_data()) {
-    LeafData leaf_data = name_value.second;
+    const auto& leaf_data = name_value.second;
     if (leaf_data.is_set) {
       YLOG_DEBUG("Creating leaf '{}' of '{}' with value: '{}'",
                  name_value.first, original_entity->yang_name, leaf_data.value);
@@ -71,7 +71,7 @@ static void copy_leaves(const Entity *original_entity,
       cloned_entity->set_value(leaf_name, leaf_value, leaf_data.name_space,
                                leaf_data.name_space_prefix);
     }
-  }
+  } 
 }
 
 static bool copy_children(const Entity *original_entity,
