@@ -151,11 +151,11 @@ class Entity {
   Entity* parent = nullptr;
   std::string yang_name;
   std::string yang_parent_name;
-  YFilter yfilter;
-  bool is_presence_container;
-  bool is_top_level_class;
-  bool has_list_ancestor;
-  bool ignore_validation;
+  YFilter yfilter = ydk::YFilter::merge;
+  bool is_presence_container = false;
+  bool is_top_level_class = false;
+  bool has_list_ancestor = false;
+  bool ignore_validation = false;
   std::vector<std::string> ylist_key_names;
   std::string ylist_key;
   YList* ylist = nullptr;
