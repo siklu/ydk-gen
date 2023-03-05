@@ -192,9 +192,6 @@ class Identity {
 
   std::string to_string() { return tag; }
 
-  virtual std::shared_ptr<Entity> clone_ptr() const;
-  std::shared_ptr<Entity> clone() const;
-
  public:
   std::string name_space;
   std::string namespace_prefix;
