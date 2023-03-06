@@ -77,8 +77,8 @@ class ClassMembersPrinter(object):
             self.ctx.writeln('std::string get_absolute_path() const override;')
 
     def _print_top_level_entity_functions(self, clazz):
-        if clazz.owner is not None and isinstance(clazz.owner, Package):
-            self.ctx.writeln('std::shared_ptr<ydk::Entity> clone_ptr() const override;')
+        # if clazz.owner is not None and isinstance(clazz.owner, Package):
+        self.ctx.writeln('std::shared_ptr<ydk::Entity> clone_ptr() const override;')
 
 
     def _print_class_value_members(self, clazz):
