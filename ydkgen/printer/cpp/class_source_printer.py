@@ -78,8 +78,8 @@ class ClassSourcePrinter(object):
         self._print_class_get_namespace(clazz)
 
     def _print_top_level_entity_functions(self, clazz, leafs):
-        if clazz.owner is not None and isinstance(clazz.owner, Package):
-            self._print_clone_ptr_function(clazz)
+        # if clazz.owner is not None and isinstance(clazz.owner, Package):
+        self._print_clone_ptr_function(clazz)
 
     def _print_clone_ptr_function(self, clazz):
         self.ctx.writeln('std::shared_ptr<ydk::Entity> %s::clone_ptr() const' % clazz.qualified_cpp_name())

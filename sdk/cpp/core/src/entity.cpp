@@ -51,6 +51,69 @@ Entity::~Entity() {}
 
 shared_ptr<Entity> Entity::clone_ptr() const { return nullptr; }
 
+static void copy_leaves(const Entity *original_entity,
+                        shared_ptr<Entity> cloned_entity) {
+  for (const auto &name_value : original_entity->get_name_leaf_data()) {
+    const auto &leaf_data = name_value.second;
+    if (!leaf_data.is_set) continue;
+
+    auto leaf_name = name_value.first;
+    auto leaf_value = leaf_data.value;
+    auto bracket_pos = leaf_name.find("[");
+    if (bracket_pos != string::npos) {
+      // Here we have leaf-list
+      leaf_value = leaf_name.substr(bracket_pos + 4,
+                                    leaf_name.length() - bracket_pos - 6);
+      leaf_name = leaf_name.substr(0, bracket_pos);
+    }
+    cloned_entity->set_value(leaf_name, leaf_value, leaf_data.name_space,
+                             leaf_data.name_space_prefix);
+  }
+}
+
+static bool copy_children(const Entity *original_entity,
+                          shared_ptr<Entity> cloned_entity) {
+  map<string, shared_ptr<Entity>> children = original_entity->get_children();
+  for (auto const &child : children) {
+    if (child.second == nullptr) continue;
+    if (!child.second->has_data() && !child.second->is_presence_container) {
+      continue;
+    }
+
+    auto child_name = child.first;
+    auto bracket_pos = child_name.find("[");
+    if (bracket_pos != string::npos) {
+      child_name = child_name.substr(0, bracket_pos);
+    }
+
+    auto const &child_entity =
+        (child.second->ylist)
+            ? cloned_entity->get_child_by_name(child_name, child.first)
+            : cloned_entity->get_child_by_name(child_name);
+
+    if (child_entity == nullptr) {
+      YLOG_ERROR("Could not fetch child entity {} in parent {}!", child_name,
+                 cloned_entity->yang_name);
+      return false;
+    }
+
+    child_entity->parent = cloned_entity.get();
+    copy_leaves(child.second.get(), child_entity);
+    copy_children(child.second.get(), child_entity);
+
+    if (child_entity->ylist && child_entity->ylist_key_names.size() > 0) {
+      child_entity->ylist->review(child_entity);
+    }
+  }
+  return true;
+}
+
+shared_ptr<Entity> Entity::clone() const {
+  shared_ptr<Entity> cloned_entity = clone_ptr();
+  copy_leaves(this, cloned_entity);
+  return copy_children(this, cloned_entity) ? cloned_entity : nullptr;
+}
+
 void Entity::set_parent(Entity *p) { parent = p; }
 
 Entity *Entity::get_parent() const { return parent; }

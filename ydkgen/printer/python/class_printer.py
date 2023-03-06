@@ -136,13 +136,13 @@ class ClassPrinter(FilePrinter):
         ClassSetAttrPrinter(self.ctx, self.one_class_per_module).print_setattr(clazz, leafs)
 
     def _print_class_clone_ptr(self, clazz):
-        if clazz.owner is not None and isinstance(clazz.owner, Package):
-            self.ctx.writeln('def clone_ptr(self):')
-            self.ctx.lvl_inc()
-            self.ctx.writeln('self._top_entity = %s()' % clazz.qn())
-            self.ctx.writeln('return self._top_entity')
-            self.ctx.bline()
-            self.ctx.lvl_dec()
+        # if clazz.owner is not None and isinstance(clazz.owner, Package):
+        self.ctx.writeln('def clone_ptr(self):')
+        self.ctx.lvl_inc()
+        self.ctx.writeln('self._top_entity = %s()' % clazz.qn())
+        self.ctx.writeln('return self._top_entity')
+        self.ctx.bline()
+        self.ctx.lvl_dec()
 
     # def _print_bits(self, bits):
     #     BitsPrinter(self.ctx).print_bits(bits)
