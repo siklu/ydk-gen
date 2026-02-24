@@ -211,13 +211,13 @@ std::vector<std::pair<std::string, LeafData>> YLeafList::get_name_leafdata()
   std::vector<std::pair<std::string, LeafData>> name_values;
   for (auto value : values) {
     auto leaf_name_data = value.get_name_leafdata();
-        auto val = value.get();
-        if (value.type == YType::boolean)
-        {
-            val = get_bool_string(val);
-        }name_values.push_back(
-        {(leaf_name_data.first + "[.=\"" + val + "\"]"),
-         {"", yfilter, value.is_set, value.value_namespace,
+    auto val = value.get();
+    if (value.type == YType::boolean) {
+      val = get_bool_string(val);
+    }
+    name_values.push_back(
+        {leaf_name_data.first,
+         {val, yfilter, value.is_set, value.value_namespace,
           value.value_namespace_prefix}});
   }
   return name_values;
