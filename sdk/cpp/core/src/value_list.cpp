@@ -55,25 +55,36 @@ string to_string(YType t) {
 }
 
 YLeafList::YLeafList(YType type, const std::string& name)
-    : yfilter(YFilter::not_set), type(type), name(name) {}
+    : yfilter(YFilter::not_set), type(type), name(name),
+      is_leafref_(false), leafref_path_("") {}
+
+YLeafList::YLeafList(YType type, const std::string& name, std::string leafref_path)
+    : yfilter(YFilter::not_set), type(type), name(name),
+      is_leafref_(true), leafref_path_(std::move(leafref_path)) {}
 
 YLeafList::YLeafList(const YLeafList& other)
     : yfilter(YFilter::not_set),
       values(other.getYLeafs()),
       type(other.type),
-      name(other.name) {}
+      name(other.name),
+      is_leafref_(other.is_leafref_),
+      leafref_path_(other.leafref_path_) {}
 
 YLeafList::YLeafList(YLeafList&& other)
     : yfilter(YFilter::not_set),
       values(other.getYLeafs()),
       type(other.type),
-      name(other.name) {}
+      name(other.name),
+      is_leafref_(other.is_leafref_),
+      leafref_path_(std::move(other.leafref_path_)) {}
 
 ydk::YLeafList& YLeafList::operator=(const YLeafList& other) {
   type = other.type;
   name = other.name;
   values = other.getYLeafs();
   yfilter = other.yfilter;
+  is_leafref_ = other.is_leafref_;
+  leafref_path_ = other.leafref_path_;
   return *this;
 }
 
@@ -82,10 +93,20 @@ ydk::YLeafList& YLeafList::operator=(YLeafList&& other) {
   name = other.name;
   values = other.getYLeafs();
   yfilter = other.yfilter;
+  is_leafref_ = other.is_leafref_;
+  leafref_path_ = std::move(other.leafref_path_);
   return *this;
 }
 
 YLeafList::~YLeafList() {}
+
+bool YLeafList::is_leafref() const {
+  return is_leafref_;
+}
+
+const std::string& YLeafList::get_leafref_path() const {
+  return leafref_path_;
+}
 
 void YLeafList::append(uint8 val) {
   YLeaf value{type, name};

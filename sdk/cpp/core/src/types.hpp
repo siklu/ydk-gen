@@ -236,6 +236,7 @@ enum class YType {
 class YLeaf {
  public:
   YLeaf(YType type, std::string name);
+  YLeaf(YType type, std::string name, std::string leafref_path);
   ~YLeaf();
 
   YLeaf(const YLeaf& val);
@@ -298,11 +299,18 @@ class YLeaf {
   int enum_value;
   YType type;
   Bits bits_value;
+
+  bool is_leafref() const;
+  const std::string& get_leafref_path() const;
+
+  bool is_leafref_;
+  std::string leafref_path_;
 };
 
 class YLeafList {
  public:
   YLeafList(YType type, const std::string& name);
+  YLeafList(YType type, const std::string& name, std::string leafref_path);
   virtual ~YLeafList();
 
   YLeafList(const YLeafList& val);
@@ -344,6 +352,12 @@ class YLeafList {
   std::vector<YLeaf> values;
   YType type;
   std::string name;
+
+  bool is_leafref() const;
+  const std::string& get_leafref_path() const;
+
+  bool is_leafref_;
+  std::string leafref_path_;
 };
 
 class YList {
