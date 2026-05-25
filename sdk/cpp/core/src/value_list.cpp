@@ -239,7 +239,7 @@ std::vector<std::pair<std::string, LeafData>> YLeafList::get_name_leafdata()
     name_values.push_back(
         {leaf_name_data.first,
          {val, yfilter, value.is_set, value.value_namespace,
-          value.value_namespace_prefix}});
+          value.value_namespace_prefix, is_leafref_, leafref_path_}});
   }
   return name_values;
 }

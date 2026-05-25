@@ -115,7 +115,8 @@ const std::string YLeaf::get() const {
 
 std::pair<std::string, LeafData> YLeaf::get_name_leafdata() const {
   return {name,
-          {get(), yfilter, is_set, value_namespace, value_namespace_prefix}};
+          {get(), yfilter, is_set, value_namespace, value_namespace_prefix,
+           is_leafref_, leafref_path_}};
 }
 
 void YLeaf::operator=(uint8 val) {

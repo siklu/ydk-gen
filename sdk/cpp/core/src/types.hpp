@@ -68,6 +68,9 @@ class LeafData {
  public:
   LeafData(const std::string& value, YFilter yfilter, bool is_set,
            const std::string& name_space, const std::string& name_space_prefix);
+  LeafData(const std::string& value, YFilter yfilter, bool is_set,
+           const std::string& name_space, const std::string& name_space_prefix,
+           bool is_leafref, const std::string& leafref_path);
   ~LeafData();
 
   bool operator==(LeafData& other) const;
@@ -80,6 +83,8 @@ class LeafData {
   std::string name_space_prefix;
   YFilter yfilter;
   bool is_set;
+  bool is_leafref;
+  std::string leafref_path;
 };
 
 struct EntityPath {

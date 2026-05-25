@@ -38,7 +38,20 @@ LeafData::LeafData(const string& value, YFilter yfilter, bool is_set,
       name_space(name_space),
       name_space_prefix(name_space_prefix),
       yfilter(yfilter),
-      is_set(is_set) {}
+      is_set(is_set),
+      is_leafref(false),
+      leafref_path("") {}
+
+LeafData::LeafData(const string& value, YFilter yfilter, bool is_set,
+                   const string& name_space, const string& name_space_prefix,
+                   bool is_leafref, const string& leafref_path)
+    : value(value),
+      name_space(name_space),
+      name_space_prefix(name_space_prefix),
+      yfilter(yfilter),
+      is_set(is_set),
+      is_leafref(is_leafref),
+      leafref_path(leafref_path) {}
 
 LeafData::~LeafData() {}
 
