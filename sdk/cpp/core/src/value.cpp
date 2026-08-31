@@ -60,7 +60,19 @@ YLeaf::YLeaf(YType type, std::string name)
       name(name),
       value(""),
       enum_value(0),
-      type(type) {}
+      type(type),
+      is_leafref_(false),
+      leafref_path_("") {}
+
+YLeaf::YLeaf(YType type, std::string name, std::string leafref_path)
+    : is_set(false),
+      yfilter(YFilter::not_set),
+      name(name),
+      value(""),
+      enum_value(0),
+      type(type),
+      is_leafref_(true),
+      leafref_path_(std::move(leafref_path)) {}
 
 YLeaf::YLeaf(const YLeaf& val)
     : is_set{val.is_set},
@@ -69,7 +81,9 @@ YLeaf::YLeaf(const YLeaf& val)
       value{val.value},
       enum_value{val.enum_value},
       type{val.type},
-      bits_value{val.bits_value} {}
+      bits_value{val.bits_value},
+      is_leafref_{val.is_leafref_},
+      leafref_path_{val.leafref_path_} {}
 
 YLeaf::YLeaf(YLeaf&& val)
     : is_set{val.is_set},
@@ -78,9 +92,19 @@ YLeaf::YLeaf(YLeaf&& val)
       value{std::move(val.value)},
       enum_value{std::move(val.enum_value)},
       type{val.type},
-      bits_value{val.bits_value} {}
+      bits_value{val.bits_value},
+      is_leafref_{val.is_leafref_},
+      leafref_path_{std::move(val.leafref_path_)} {}
 
 YLeaf::~YLeaf() {}
+
+bool YLeaf::is_leafref() const {
+  return is_leafref_;
+}
+
+const std::string& YLeaf::get_leafref_path() const {
+  return leafref_path_;
+}
 
 const std::string YLeaf::get() const {
   if (type == YType::bits) {
@@ -91,7 +115,8 @@ const std::string YLeaf::get() const {
 
 std::pair<std::string, LeafData> YLeaf::get_name_leafdata() const {
   return {name,
-          {get(), yfilter, is_set, value_namespace, value_namespace_prefix}};
+          {get(), yfilter, is_set, value_namespace, value_namespace_prefix,
+           is_leafref_, leafref_path_}};
 }
 
 void YLeaf::operator=(uint8 val) {
