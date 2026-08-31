@@ -29,7 +29,7 @@ source_printer.py
 from ydkgen.api_model import Bits, Class, DataType, Enum, AnyXml
 from ydkgen.common import get_module_name, has_list_ancestor, is_top_level_class, clazz_yang_name
 
-from pyang.types import UnionTypeSpec
+from pyang.types import UnionTypeSpec, PathTypeSpec
 
 
 def get_type_name(prop_type):
@@ -64,6 +64,18 @@ def get_yang_name_for_leaf(clazz, prop):
     else:
         name = prop.stmt.arg
     return name
+
+
+def _get_leafref_path(prop):
+    """Return the YANG leafref path string for a property, or None if not a leafref."""
+    if not isinstance(prop.property_type, PathTypeSpec):
+        return None
+    type_stmt = prop.stmt.search_one('type')
+    if type_stmt is not None:
+        path_stmt = type_stmt.search_one('path')
+        if path_stmt is not None:
+            return path_stmt.arg
+    return None
 
 
 class ClassConstructorPrinter(object):
@@ -120,8 +132,14 @@ class ClassConstructorPrinter(object):
                     leaf_name = prop.stmt.i_module.arg + ':' + prop.stmt.arg
                 else:
                     leaf_name = prop.stmt.arg
-                self.ctx.writeln('%s{YType::%s, "%s"}%s' % (prop.name,
-                            get_type_name(prop.property_type), leaf_name, (',' if index != len(leafs) - 1 else '')))
+                leafref_path = _get_leafref_path(prop)
+                if leafref_path is not None:
+                    self.ctx.writeln('%s{YType::%s, "%s", "%s"}%s' % (prop.name,
+                                get_type_name(prop.property_type), leaf_name, leafref_path,
+                                (',' if index != len(leafs) - 1 else '')))
+                else:
+                    self.ctx.writeln('%s{YType::%s, "%s"}%s' % (prop.name,
+                                get_type_name(prop.property_type), leaf_name, (',' if index != len(leafs) - 1 else '')))
                 index += 1
 
         init_stmts = []

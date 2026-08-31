@@ -202,3 +202,86 @@ TEST_CASE("test_value_list_boolean") {
   CHECK(leaf_data[0].first == "value[.=\"true\"]");
   CHECK(leaf_data[1].first == "value[.=\"false\"]");
 }
+
+// ============== YLeafList LeafRef Metadata Tests ==============
+
+TEST_CASE("test_value_list_leafref_constructor") {
+  // Test default constructor - no leafref
+  YLeafList yleaflist_default{YType::str, "mylist"};
+  REQUIRE(yleaflist_default.is_leafref() == false);
+  REQUIRE(yleaflist_default.get_leafref_path() == "");
+  
+  // Test leafref constructor
+  YLeafList yleaflist_leafref{YType::str, "mylist", "/some/leafref/path"};
+  REQUIRE(yleaflist_leafref.is_leafref() == true);
+  REQUIRE(yleaflist_leafref.get_leafref_path() == "/some/leafref/path");
+}
+
+TEST_CASE("test_value_list_leafref_get_name_leafdata") {
+  YLeafList yleaflist_leafref{YType::str, "mylist", "/config/ref-target"};
+  yleaflist_leafref.append("value1");
+  yleaflist_leafref.append("value2");
+  yleaflist_leafref.append("value3");
+  
+  auto leaf_data_vec = yleaflist_leafref.get_name_leafdata();
+  REQUIRE(leaf_data_vec.size() == 3);
+  
+  // Verify first value
+  REQUIRE(leaf_data_vec[0].first == "mylist[.=\"value1\"]");
+  REQUIRE(leaf_data_vec[0].second.value == "value1");
+  REQUIRE(leaf_data_vec[0].second.is_leafref == true);
+  REQUIRE(leaf_data_vec[0].second.leafref_path == "/config/ref-target");
+  
+  // Verify second value
+  REQUIRE(leaf_data_vec[1].first == "mylist[.=\"value2\"]");
+  REQUIRE(leaf_data_vec[1].second.value == "value2");
+  REQUIRE(leaf_data_vec[1].second.is_leafref == true);
+  REQUIRE(leaf_data_vec[1].second.leafref_path == "/config/ref-target");
+  
+  // Verify third value
+  REQUIRE(leaf_data_vec[2].first == "mylist[.=\"value3\"]");
+  REQUIRE(leaf_data_vec[2].second.value == "value3");
+  REQUIRE(leaf_data_vec[2].second.is_leafref == true);
+  REQUIRE(leaf_data_vec[2].second.leafref_path == "/config/ref-target");
+}
+
+TEST_CASE("test_value_list_non_leafref_baseline") {
+  YLeafList yleaflist_non_leafref{YType::uint32, "port-list"};
+  yleaflist_non_leafref.append(80);
+  yleaflist_non_leafref.append(443);
+  
+  auto leaf_data_vec = yleaflist_non_leafref.get_name_leafdata();
+  REQUIRE(leaf_data_vec.size() == 2);
+  
+  // Verify non-leafref baseline
+  REQUIRE(leaf_data_vec[0].second.is_leafref == false);
+  REQUIRE(leaf_data_vec[0].second.leafref_path == "");
+  REQUIRE(leaf_data_vec[1].second.is_leafref == false);
+  REQUIRE(leaf_data_vec[1].second.leafref_path == "");
+}
+
+TEST_CASE("test_value_list_leafref_copy_move") {
+  YLeafList original{YType::str, "original", "/path/to/leafref"};
+  original.append("val1");
+  original.append("val2");
+  
+  // Copy constructor
+  YLeafList copy_ctor{original};
+  REQUIRE(copy_ctor.is_leafref() == true);
+  REQUIRE(copy_ctor.get_leafref_path() == "/path/to/leafref");
+  auto copy_data = copy_ctor.get_name_leafdata();
+  REQUIRE(copy_data.size() == 2);
+  REQUIRE(copy_data[0].second.is_leafref == true);
+  REQUIRE(copy_data[0].second.leafref_path == "/path/to/leafref");
+  
+  // Copy assignment
+  YLeafList copy_assign{YType::str, "temp"};
+  copy_assign = original;
+  REQUIRE(copy_assign.is_leafref() == true);
+  REQUIRE(copy_assign.get_leafref_path() == "/path/to/leafref");
+  
+  // Move constructor
+  YLeafList move_ctor{std::move(YLeafList{YType::str, "move_orig", "/move/leafref"})};
+  REQUIRE(move_ctor.is_leafref() == true);
+  REQUIRE(move_ctor.get_leafref_path() == "/move/leafref");
+}

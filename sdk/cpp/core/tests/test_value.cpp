@@ -159,3 +159,60 @@ TEST_CASE("test_deci64") {
   test_value = Decimal64("1.2");
   REQUIRE(test_value.get() == "1.2");
 }
+
+// ============== YLeaf LeafRef Metadata Tests ==============
+
+TEST_CASE("test_yleaf_leafref_constructor") {
+  // Test default constructor - no leafref
+  YLeaf yleaf_default{YType::str, "myname"};
+  REQUIRE(yleaf_default.is_leafref() == false);
+  REQUIRE(yleaf_default.get_leafref_path() == "");
+  
+  // Test leafref constructor
+  YLeaf yleaf_leafref{YType::str, "myname", "/some/path"};
+  REQUIRE(yleaf_leafref.is_leafref() == true);
+  REQUIRE(yleaf_leafref.get_leafref_path() == "/some/path");
+}
+
+TEST_CASE("test_yleaf_leafref_get_name_leafdata") {
+  YLeaf yleaf_leafref{YType::str, "myname", "/config/target"};
+  yleaf_leafref = "test-value";
+  
+  auto leaf_data = yleaf_leafref.get_name_leafdata();
+  REQUIRE(leaf_data.first == "myname");
+  REQUIRE(leaf_data.second.value == "test-value");
+  REQUIRE(leaf_data.second.is_leafref == true);
+  REQUIRE(leaf_data.second.leafref_path == "/config/target");
+}
+
+TEST_CASE("test_yleaf_non_leafref_baseline") {
+  YLeaf yleaf_non_leafref{YType::int32, "counter"};
+  yleaf_non_leafref = 42;
+  
+  auto leaf_data = yleaf_non_leafref.get_name_leafdata();
+  REQUIRE(leaf_data.second.value == "42");
+  REQUIRE(leaf_data.second.is_leafref == false);
+  REQUIRE(leaf_data.second.leafref_path == "");
+}
+
+TEST_CASE("test_yleaf_leafref_copy_move") {
+  YLeaf original{YType::str, "orig", "/path/to/ref"};
+  original = "original-value";
+  
+  // Copy constructor
+  YLeaf copy_ctor{original};
+  REQUIRE(copy_ctor.is_leafref() == true);
+  REQUIRE(copy_ctor.get_leafref_path() == "/path/to/ref");
+  REQUIRE(copy_ctor.get() == "original-value");
+  
+  // Copy assignment
+  YLeaf copy_assign{YType::str, "temp"};
+  copy_assign = original;
+  REQUIRE(copy_assign.is_leafref() == true);
+  REQUIRE(copy_assign.get_leafref_path() == "/path/to/ref");
+  
+  // Move constructor
+  YLeaf move_ctor{std::move(YLeaf{YType::str, "move_orig", "/move/path"})};
+  REQUIRE(move_ctor.is_leafref() == true);
+  REQUIRE(move_ctor.get_leafref_path() == "/move/path");
+}
